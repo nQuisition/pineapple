@@ -2,7 +2,7 @@ from os.path import dirname, basename, isfile
 import glob
 import importlib.util
 import BotPreferences
-
+import sys
 class PluginManager(object):
 	plugins = {}
 	commands = {}
@@ -28,6 +28,10 @@ class PluginManager(object):
 			for cmd in cmds:
 				self.commands[cmd] = plugin
 
-	async def HandleCommand(self, channel, command, args):
+	async def HandleCommand(self, messageObject, command, args):
 		target = self.commands[command]
-		await target.HandleCommand(channel, command, args)
+		try:
+			await target.HandleCommand(messageObject, command, args)
+		except Exception as e:
+			await self.client.send_message(messageObject.channel, "Error: " + str(e))
+			

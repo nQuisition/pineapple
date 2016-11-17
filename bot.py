@@ -13,15 +13,15 @@ pm.RegisterCommands()
 
 @client.event
 async def on_ready():
-    print('Logged in as')
-    print(client.user.name)
-    print(client.user.id)
-    print('------')
-
+	print('Logged in as')
+	print(client.user.name)
+	print(client.user.id)
+	print('------')
+	for instance in client.servers:
+		await client.change_nickname(instance.me, pm.botPreferences.nickName)
 @client.event
 async def on_message(message):
 	if message.content.startswith(pm.botPreferences.commandPrefix):
 		words = message.content.partition(' ')
-		await pm.HandleCommand(message.channel, words[0][1:], words[1:])
-
+		await pm.HandleCommand(message, words[0][1:], words[1:])
 client.run(sys.argv[1])
