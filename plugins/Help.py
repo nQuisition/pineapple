@@ -1,23 +1,28 @@
-class Plugin(object):
-	def __init__(self, pm):
-		self.pm = pm
-		
-	def RegisterCommands(self):
-		return ["help", "info", "hello"]
-		
-	async def HandleCommand(self, messageObject, command, args):
-		if command == "help":
-			await self.help(messageObject)
-		if command == "info":
-			await self.info(messageObject)
-		if command == "hello":
-			await self.hello(messageObject)
-			
-	async def help(self, messageObject):
-		tmp = await self.pm.client.send_message(messageObject.channel, 'Helphelp')
-	async def info(self, messageObject):
-		tmp = await self.pm.client.send_message(messageObject.channel, 'Poke Dynista or Theraga for help')
+from util import Events
 
-	async def hello(self, messageObject):
-			msg = 'Hello {0.author.mention}'.format(messageObject)
-			await self.pm.client.send_message(messageObject.channel, msg)
+
+class Plugin(object):
+    def __init__(self, pm):
+        self.pm = pm
+
+    @staticmethod
+    def register_events():
+        return [Events.Command("help"), Events.Command("info"), Events.Command("hello")]
+
+    async def handle_command(self, message_object, command, args):
+        if command == "help":
+            await self.help(message_object)
+        if command == "info":
+            await self.info(message_object)
+        if command == "hello":
+            await self.hello(message_object)
+
+    async def help(self, message_object):
+        await self.pm.client.send_message(message_object.channel, 'Helphelp')
+
+    async def info(self, message_object):
+        await self.pm.client.send_message(message_object.channel, 'Poke Dynista or Theraga for help')
+
+    async def hello(self, message_object):
+        msg = 'Hello {0.author.mention}'.format(message_object)
+        await self.pm.client.send_message(message_object.channel, msg)
