@@ -1,5 +1,7 @@
 [client]
 token = TOKEN_HERE
+nick = PineappleBot
+prefix = !
 
 [Admin]
 groups = Admin, Owner
