@@ -39,7 +39,8 @@ async def on_typing(channel, user, when):
 @client.event
 async def on_message_delete(message):
     try:
-        await pm.handle_message_delete(message)
+        if message.author.name != "PluginBot":
+            await pm.handle_message_delete(message)
     except Exception as e:
         await client.send_message(message.channel, "Error: " + str(e))
 
