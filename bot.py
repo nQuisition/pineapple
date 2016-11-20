@@ -36,6 +36,7 @@ async def on_typing(channel, user, when):
     except Exception as e:
         await client.send_message(channel, "Error: " + str(e))
 
+
 @client.event
 async def on_message_delete(message):
     try:
@@ -44,4 +45,4 @@ async def on_message_delete(message):
     except Exception as e:
         await client.send_message(message.channel, "Error: " + str(e))
 
-client.run(sys.argv[1])
+client.run(pm.botPreferences.token)

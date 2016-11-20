@@ -1,5 +1,5 @@
-import datetime
 from util import Events
+from util.Ranks import Ranks
 
 
 class Plugin(object):
@@ -8,7 +8,7 @@ class Plugin(object):
 
     @staticmethod
     def register_events():
-        return [Events.Command("role")]
+        return [Events.Command("role", Ranks.Member)]
 
     async def handle_command(self, message_object, command, args):
         if command == "role":

@@ -1,4 +1,5 @@
 from util import Events
+from util.Ranks import Ranks
 
 
 class Plugin(object):
@@ -7,7 +8,7 @@ class Plugin(object):
 
     @staticmethod
     def register_events():
-        return [Events.Command("nick")]
+        return [Events.Command("nick", Ranks.Admin)]
 
     async def handle_command(self, message_object, command, args):
         if command == "nick":
