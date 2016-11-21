@@ -50,6 +50,7 @@ class Plugin(object):
         root = ElementTree.fromstring(data)
         if len(root) == 0:
             await self.pm.client.send_message(message_object.channel, "Sorry, I found nothing :cry:.")
+            return
         elif len(root) == 1:
             entry = root[0]
         else:
@@ -58,7 +59,7 @@ class Plugin(object):
 
             question = await self.pm.client.send_message(message_object.channel, msg)
 
-            check = lambda m: m.content in map(str, range(1, len(root) + 1))
+            def check(m): m.content in map(str, range(1, len(root) + 1))
             resp = await self.pm.client.wait_for_message(
                 author=message_object.author,
                 check=check,
