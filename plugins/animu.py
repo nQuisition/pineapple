@@ -1,8 +1,5 @@
-from configparser import ConfigParser
-import asyncio
 from util import Events
 from xml.etree import ElementTree
-import re
 import aiohttp
 import html
 
@@ -17,62 +14,49 @@ class Plugin(object):
     def register_events():
         return [Events.Command("anime"), Events.Command("manga")]
 
-    async def get_xml_anime(self, name):
-        auth = aiohttp.BasicAuth(login=self.username, password=self.password)
-        url = 'https://myanimelist.net/api/anime/search.xml'
-        params = {
-            'q': name
-        }
-        with aiohttp.ClientSession(auth=auth) as session:
-            async with session.get(url, params=params) as response:
-                print(response)
-                data = await response.text()
-                return data
-
-    async def get_xml_manga(self, name):
-        auth = aiohttp.BasicAuth(login=self.username, password=self.password)
-        url = 'https://myanimelist.net/api/manga/search.xml'
-        params = {
-            'q': name
-        }
-        with aiohttp.ClientSession(auth=auth) as session:
-            async with session.get(url, params=params) as response:
-                print(response)
-                data = await response.text()
-                return data
-
     async def handle_command(self, message_object, command, args):
         if command == "anime":
-            await self.anime(message_object)
+            await self.mal_search(message_object, args, "anime")
         if command == "manga":
-            await self.manga(message_object)
+            await self.mal_search(message_object, args, "manga")
 
-    async def anime(self, message_object):
-        rule = r'!(anime) (.*)'
-        check = re.match(rule, message_object.content)
-        nature, name = check.groups()
+    async def get_xml(self, category, name):
+        """
+        Queries the MAL search API to find a manga/anime based on a name
+        :param category: String, "manga" or "anime"
+        :param name: Search query
+        :return: XML Data
+        """
+        auth = aiohttp.BasicAuth(login=self.username, password=self.password)
+        url = 'https://myanimelist.net/api/' + category + '/search.xml'
+        params = {'q': name}
+        with aiohttp.ClientSession(auth=auth) as session:
+            async with session.get(url, params=params) as response:
+                data = await response.text()
+                return data
 
-        data = await self.get_xml_anime(name)
+    async def mal_search(self, message_object, args, category):
+        """
+        Process a MAL search command
+        :param message_object: discord.Message object containing the message
+        :param args: List of words in the command
+        :param category: Type of search
+        """
+        data = await self.get_xml(category, ' '.join(args[1:]))
         if data == '':
-            await self.pm.send_message(
-                message_object.channel,
-                'I didn\'t find anything :cry: ...'
-            )
+            await self.pm.client.send_message(message_object.channel, "I didn't find anything :cry: ...")
             return
 
         root = ElementTree.fromstring(data)
         if len(root) == 0:
-            await self.pm.send_message(
-                message_object.channel,
-                'Sorry, I found nothing :cry:.'
-            )
+            await self.pm.client.send_message(message_object.channel, "Sorry, I found nothing :cry:.")
         elif len(root) == 1:
             entry = root[0]
         else:
             msg = "**Please choose one by giving its number.**\n"
             msg += "\n".join(['{} - {}'.format(n + 1, entry[1].text) for n, entry in enumerate(root) if n < 10])
 
-            await self.pm.client.send_message(message_object.channel, msg)
+            question = await self.pm.client.send_message(message_object.channel, msg)
 
             check = lambda m: m.content in map(str, range(1, len(root) + 1))
             resp = await self.pm.client.wait_for_message(
@@ -82,6 +66,9 @@ class Plugin(object):
             )
             if resp is None:
                 return
+
+            await self.pm.client.delete_message(question)
+            await self.pm.client.delete_message(resp)
 
             entry = root[int(resp.content) - 1]
 
@@ -102,74 +89,7 @@ class Plugin(object):
         for k in switcher:
             spec = entry.find(k)
             if spec is not None and spec.text is not None:
-                msg += '**{}** {}\n'.format(k.capitalize() + ':', html.unescape(spec.text.replace('<br />', '')))
-        msg += 'http://myanimelist.net/{}/{}'.format(nature, entry.find('id').text)
+                msg += "**{}** {}\n".format(k.capitalize() + ":", html.unescape(spec.text.replace('<br />', '')))
+        msg += "http://myanimelist.net/{}/{}".format(category, entry.find('id').text)
 
-        await self.pm.client.send_message(
-            message_object.channel,
-            msg
-        )
-
-    async def manga(self, message_object):
-
-        rule = r'!(manga) (.*)'
-        check = re.match(rule, message_object.content)
-        nature, name = check.groups()
-
-        data = await self.get_xml_manga(name)
-        if data == '':
-            await self.pm.send_message(
-                message_object.channel,
-                'I didn\'t find anything :cry: ...'
-            )
-            return
-
-        root = ElementTree.fromstring(data)
-        if len(root) == 0:
-            await self.pm.send_message(
-                message_object.channel,
-                'Sorry, I found nothing :cry:.'
-            )
-        elif len(root) == 1:
-            entry = root[0]
-        else:
-            msg = "**Please choose one by giving its number.**\n"
-            msg += "\n".join(['{} - {}'.format(n + 1, entry[1].text) for n, entry in enumerate(root) if n < 10])
-
-            await self.pm.client.send_message(message_object.channel, msg)
-
-            check = lambda m: m.content in map(str, range(1, len(root) + 1))
-            resp = await self.pm.client.wait_for_message(
-                author=message_object.author,
-                check=check,
-                timeout=20
-            )
-            if resp is None:
-                return
-
-            entry = root[int(resp.content) - 1]
-
-        switcher = [
-            'english',
-            'score',
-            'type',
-            'episodes',
-            'volumes',
-            'chapters',
-            'status',
-            'start_date',
-            'end_date',
-            'synopsis'
-        ]
-
-        msg = '\n**{}**\n\n'.format(entry.find('title').text)
-        for k in switcher:
-            spec = entry.find(k)
-            if spec is not None and spec.text is not None:
-                msg += '**{}** {}\n'.format(k.capitalize() + ':', html.unescape(spec.text.replace('<br />', '')))
-        msg += 'http://myanimelist.net/{}/{}'.format(nature, entry.find('id').text)
-
-        await self.pm.client.send_message(
-            message_object.channel,
-            msg
-        )
+        await self.pm.client.send_message(message_object.channel, msg)
