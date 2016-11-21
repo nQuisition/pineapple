@@ -6,15 +6,17 @@ from util.Ranks import Ranks
 
 
 class PluginManager(object):
+    # Container for all loaded plugins, dictionary: { filename: Plugin object }
     plugins = {}
 
-    # Event handler containers
+    # Event handler containers, dictionary: { Event name: (plugin, minimum_rank) }
     commands = {}
     join = {}
     leave = {}
     typing = {}
     delete = {}
 
+    # References to various managers
     botPreferences = None
     client = None
 

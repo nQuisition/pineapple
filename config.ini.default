@@ -2,6 +2,7 @@
 token = TOKEN_HERE
 nick = PineappleBot
 prefix = !
+debug = 0
 
 [Admin]
 groups = Admin, Owner

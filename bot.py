@@ -1,5 +1,6 @@
 from PluginManager import PluginManager
 import discord
+import traceback
 
 print("Starting Pineapple")
 print("Starting Discord Client")
@@ -40,6 +41,8 @@ async def on_message(message):
             await pm.handle_command(message, words[0][len(pm.botPreferences.commandPrefix):], words[1:])
     except Exception as e:
         await client.send_message(message.channel, "Error: " + str(e))
+        if pm.botPreferences.get_config_value("client", "debug") == "1":
+            traceback.print_exc()
 
 
 @client.event
@@ -54,6 +57,8 @@ async def on_typing(channel, user, when):
         await pm.handle_typing(channel, user, when)
     except Exception as e:
         await client.send_message(channel, "Error: " + str(e))
+        if pm.botPreferences.get_config_value("client", "debug") == "1":
+            traceback.print_exc()
 
 
 @client.event
@@ -67,7 +72,8 @@ async def on_message_delete(message):
             await pm.handle_message_delete(message)
     except Exception as e:
         await client.send_message(message.channel, "Error: " + str(e))
-
+        if pm.botPreferences.get_config_value("client", "debug") == "1":
+            traceback.print_exc()
 
 # Run the client and login with the bot token (yes, this needs to be down here)
 client.run(pm.botPreferences.token)

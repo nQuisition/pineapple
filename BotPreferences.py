@@ -1,4 +1,4 @@
-from configparser import ConfigParser
+from configparser import ConfigParser, NoSectionError, NoOptionError
 
 
 class BotPreferences(object):
@@ -15,13 +15,13 @@ class BotPreferences(object):
         self.config.read("config.ini")
 
         # Discord login token
-        self.token = str(self.config.get("client", "token"))
+        self.token = self.get_config_value("client", "token")
 
         # Bot nickname
-        self.nickName = str(self.config.get("client", "nick"))
+        self.nickName = self.get_config_value("client", "nick")
 
         # Command prefix
-        self.commandPrefix = str(self.config.get("client", "prefix"))
+        self.commandPrefix = self.get_config_value("client", "prefix")
 
         # Bind roles
         self.bind_roles("Admin", self.admin)
@@ -30,6 +30,17 @@ class BotPreferences(object):
         self.bind_roles("Default", self.default)
 
     def bind_roles(self, name, container):
-        roles = str(self.config.get(name, "groups")).split(",")
+        roles = self.get_config_value(name, "groups").split(",")
         for role in roles:
             container.append(role.strip())
+
+    def reload_config(self):
+        self.config.read("config.ini")
+
+    def get_config_value(self, category, item):
+        try:
+            return str(self.config.get(category, item))
+        except NoSectionError as e:
+            print("Can't find section " + e.section)
+        except NoOptionError as e:
+            print("Can't find option " + e.option + ", " + e.section)

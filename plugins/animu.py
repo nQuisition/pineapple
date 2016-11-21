@@ -10,17 +10,15 @@ import html
 class Plugin(object):
     def __init__(self, pm):
         self.pm = pm
+        self.username = self.pm.botPreferences.get_config_value("MAL", "username")
+        self.password = self.pm.botPreferences.get_config_value("MAL", "password")
 
     @staticmethod
     def register_events():
         return [Events.Command("anime"), Events.Command("manga")]
 
     async def get_xml_anime(self, name):
-        self.config = ConfigParser()
-        self.config.read("config.ini")
-        username = str(self.config.get("MAL", "username"))
-        password = str(self.config.get("MAL", "password"))
-        auth = aiohttp.BasicAuth(login = username, password = password)
+        auth = aiohttp.BasicAuth(login=self.username, password=self.password)
         url = 'https://myanimelist.net/api/anime/search.xml'
         params = {
             'q': name
@@ -32,11 +30,7 @@ class Plugin(object):
                 return data
 
     async def get_xml_manga(self, name):
-        self.config = ConfigParser()
-        self.config.read("config.ini")
-        username = str(self.config.get("MAL", "username"))
-        password = str(self.config.get("MAL", "password"))
-        auth = aiohttp.BasicAuth(login=username, password=password)
+        auth = aiohttp.BasicAuth(login=self.username, password=self.password)
         url = 'https://myanimelist.net/api/manga/search.xml'
         params = {
             'q': name
@@ -76,20 +70,20 @@ class Plugin(object):
             entry = root[0]
         else:
             msg = "**Please choose one by giving its number.**\n"
-            msg += "\n".join([ '{} - {}'.format(n+1, entry[1].text) for n, entry in enumerate(root) if n < 10 ])
+            msg += "\n".join(['{} - {}'.format(n + 1, entry[1].text) for n, entry in enumerate(root) if n < 10])
 
             await self.pm.client.send_message(message_object.channel, msg)
 
-            check = lambda m: m.content in map(str, range(1, len(root)+1))
+            check = lambda m: m.content in map(str, range(1, len(root) + 1))
             resp = await self.pm.client.wait_for_message(
-                author = message_object.author,
-                check = check,
-                timeout = 20
+                author=message_object.author,
+                check=check,
+                timeout=20
             )
             if resp is None:
                 return
 
-            entry = root[int(resp.content)-1]
+            entry = root[int(resp.content) - 1]
 
         switcher = [
             'english',
@@ -102,19 +96,20 @@ class Plugin(object):
             'start_date',
             'end_date',
             'synopsis'
-            ]
+        ]
 
         msg = '\n**{}**\n\n'.format(entry.find('title').text)
         for k in switcher:
             spec = entry.find(k)
             if spec is not None and spec.text is not None:
-                msg += '**{}** {}\n'.format(k.capitalize()+':', html.unescape(spec.text.replace('<br />', '')))
+                msg += '**{}** {}\n'.format(k.capitalize() + ':', html.unescape(spec.text.replace('<br />', '')))
         msg += 'http://myanimelist.net/{}/{}'.format(nature, entry.find('id').text)
 
         await self.pm.client.send_message(
             message_object.channel,
             msg
         )
+
     async def manga(self, message_object):
 
         rule = r'!(manga) (.*)'
