@@ -14,3 +14,7 @@ groups = Member
 
 [Default]
 groups = @everyone
+
+[MAL]
+username =
+password =
