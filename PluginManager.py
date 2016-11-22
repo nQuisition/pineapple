@@ -21,26 +21,41 @@ class PluginManager(object):
     client = None
 
     def __init__(self, directory, client):
+        """
+        Initializes some fields for plugins to use
+        :param directory: Plugin directory path, should always be "plugins/"
+        :param client: discord.Client object
+        """
         self.dir = directory
         self.botPreferences = BotPreferences.BotPreferences()
         self.client = client
 
-    # Load all plugin files in the /plugins folder as modules and into a container dictionary list
     def load_plugins(self):
-        modules = glob.glob(dirname(__file__) + "/plugins/*.py")
+        """
+        Load all plugin files in the folder (specified by self.directory) as modules
+        and into a container dictionary list.
+        :return:
+        """
+
+        # Find all python files in the plugin directory
+        modules = glob.glob(dirname(__file__) + "/" + self.dir + "*.py")
+
+        # Iterate over each file, import them as a Python module and add them to the plugin list
         for f in modules:
             spec = importlib.util.spec_from_file_location(basename(f)[:-3], f)
             plugin = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(plugin)
             self.plugins[basename(f)] = plugin.Plugin(self)
-        print(self.plugins)
+            print("Loaded plugin: " + basename(f))
 
-    # Request every loaded plugin to present the events they would like to bind to
     def register_events(self):
+        """
+        Request every loaded plugin to present the events they would like to bind to. See util.Events for
+        event descriptions
+        """
         for name, plugin in self.plugins.items():
             events = plugin.register_events()
 
-            # Refer to util.Events for appropriate names
             self.bind_event("Command", self.commands, plugin, events)
             self.bind_event("UserJoin", self.join, plugin, events)
             self.bind_event("UserLeave", self.leave, plugin, events)
@@ -79,9 +94,14 @@ class PluginManager(object):
             # Data is stored as a tuple (Plugin, Required Rank) with the event binding's name as key in a dictionary
             container[cmd.name] = (plugin, cmd.minimum_rank)
 
-    # Checks whether one of the user's roles has the right level for the requested permission_level
-    # Roles are defined in config.ini and parsed in BotPreferences
     def user_has_permission(self, user, permission_level):
+        """
+        Checks whether one of the user's roles has the right level for the requested permission_level
+        Roles are defined in config.ini and parsed in BotPreferences
+        :param user: discord.Member object containing the user that triggered the event
+        :param permission_level: Minimal permission level specified by the triggered event
+        :return: True/False, whether used is allowed to trigger this event
+        """
         highest_rank = Ranks.Default
         for rank in user.roles:
             if rank.name in self.botPreferences.admin and highest_rank < Ranks.Admin:
