@@ -16,7 +16,7 @@ class Plugin(object):
         await self.pm.client.delete_message(tmp)'''
 
     async def handle_message_delete(self, message):
-        tmp = await self.pm.client.send_message(message.channel,
+        '''tmp = await self.pm.client.send_message(message.channel,
                                                 "Message deleted (" + message.author.name + "): " + message.content)
         await asyncio.sleep(5)
-        await self.pm.client.delete_message(tmp)
+        await self.pm.client.delete_message(tmp)'''

@@ -36,9 +36,8 @@ class PluginManager(object):
         and into a container dictionary list.
         :return:
         """
-
         # Find all python files in the plugin directory
-        modules = glob.glob(dirname(__file__) + "/" + self.dir + "*.py")
+        modules = glob.glob(dirname(__file__) + "/" + self.dir + "/*.py")
 
         # Iterate over each file, import them as a Python module and add them to the plugin list
         for f in modules:
@@ -66,12 +65,15 @@ class PluginManager(object):
     #   Handling events
     ###
     async def handle_command(self, message_object, command, args):
-        target, rank = self.commands[command]
-        if self.user_has_permission(message_object.author, rank):
-            await target.handle_command(message_object, command, args)
-        else:
-            await self.client.send_message(message_object.channel,
-                                           "You do not have the required permissions to do that (" + rank.name + ")")
+        try:
+            target, rank = self.commands[command]
+            if self.user_has_permission(message_object.author, rank):
+                await target.handle_command(message_object, command, args)
+            else:
+                await self.client.send_message(message_object.channel,
+                                               "You don't have the required permissions to do that (" + rank.name + ")")
+        except KeyError:
+            pass
 
     async def handle_typing(self, channel, user, when):
         for obj in self.typing:
@@ -110,5 +112,5 @@ class PluginManager(object):
                 highest_rank = Ranks.Mod
             elif rank.name in self.botPreferences.member and highest_rank < Ranks.Member:
                 highest_rank = Ranks.Member
-        print(highest_rank)
+        #print(highest_rank)
         return highest_rank >= permission_level
