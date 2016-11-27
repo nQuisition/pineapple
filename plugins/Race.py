@@ -11,12 +11,17 @@ class Plugin(object):
 
     class Race(object):
         class Participant(object):
+            # Field used to sort participants
+            position = 0
+
             def __init__(self, name, emoji):
                 self.name = name
                 self.emoji = emoji
                 self.progress = 0
+                self.finished = False
 
         participants = list()
+        finish_pos = 1
 
     @staticmethod
     def register_events():
@@ -44,6 +49,8 @@ class Plugin(object):
         """
         self.race = None
         self.race = self.Race()
+        self.race.participants = list()
+        self.race.finish_pos = 1
         race_start = await self.pm.client.send_message(message_object.channel,
                                                        message_object.author.name + " has started a race! \n"
                                                                                     "Type !joinrace [emoji] to "
@@ -59,40 +66,68 @@ class Plugin(object):
             for p in self.race.participants:
                 steps = round(p.progress / 5) - 1
                 left = 20 - steps - 1
-                race_status += p.name + " | " + self.repeat("X", steps) + p.emoji + self.repeat("O", left) + " (" + str(
-                    p.progress) + ") \n"
+                race_status += "`" + p.name[:15] + self.repeat("_", 15 - len(p.name)) + "` | " + \
+                               self.repeat("\_", steps) + p.emoji + self.repeat("\_", left) + \
+                               " (" + str(p.progress) + ") \n"
             race_status += ":checkered_flag: :checkered_flag: :checkered_flag:"
             race_message = await self.pm.client.send_message(message_object.channel, race_status)
 
+            # Run the race until every player has finished
             running = True
             while running:
                 running = False
+                player_finished = False
+
+                # Update player states
                 for p in self.race.participants:
-                    p.progress = min(p.progress + random.randint(3, 15), 100)
+                    p.progress = min(p.progress + random.randint(5, 20), 100)
                     if p.progress < 100:
                         running = True
+                    elif not p.finished:
+                        p.position = self.race.finish_pos
+                        print("Player " + p.name + " " + p.emoji + "finished " + str(p.position))
+                        p.finished = True
+                        player_finished = True
 
+                # Update progress message
                 race_status = ":checkered_flag: :checkered_flag: :checkered_flag:\n"
                 for p in self.race.participants:
                     steps = round(p.progress / 5) - 1
                     left = 20 - steps - 1
-                    race_status += p.name + " | " + self.repeat("X", steps) + p.emoji + self.repeat("O",
-                                                                                                    left) + " (" + str(
-                        p.progress) + ") \n"
+
+                    race_status += "`" + p.name[:15] + self.repeat("_", 15 - len(p.name)) + "` | " + \
+                                   self.repeat("\_", steps) + p.emoji + self.repeat("\_", left) + \
+                                   " (" + str(p.progress) + ") \n"
+
                 race_status += ":checkered_flag: :checkered_flag: :checkered_flag:"
                 race_message = await self.pm.client.edit_message(race_message, race_status)
-                await asyncio.sleep(2)
 
+                # Finishing state update
+                if player_finished:
+                    self.race.finish_pos += 1
+
+                # Wait a bit before updating
+                await asyncio.sleep(1)
+
+            # Game ended. Display rankings
+            finish_text = "Race ended! Ranking:\n"
+            for pl in sorted(self.race.participants, key=lambda part: part.position):
+                finish_text += pl.name + " ("+ pl.emoji + "): " + str(pl.position) + "\n"
+
+            await self.pm.client.send_message(message_object.channel, finish_text)
 
     async def join_race(self, message_object: discord.Message, args):
         if args[1] != "":
-            self.race.participants.append(self.Race.Participant(message_object.author.name, args[1]))
+            if message_object.author.nick is not None:
+                self.race.participants.append(self.Race.Participant(message_object.author.nick, args[1]))
+            else:
+                self.race.participants.append(self.Race.Participant(message_object.author.name, args[1]))
             user_join = await self.pm.client.send_message(message_object.channel,
                                                           message_object.author.name + " has joined the race as " +
                                                           args[1])
             await asyncio.sleep(3)
             await self.pm.client.delete_message(message_object)
-            await self.pm.client.delete_message(user_join)
+            # await self.pm.client.delete_message(user_join)
 
     @staticmethod
     def repeat(char, num):
