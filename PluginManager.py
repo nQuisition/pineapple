@@ -45,7 +45,7 @@ class PluginManager(object):
         self.delete.clear()
 
         # Find all python files in the plugin directory
-        modules = glob.glob(dirname(__file__) + "/" + self.dir + "/*.py")
+        modules = glob.glob(dirname(__file__) + "/" + self.dir + "/**/*.py", recursive=True)
 
         # Iterate over each file, import them as a Python module and add them to the plugin list
         for f in modules:
