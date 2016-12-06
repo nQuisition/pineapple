@@ -18,7 +18,7 @@ class Plugin(object):
             await self.hello(message_object)
 
     async def help(self, message_object):
-        await self.pm.client.send_message(message_object.channel, 'Helphelp')
+        await self.pm.client.send_message(message_object.channel, 'Help help')
 
     async def info(self, message_object):
         await self.pm.client.send_message(message_object.channel, 'Poke Dynista or Theraga for help')

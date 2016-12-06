@@ -36,6 +36,14 @@ class PluginManager(object):
         and into a container dictionary list.
         :return:
         """
+        # Clear containers
+        self.plugins.clear()
+        self.commands.clear()
+        self.join.clear()
+        self.leave.clear()
+        self.typing.clear()
+        self.delete.clear()
+
         # Find all python files in the plugin directory
         modules = glob.glob(dirname(__file__) + "/" + self.dir + "/*.py")
 
@@ -112,5 +120,4 @@ class PluginManager(object):
                 highest_rank = Ranks.Mod
             elif rank.name in self.botPreferences.member and highest_rank < Ranks.Member:
                 highest_rank = Ranks.Member
-        #print(highest_rank)
         return highest_rank >= permission_level

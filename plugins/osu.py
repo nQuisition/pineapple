@@ -1,9 +1,7 @@
-from util import Events
-from xml.etree import ElementTree
-import aiohttp
-import html
 import requests
-import json
+
+from util import Events
+
 
 class Plugin(object):
     def __init__(self, pm):
@@ -25,4 +23,6 @@ class Plugin(object):
         url = 'https://osu.ppy.sh/api/get_user?k=' + apikey + '&u=' + username
         response = requests.get(url, verify=True)
         displayData = response.json()[0]
-        await self.pm.client.send_message(message_object.channel, "country: " + displayData["country"] + "\n"  + "username: " + displayData["username"])
+        await self.pm.client.send_message(message_object.channel,
+                                          "country: " + displayData["country"] + "\n" + "username: " + displayData[
+                                              "username"])
