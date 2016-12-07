@@ -1,5 +1,8 @@
 config.ini
 
+#images folder
+plugins\images\*
+
 # Created by https://www.gitignore.io/api/python
 .idea/
 ### Python ###

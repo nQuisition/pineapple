@@ -1,4 +1,7 @@
 import requests
+import urllib.request
+import errno
+import os
 
 from util import Events
 
@@ -18,11 +21,15 @@ class Plugin(object):
 
     async def osu(self, message_object, username):
         """Adds two numbers together."""
+        directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "images")
+        filename = os.path.join(directory, username +"test.jpg")
+        urllib.request.urlretrieve("http://lemmmy.pw/osusig/sig.php?colour=pink&uname=" + username , filename)
         apikey = self.apikey
         await self.pm.client.send_message(message_object.channel, 'Fetching data')
         url = 'https://osu.ppy.sh/api/get_user?k=' + apikey + '&u=' + username
         response = requests.get(url, verify=True)
         displayData = response.json()[0]
+        await self.pm.client.send_file(message_object.channel, filename)
         await self.pm.client.send_message(message_object.channel,
                                           "country: " + displayData["country"] + "\n" + "username: " + displayData[
                                               "username"])
