@@ -40,7 +40,7 @@ class Plugin(object):
         encoded = params.encode('utf8')
         req = urllib.request.Request(
             "http://waifu2x.udp.jp/api", encoded)
-        response = urllib.request.urlopen(req)
+        response = urllib.request.urlopen(req, timeout=60)
         img = response.read()
         with open("scale.png", 'wb+') as f:
             f.write(img)

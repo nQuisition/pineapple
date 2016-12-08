@@ -20,6 +20,8 @@ class Plugin(object):
                 self.progress = 0
                 self.finished = False
 
+        open = False
+        running = False
         participants = list()
         finish_pos = 1
 
@@ -56,9 +58,11 @@ class Plugin(object):
                                                                                     "Type !joinrace [emoji] to "
                                                                                     "join the race (10s)")
         # Give users time to join
+        self.race.open = True
         await asyncio.sleep(10)
         await self.pm.client.delete_message(message_object)
         await self.pm.client.delete_message(race_start)
+        self.race.open = False
 
         # If enough participants, start the race
         if len(self.race.participants) > 0:
@@ -73,16 +77,16 @@ class Plugin(object):
             race_message = await self.pm.client.send_message(message_object.channel, race_status)
 
             # Run the race until every player has finished
-            running = True
-            while running:
-                running = False
+            self.race.running = True
+            while self.race.running:
+                self.race.running = False
                 player_finished = False
 
                 # Update player states
                 for p in self.race.participants:
                     p.progress = min(p.progress + random.randint(5, 20), 100)
                     if p.progress < 100:
-                        running = True
+                        self.race.running = True
                     elif not p.finished:
                         p.position = self.race.finish_pos
                         print("Player " + p.name + " " + p.emoji + "finished " + str(p.position))
@@ -112,22 +116,38 @@ class Plugin(object):
             # Game ended. Display rankings
             finish_text = "Race ended! Ranking:\n"
             for pl in sorted(self.race.participants, key=lambda part: part.position):
-                finish_text += pl.name + " ("+ pl.emoji + "): " + str(pl.position) + "\n"
+                finish_text += pl.name + " (" + pl.emoji + "): " + str(pl.position) + "\n"
 
             await self.pm.client.send_message(message_object.channel, finish_text)
 
     async def join_race(self, message_object: discord.Message, args):
-        if args[1] != "":
-            if message_object.author.nick is not None:
-                self.race.participants.append(self.Race.Participant(message_object.author.nick, args[1]))
+        if self.race.open:
+            if args[1] != "":
+                for e in self.pm.client.get_all_emojis():
+                    print(e)
+                await self.user_join_as_emoji(message_object, args[1])
             else:
-                self.race.participants.append(self.Race.Participant(message_object.author.name, args[1]))
-            user_join = await self.pm.client.send_message(message_object.channel,
-                                                          message_object.author.name + " has joined the race as " +
-                                                          args[1])
+                emojis = [":dog:", ":cat:", ":mouse:", ":hamster:", ":rabbit:", ":bear:", ":panda_face:", ":koala:",
+                          ":snail:", ":bee:", ":elephant:", ":gorilla:", ":squid:"]
+                await self.user_join_as_emoji(message_object, random.choice(emojis))
+        else:
+            not_running = await self.pm.client.send_message(message_object.channel,
+                                                            "There is no active or open race at this moment! "
+                                                            "Please start one with '!race'")
             await asyncio.sleep(3)
-            await self.pm.client.delete_message(message_object)
-            # await self.pm.client.delete_message(user_join)
+            await self.pm.client.delete_message(not_running)
+
+    async def user_join_as_emoji(self, message_object, emoji):
+        if message_object.author.nick is not None:
+            self.race.participants.append(self.Race.Participant(message_object.author.nick, emoji))
+        else:
+            self.race.participants.append(self.Race.Participant(message_object.author.name, emoji))
+
+        await self.pm.client.send_message(message_object.channel,
+                                          message_object.author.name + " has joined the race as " +
+                                          emoji)
+        await asyncio.sleep(3)
+        await self.pm.client.delete_message(message_object)
 
     @staticmethod
     def repeat(char, num):
