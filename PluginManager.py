@@ -29,6 +29,7 @@ class PluginManager(object):
         self.dir = directory
         self.botPreferences = BotPreferences.BotPreferences()
         self.client = client
+        self.comlist = {}
 
     def load_plugins(self):
         """
@@ -62,12 +63,12 @@ class PluginManager(object):
         """
         for name, plugin in self.plugins.items():
             events = plugin.register_events()
-
-            self.bind_event("Command", self.commands, plugin, events)
-            self.bind_event("UserJoin", self.join, plugin, events)
-            self.bind_event("UserLeave", self.leave, plugin, events)
-            self.bind_event("MessageDelete", self.delete, plugin, events)
-            self.bind_event("Typing", self.typing, plugin, events)
+            self.comlist[basename(name)] = []
+            self.bind_event("Command", self.commands, plugin, events, self.comlist, name)
+            self.bind_event("UserJoin", self.join, plugin, events, self.comlist, name)
+            self.bind_event("UserLeave", self.leave, plugin, events, self.comlist, name)
+            self.bind_event("MessageDelete", self.delete, plugin, events, self.comlist, name)
+            self.bind_event("Typing", self.typing, plugin, events, self.comlist, name)
 
     ###
     #   Handling events
@@ -99,10 +100,12 @@ class PluginManager(object):
     #   Utility methods
     ###
     @staticmethod
-    def bind_event(name, container, plugin, events):
+    def bind_event(name, container, plugin, events, comlist, comname):
         for cmd in (cmd for cmd in events if type(cmd).__name__ == name):
             # Data is stored as a tuple (Plugin, Required Rank) with the event binding's name as key in a dictionary
             container[cmd.name] = (plugin, cmd.minimum_rank)
+            if name == "Command":
+                comlist[basename(comname)].append([cmd.name, cmd.desc])
 
     def user_has_permission(self, user, permission_level):
         """

@@ -7,22 +7,58 @@ class Plugin(object):
 
     @staticmethod
     def register_events():
-        return [Events.Command("help"), Events.Command("info"), Events.Command("hello")]
+        return [Events.Command("help", desc="Usage: help [module]|all, shows help text for a plugin, or a list of "
+                                            "plugins if no plugin is specified."),
+                Events.Command("hello"),
+                Events.Command("info")]
 
     async def handle_command(self, message_object, command, args):
         if command == "help":
-            await self.help(message_object)
+            if "all" in args[1]:
+                await self.all_help(message_object)
+            elif args[1] is not "":
+                await self.show_help(message_object, args[1])
+            else:
+                await self.show_help_assigned(message_object)
         if command == "info":
             await self.info(message_object)
         if command == "hello":
             await self.hello(message_object)
 
-    async def help(self, message_object):
-        await self.pm.client.send_message(message_object.channel, 'Help help')
+    async def all_help(self, message_object):
+        hstr = "Complete Command List\n"
+        for name, commands in self.pm.comlist.items():
+            if len(commands) > 0:
+                hstr += "\n**{0}**\n".format(name[:-3])
+                for c, d in commands:
+                    if d is not "":
+                        hstr += "`" + self.pm.botPreferences.commandPrefix + c + "`: \n_" + d + "_\n"
+                    else:
+                        hstr += "`" + self.pm.botPreferences.commandPrefix + c + "`\n"
+        await self.pm.client.send_message(message_object.channel, hstr)
 
     async def info(self, message_object):
-        await self.pm.client.send_message(message_object.channel, 'Poke Dynista or Theraga for help')
+        await self.pm.client.send_message(message_object.channel, 'Info about the bot will be here soon(tm)')
 
     async def hello(self, message_object):
         msg = 'Hello {0.author.mention}'.format(message_object)
         await self.pm.client.send_message(message_object.channel, msg)
+
+    async def show_help(self, message_object, args):
+        try:
+            hstr = "**{0}**:\n".format(args)
+            for c, d in self.pm.comlist[args + ".py"]:
+                hstr = hstr + "`" + self.pm.botPreferences.commandPrefix + c + "`: " + d + "\n"
+            await self.pm.client.send_message(message_object.channel, hstr)
+        except KeyError:
+            await self.pm.client.send_message(message_object.channel,
+                                              ":exclamation: That\'s not a valid plugin name")
+
+    async def show_help_assigned(self, message_object):
+        x = "Bot Help\n```"
+        for name, commands in self.pm.comlist.items():
+            x = x + name[:-3] + " "
+
+        x += "```\n`" + self.pm.botPreferences.commandPrefix + "help [help_topic]` to evoke a help topic.\n`" + \
+             self.pm.botPreferences.commandPrefix + "help all` for all commands."
+        await self.pm.client.send_message(message_object.channel, x)
