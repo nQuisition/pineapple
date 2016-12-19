@@ -3,6 +3,7 @@ import glob
 import os
 import random
 
+
 class Plugin(object):
     def __init__(self, pm):
         self.pm = pm
@@ -18,6 +19,7 @@ class Plugin(object):
     async def pat(self, message_object, user):
         files = glob.glob(os.getcwd() + "/images/pat/" + '*.gif')
         files.extend(glob.glob(os.getcwd() + "/images/pat/" + '*.png'))
+        files.extend(glob.glob(os.getcwd() + "/images/pat/" + '*.jpg'))
         file = random.choice(files)
         await self.pm.client.send_message(message_object.channel,
                                           "**" + user + "** you got a pat from **" + message_object.author.name + "**")
