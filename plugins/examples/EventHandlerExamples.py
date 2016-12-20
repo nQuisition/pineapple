@@ -8,7 +8,7 @@ class Plugin(object):
 
     @staticmethod
     def register_events():
-        return [Events.Typing("example_typing"), Events.MessageDelete("example_delete")]
+        return [Events.Typing("example_typing"), Events.MessageDelete("example_delete"), Events.UserJoin("welcome_msg")]
 
     async def handle_typing(self, channel, user, when):
         '''tmp = await self.pm.client.send_message(channel, user.name + " is typing, wow!")
@@ -20,3 +20,6 @@ class Plugin(object):
                                                 "Message deleted (" + message.author.name + "): " + message.content)
         await asyncio.sleep(5)
         await self.pm.client.delete_message(tmp)'''
+
+    async def handle_member_join(self, member):
+        await self.pm.client.send_message(member.server.default_channel, "Welcome " + member.mention)

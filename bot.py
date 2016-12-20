@@ -75,5 +75,11 @@ async def on_message_delete(message):
         if pm.botPreferences.get_config_value("client", "debug") == "1":
             traceback.print_exc()
 
+
+@client.event
+async def on_member_join(member):
+    await pm.handle_member_join(member)
+
+
 # Run the client and login with the bot token (yes, this needs to be down here)
 client.run(pm.botPreferences.token)

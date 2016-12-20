@@ -96,6 +96,11 @@ class PluginManager(object):
             if self.user_has_permission(message.author, rank):
                 await name.handle_message_delete(message)
 
+    async def handle_member_join(self, member):
+        for obj in self.join:
+            name, rank = self.join[obj]
+            await name.handle_member_join(member)
+
     ###
     #   Utility methods
     ###
