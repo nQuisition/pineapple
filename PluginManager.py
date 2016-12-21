@@ -101,6 +101,11 @@ class PluginManager(object):
             name, rank = self.join[obj]
             await name.handle_member_join(member)
 
+    async def handle_member_leave(self, member):
+        for obj in self.leave:
+            name, rank = self.leave[obj]
+            await name.handle_member_leave(member)
+
     ###
     #   Utility methods
     ###

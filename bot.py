@@ -81,5 +81,10 @@ async def on_member_join(member):
     await pm.handle_member_join(member)
 
 
+@client.event
+async def on_member_remove(member):
+    await pm.handle_member_leave(member)
+
+
 # Run the client and login with the bot token (yes, this needs to be down here)
 client.run(pm.botPreferences.token)
