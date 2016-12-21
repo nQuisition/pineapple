@@ -1,4 +1,7 @@
 from util import Events
+import glob
+import os
+import random
 import asyncio
 
 
@@ -22,4 +25,8 @@ class Plugin(object):
         await self.pm.client.delete_message(tmp)'''
 
     async def handle_member_join(self, member):
-        await self.pm.client.send_message(member.server.default_channel, "Welcome " + member.mention)
+        '''welcome = glob.glob(os.getcwd() + "/images/" + 'hi.gif')
+        file = random.choice(welcome)
+        await asyncio.sleep(1)
+        await self.pm.client.send_message(member.server.default_channel, "Welcome here " + member.mention)
+        await self.pm.client.send_file(member.server.default_channel, file)'''

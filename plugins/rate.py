@@ -17,7 +17,7 @@ class Plugin(object):
         # totally not rigged or something
         def isDevMentioned():
             for u in message_object.mentions:
-                if u.name == "Theraga" or u.name =="Dynista":
+                if u.name == "Theraga" or "Dynista":
                     return True
             return False
         if user == "theraga" or user == "Theraga" or user == "dynista" or user == "Dynista" or isDevMentioned():
