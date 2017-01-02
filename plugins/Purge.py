@@ -8,7 +8,7 @@ class Plugin(object):
 
     @staticmethod
     def register_events():
-        return [Events.Command("purge", Ranks.Mod)]
+        return [Events.Command("purge", Ranks.Mod, desc="Purge a number of messages. Mods and Admins only")]
 
     async def handle_command(self, message_object, command, args):
         if command == "purge":

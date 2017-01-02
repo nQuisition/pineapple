@@ -11,7 +11,7 @@ class Plugin(object):
 
     @staticmethod
     def register_events():
-        return [Events.UserJoin("welcome_msg"), Events.UserLeave("leave_msg")]
+        return [Events.UserJoin("welcome_msg"),  Events.UserLeave("leave_msg"),]
 
     async def handle_member_join(self, member):
         welcome = glob.glob(os.getcwd() + "/images/" + 'hi.gif')

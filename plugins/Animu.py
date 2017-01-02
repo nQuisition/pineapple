@@ -12,7 +12,7 @@ class Plugin(object):
 
     @staticmethod
     def register_events():
-        return [Events.Command("anime"), Events.Command("manga")]
+        return [Events.Command("anime",desc="Search MAL for an anime"), Events.Command("manga",desc="Search MAL for a manga")]
 
     async def handle_command(self, message_object, command, args):
         if command == "anime":
