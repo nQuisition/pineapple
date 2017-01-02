@@ -17,9 +17,9 @@ class Plugin(object):
             await self.pat(message_object, args[1])
 
     async def pat(self, message_object, user):
-        files = glob.glob(os.getcwd() + "/images/pat/" + '*.gif')
-        files.extend(glob.glob(os.getcwd() + "/images/pat/" + '*.png'))
-        files.extend(glob.glob(os.getcwd() + "/images/pat/" + '*.jpg'))
+        files = glob.glob(os.getcwd() + "/images/kiss/" + '*.gif')
+        files.extend(glob.glob(os.getcwd() + "/images/kiss/" + '*.png'))
+        files.extend(glob.glob(os.getcwd() + "/images/kiss/" + '*.jpg'))
         file = random.choice(files)
         await self.pm.client.send_message(message_object.channel,
                                           "**" + user + "** you got a kiss from **" + message_object.author.name + "**")
