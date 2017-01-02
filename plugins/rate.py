@@ -7,7 +7,7 @@ class Plugin(object):
 
     @staticmethod
     def register_events():
-        return [Events.Command("rate")]
+        return [Events.Command("rate",desc="Rate someone or something between 0 and 100")]
 
     async def handle_command(self, message_object, command, args):
         if command == "rate":

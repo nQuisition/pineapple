@@ -13,7 +13,7 @@ class Plugin(object):
 
     @staticmethod
     def register_events():
-        return [Events.Command("osu")]
+        return [Events.Command("osu",desc="Get the osu details for a user")]
 
     async def handle_command(self, message_object, command, args):
         if command == "osu":

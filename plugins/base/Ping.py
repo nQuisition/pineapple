@@ -8,7 +8,7 @@ class Plugin(object):
 
     @staticmethod
     def register_events():
-        return [Events.Command("ping"), Events.Command("pong")]
+        return [Events.Command("ping",desc="Ping the bot"), Events.Command("pong", desc="Pong the bot")]
 
     async def handle_command(self, message_object, command, args):
         if command == "ping":

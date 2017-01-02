@@ -8,7 +8,8 @@ class Plugin(object):
 
     @staticmethod
     def register_events():
-        return [Events.Command("nick", Ranks.Admin)]
+        return [Events.Command("nick", Ranks.Admin,
+                               desc="Change the nickname for the bot. Admin only")]
 
     async def handle_command(self, message_object, command, args):
         if command == "nick":

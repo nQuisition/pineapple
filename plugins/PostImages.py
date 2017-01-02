@@ -10,7 +10,10 @@ class Plugin(object):
 
     @staticmethod
     def register_events():
-        return [Events.Command("pat"),Events.Command("lewd"),Events.Command("weeb"),Events.Command("doushio"),Events.Command("rekt"), ]
+        return [Events.Command("pat", desc="Pat someone else"),
+                Events.Command("lewd", desc="Use this if things get too lewd"),
+                Events.Command("weeb", desc="When someone is being a weeb"), Events.Command("doushio", desc="Doushio"),
+                Events.Command("rekt", desc="When someone just got rekt"), ]
 
     async def handle_command(self, message_object, command, args):
         if command == "pat":
