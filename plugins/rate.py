@@ -14,16 +14,18 @@ class Plugin(object):
             await self.rate(message_object, args[1])
 
     async def rate(self, message_object, user):
+        '''
         # totally not rigged or something
         def isDevMentioned():
             for u in message_object.mentions:
-                if u.name == "Theraga" or "Dynista":
+                if u.name == "Theraga" or u.name == "Dynista":
                     return True
             return False
         if user == "theraga" or user == "Theraga" or user == "dynista" or user == "Dynista" or isDevMentioned():
             await self.pm.client.send_message(message_object.channel, "I would rate **" + user + "** 100.00/100")
         else:
-            number = round(random.uniform(1, 100), 2)
-            print(message_object.mentions)
-            await self.pm.client.send_message(message_object.channel,
-                                              "I would rate " + "**" + user + "** " + str(number) + "/100")
+                '''
+        number = round(random.uniform(1, 100), 2)
+        print(message_object.mentions)
+        await self.pm.client.send_message(message_object.channel,
+                                          "I would rate " + "**" + user + "** " + str(number) + "/100")
