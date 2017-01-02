@@ -8,15 +8,15 @@ class Plugin(object):
     def __init__(self, pm):
         self.pm = pm
         self.api_key = self.pm.botPreferences.get_config_value("OSU", "apikey")
-		#base_url controls parameters for lammmy generation. Use python string format to change mode/username
+        # base_url controls parameters for lammmy generation. Use python string format to change mode/username
         self.base_url = "http://lemmmy.pw/osusig/sig.php?mode={}&pp=0&removemargin&darktriangles&colour=pink&uname={}"
 
     @staticmethod
     def register_events():
         return [Events.Command("osu", desc="Get the osu!standard details for a user"),
-        Events.Command("ctb", desc="Get the osu!catch the beat details for a user"),
-		Events.Command("taiko", desc="Get the osu!taiko details for a user"),
-		Events.Command("mania", desc="Get the osu!mania details for a user")]
+                Events.Command("ctb", desc="Get the osu!catch the beat details for a user"),
+                Events.Command("taiko", desc="Get the osu!taiko details for a user"),
+                Events.Command("mania", desc="Get the osu!mania details for a user")]
 
     async def handle_command(self, message_object, command, args):
         if command == "osu":
@@ -30,7 +30,6 @@ class Plugin(object):
 
     async def osu(self, message_object, username):
         try:
-            """Adds two numbers together."""
             directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "temp")
             if not os.path.exists(directory):
                 os.makedirs(directory)
@@ -52,10 +51,9 @@ class Plugin(object):
             os.remove(filename)
         except:
             await self.pm.client.send_message(message_object.channel, "Error unknown user **" + username + "**")
-			
+
     async def taiko(self, message_object, username):
         try:
-            """Adds two numbers together."""
             directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "temp")
             if not os.path.exists(directory):
                 os.makedirs(directory)
@@ -77,10 +75,9 @@ class Plugin(object):
             os.remove(filename)
         except:
             await self.pm.client.send_message(message_object.channel, "Error unknown user **" + username + "**")
-            
+
     async def ctb(self, message_object, username):
         try:
-            """Adds two numbers together."""
             directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "temp")
             if not os.path.exists(directory):
                 os.makedirs(directory)
@@ -102,13 +99,13 @@ class Plugin(object):
             os.remove(filename)
         except:
             await self.pm.client.send_message(message_object.channel, "Error unknown user **" + username + "**")
-			
+
     async def mania(self, message_object, username):
         try:
-            """Adds two numbers together."""
             directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "temp")
             if not os.path.exists(directory):
                 os.makedirs(directory)
+            filename = os.path.join(directory, username + "test.jpg")
             image_url = self.base_url.format(3, username)
             urllib.request.urlretrieve(image_url, filename)
             api_key = self.api_key
