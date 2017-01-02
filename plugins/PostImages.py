@@ -12,8 +12,10 @@ class Plugin(object):
     def register_events():
         return [Events.Command("pat", desc="Pat someone else"),
                 Events.Command("lewd", desc="Use this if things get too lewd"),
-                Events.Command("weeb", desc="When someone is being a weeb"), Events.Command("doushio", desc="Doushio"),
-                Events.Command("rekt", desc="When someone just got rekt"), ]
+                Events.Command("weeb", desc="When someone is being a weeb"), 
+				Events.Command("doushio", desc="Doushio"),
+                Events.Command("rekt", desc="When someone just got rekt"),
+				Events.Command("boop", desc="boop~")]
 
     async def handle_command(self, message_object, command, args):
         if command == "pat":
@@ -25,6 +27,8 @@ class Plugin(object):
         if command == "doushio":
             await self.doushio(message_object)
         if command == "rekt":
+            await self.rekt(message_object)
+		if command == "boop":
             await self.rekt(message_object)
 
     async def pat(self, message_object, user):
@@ -65,6 +69,14 @@ class Plugin(object):
         files = glob.glob(os.getcwd() + "/images/rekt/" + '*.gif')
         files.extend(glob.glob(os.getcwd() + "/images/rekt/" + '*.png'))
         files.extend(glob.glob(os.getcwd() + "/images/rekt/" + '*.jpg'))
+        file = random.choice(files)
+        await self.pm.client.delete_message(message_object)
+        await self.pm.client.send_file(message_object.channel, file)
+	
+	async def boop(self, message_object):
+        files = glob.glob(os.getcwd() + "/images/boop/" + '*.gif')
+        files.extend(glob.glob(os.getcwd() + "/images/boop/" + '*.png'))
+        files.extend(glob.glob(os.getcwd() + "/images/boop/" + '*.jpg'))
         file = random.choice(files)
         await self.pm.client.delete_message(message_object)
         await self.pm.client.send_file(message_object.channel, file)
