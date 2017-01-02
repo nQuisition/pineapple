@@ -15,11 +15,14 @@ class Plugin(object):
                 Events.Command("weeb", desc="When someone is being a weeb"), 
 				Events.Command("doushio", desc="Doushio"),
                 Events.Command("rekt", desc="When someone just got rekt"),
+                Events.Command("kiss", desc="Share a kiss"),
 				Events.Command("boop", desc="boop~")]
 
     async def handle_command(self, message_object, command, args):
         if command == "pat":
             await self.pat(message_object, args[1])
+        if command == "kiss":
+            await self.kiss(message_object, args[1])
         if command == "lewd":
             await self.lewd(message_object)
         if command == "weeb":
@@ -29,7 +32,7 @@ class Plugin(object):
         if command == "rekt":
             await self.rekt(message_object)
         if command == "boop":
-            await self.rekt(message_object)
+            await self.boop(message_object)
 
     async def pat(self, message_object, user):
         files = glob.glob(os.getcwd() + "/images/pat/" + '*.gif')
@@ -39,6 +42,16 @@ class Plugin(object):
         await self.pm.client.delete_message(message_object)
         await self.pm.client.send_message(message_object.channel,
                                           "**" + user + "** you got a pat from **" + message_object.author.name + "**")
+        await self.pm.client.send_file(message_object.channel, file)
+        
+    async def kiss(self, message_object, user):
+        files = glob.glob(os.getcwd() + "/images/kiss/" + '*.gif')
+        files.extend(glob.glob(os.getcwd() + "/images/kiss/" + '*.png'))
+        files.extend(glob.glob(os.getcwd() + "/images/kiss/" + '*.jpg'))
+        file = random.choice(files)
+        await self.pm.client.delete_message(message_object)
+        await self.pm.client.send_message(message_object.channel,
+                                          "**" + user + "** you got a kiss from **" + message_object.author.name + "**")
         await self.pm.client.send_file(message_object.channel, file)
 
     async def lewd(self, message_object):
