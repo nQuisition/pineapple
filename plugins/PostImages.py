@@ -28,7 +28,7 @@ class Plugin(object):
             await self.doushio(message_object)
         if command == "rekt":
             await self.rekt(message_object)
-		if command == "boop":
+        if command == "boop":
             await self.rekt(message_object)
 
     async def pat(self, message_object, user):
@@ -73,7 +73,7 @@ class Plugin(object):
         await self.pm.client.delete_message(message_object)
         await self.pm.client.send_file(message_object.channel, file)
 	
-	async def boop(self, message_object):
+    async def boop(self, message_object):
         files = glob.glob(os.getcwd() + "/images/boop/" + '*.gif')
         files.extend(glob.glob(os.getcwd() + "/images/boop/" + '*.png'))
         files.extend(glob.glob(os.getcwd() + "/images/boop/" + '*.jpg'))
