@@ -25,16 +25,20 @@ class Plugin(object):
             directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "temp")
             if not os.path.exists(directory):
                 os.makedirs(directory)
-            filename = os.path.join(directory, username +"test.jpg")
-            urllib.request.urlretrieve("http://lemmmy.pw/osusig/sig.php?colour=pink&uname=" + username , filename)
+            filename = os.path.join(directory, username + "test.jpg")
+            urllib.request.urlretrieve("http://lemmmy.pw/osusig/sig.php?colour=pink&uname=" + username, filename)
             apikey = self.apikey
             url = 'https://osu.ppy.sh/api/get_user?k=' + apikey + '&u=' + username
             response = requests.get(url, verify=True)
             displayData = response.json()[0]
             await self.pm.client.send_file(message_object.channel, filename)
             await self.pm.client.send_message(message_object.channel,
-                                              "country: " + displayData["country"] + "\n" + "username: " + displayData[
-                                                  "username"])
+                                              "username: " + displayData["username"] + "\n" + "rank: " + displayData[
+                                                  "pp_rank"] +"\n" + "accuracy: " + displayData[
+                                                  "accuracy"] + "\n" + "pp: " + displayData[
+                                                  "pp_raw"] + "\n" + "country: " + displayData[
+                                                  "country"] + "\n" + "Rank in country: " + displayData[
+                                                  "pp_country_rank"])
             os.remove(filename)
         except:
             await self.pm.client.send_message(message_object.channel, "Error unknown user")
