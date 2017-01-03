@@ -12,11 +12,12 @@ class Plugin(object):
     def register_events():
         return [Events.Command("pat", desc="Pat someone else"),
                 Events.Command("lewd", desc="Use this if things get too lewd"),
-                Events.Command("weeb", desc="When someone is being a weeb"), 
-				Events.Command("doushio", desc="Doushio"),
+                Events.Command("weeb", desc="When someone is being a weeb"),
+                Events.Command("doushio", desc="Doushio"),
                 Events.Command("rekt", desc="When someone just got rekt"),
                 Events.Command("kiss", desc="Share a kiss"),
-				Events.Command("boop", desc="boop~")]
+                Events.Command("boop", desc="boop~"),
+                Events.Command("smug", desc="smug face")]
 
     async def handle_command(self, message_object, command, args):
         if command == "pat":
@@ -33,6 +34,8 @@ class Plugin(object):
             await self.rekt(message_object)
         if command == "boop":
             await self.boop(message_object)
+        if command == "smug":
+            await self.smug(message_object)
 
     async def pat(self, message_object, user):
         files = glob.glob(os.getcwd() + "/images/pat/" + '*.gif')
@@ -43,7 +46,7 @@ class Plugin(object):
         await self.pm.client.send_message(message_object.channel,
                                           "**" + user + "** you got a pat from **" + message_object.author.name + "**")
         await self.pm.client.send_file(message_object.channel, file)
-        
+
     async def kiss(self, message_object, user):
         files = glob.glob(os.getcwd() + "/images/kiss/" + '*.gif')
         files.extend(glob.glob(os.getcwd() + "/images/kiss/" + '*.png'))
@@ -85,11 +88,19 @@ class Plugin(object):
         file = random.choice(files)
         await self.pm.client.delete_message(message_object)
         await self.pm.client.send_file(message_object.channel, file)
-	
+
     async def boop(self, message_object):
         files = glob.glob(os.getcwd() + "/images/boop/" + '*.gif')
         files.extend(glob.glob(os.getcwd() + "/images/boop/" + '*.png'))
         files.extend(glob.glob(os.getcwd() + "/images/boop/" + '*.jpg'))
+        file = random.choice(files)
+        await self.pm.client.delete_message(message_object)
+        await self.pm.client.send_file(message_object.channel, file)
+
+    async def smug(self, message_object):
+        files = glob.glob(os.getcwd() + "/images/smug/" + '*.gif')
+        files.extend(glob.glob(os.getcwd() + "/images/smug/" + '*.png'))
+        files.extend(glob.glob(os.getcwd() + "/images/smug/" + '*.jpg'))
         file = random.choice(files)
         await self.pm.client.delete_message(message_object)
         await self.pm.client.send_file(message_object.channel, file)
