@@ -19,7 +19,7 @@ class Plugin(object):
         await asyncio.sleep(1)
         await self.pm.client.send_message(member.server.default_channel,
                                           "Welcome to the server " + member.mention +
-                                          "Please read #info_read_first and tell and admin/mod which role you would like")
+                                          " Please read #info_read_first and tell an admin/mod which role you would like")
         await self.pm.client.send_file(member.server.default_channel, file)
 
     async def handle_member_leave(self, member):
