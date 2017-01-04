@@ -11,13 +11,15 @@ class Plugin(object):
 
     @staticmethod
     def register_events():
-        return [Events.UserJoin("welcome_msg"),  Events.UserLeave("leave_msg"),]
+        return [Events.UserJoin("welcome_msg"), Events.UserLeave("leave_msg"), ]
 
     async def handle_member_join(self, member):
         welcome = glob.glob(os.getcwd() + "/images/" + 'hi.gif')
         file = random.choice(welcome)
         await asyncio.sleep(1)
-        await self.pm.client.send_message(member.server.default_channel, "Welcome to the server " + member.mention)
+        await self.pm.client.send_message(member.server.default_channel,
+                                          "Welcome to the server " + member.mention +
+                                          "Please read #info_read_first and tell and admin/mod which role you would like")
         await self.pm.client.send_file(member.server.default_channel, file)
 
     async def handle_member_leave(self, member):
