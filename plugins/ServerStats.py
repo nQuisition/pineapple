@@ -1,6 +1,6 @@
 from util import Events
 from util.Ranks import Ranks
-
+import operator
 
 class Plugin(object):
     def __init__(self, pm):
@@ -28,8 +28,8 @@ class Plugin(object):
                         roles[member_role.name] += 1
                     else:
                         roles[member_role.name] = 1
-
-        for role, count in roles.items():
+        sorted_x = sorted(roles.items(), key=operator.itemgetter(1))
+        for role, count in reversed(sorted_x):
             msg += role + ": " + str(count) + " users\n"
 
         await self.pm.client.send_message(message_object.channel, msg)
