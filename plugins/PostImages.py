@@ -62,7 +62,7 @@ class Plugin(object):
         files.extend(glob.glob(os.getcwd() + "/images/lewd/" + '*.png'))
         files.extend(glob.glob(os.getcwd() + "/images/lewd/" + '*.jpg'))
         file = random.choice(files)
-        await self.pm.client.delete_message(message_object)
+        #await self.pm.client.delete_message(message_object)
         await self.pm.client.send_file(message_object.channel, file)
 
     async def weeb(self, message_object):
@@ -70,7 +70,7 @@ class Plugin(object):
         files.extend(glob.glob(os.getcwd() + "/images/weeb/" + '*.png'))
         files.extend(glob.glob(os.getcwd() + "/images/weeb/" + '*.jpg'))
         file = random.choice(files)
-        await self.pm.client.delete_message(message_object)
+        #await self.pm.client.delete_message(message_object)
         await self.pm.client.send_file(message_object.channel, file)
 
     async def doushio(self, message_object):
@@ -78,7 +78,7 @@ class Plugin(object):
         files.extend(glob.glob(os.getcwd() + "/images/doushio/" + '*.png'))
         files.extend(glob.glob(os.getcwd() + "/images/doushio/" + '*.jpg'))
         file = random.choice(files)
-        await self.pm.client.delete_message(message_object)
+        #await self.pm.client.delete_message(message_object)
         await self.pm.client.send_file(message_object.channel, file)
 
     async def rekt(self, message_object):
@@ -86,7 +86,7 @@ class Plugin(object):
         files.extend(glob.glob(os.getcwd() + "/images/rekt/" + '*.png'))
         files.extend(glob.glob(os.getcwd() + "/images/rekt/" + '*.jpg'))
         file = random.choice(files)
-        await self.pm.client.delete_message(message_object)
+        #await self.pm.client.delete_message(message_object)
         await self.pm.client.send_file(message_object.channel, file)
 
     async def boop(self, message_object):
@@ -94,7 +94,7 @@ class Plugin(object):
         files.extend(glob.glob(os.getcwd() + "/images/boop/" + '*.png'))
         files.extend(glob.glob(os.getcwd() + "/images/boop/" + '*.jpg'))
         file = random.choice(files)
-        await self.pm.client.delete_message(message_object)
+        #await self.pm.client.delete_message(message_object)
         await self.pm.client.send_file(message_object.channel, file)
 
     async def smug(self, message_object):
@@ -102,5 +102,5 @@ class Plugin(object):
         files.extend(glob.glob(os.getcwd() + "/images/smug/" + '*.png'))
         files.extend(glob.glob(os.getcwd() + "/images/smug/" + '*.jpg'))
         file = random.choice(files)
-        await self.pm.client.delete_message(message_object)
+        #await self.pm.client.delete_message(message_object)
         await self.pm.client.send_file(message_object.channel, file)
