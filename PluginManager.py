@@ -63,7 +63,7 @@ class PluginManager(object):
         """
         for name, plugin in self.plugins.items():
             events = plugin.register_events()
-            self.comlist[basename(name)] = []
+            self.comlist[basename(name).lower()] = []
             self.bind_event("Command", self.commands, plugin, events, self.comlist, name)
             self.bind_event("UserJoin", self.join, plugin, events, self.comlist, name)
             self.bind_event("UserLeave", self.leave, plugin, events, self.comlist, name)
@@ -115,7 +115,7 @@ class PluginManager(object):
             # Data is stored as a tuple (Plugin, Required Rank) with the event binding's name as key in a dictionary
             container[cmd.name] = (plugin, cmd.minimum_rank)
             if name == "Command":
-                comlist[basename(comname)].append([cmd.name, cmd.desc])
+                comlist[basename(comname).lower()].append([cmd.name, cmd.desc])
 
     def user_has_permission(self, user, permission_level):
         """
