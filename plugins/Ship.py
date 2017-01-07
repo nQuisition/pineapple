@@ -5,7 +5,7 @@ import re
 import os
 
 # rudimentary regex match for finding syllables
-SYLLABLE = "([aeiou]|[0-9])"
+SYLLABLE = "([aeiouy]|[0-9])"
 
 
 class Plugin(object):
