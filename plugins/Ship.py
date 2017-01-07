@@ -2,7 +2,6 @@ from util import Events
 from PIL import Image
 import discord.utils
 import urllib.request
-import pdb
 import re
 import os
 
