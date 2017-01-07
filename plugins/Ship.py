@@ -5,7 +5,7 @@ import re
 import os
 
 # rudimentary regex match for finding syllables
-SYLLABLE = "([aeiouy]|[0-9])"
+SYLLABLE = "([aeiouyAEIOUY]|[0-9])"
 
 
 class Plugin(object):
@@ -36,6 +36,9 @@ class Plugin(object):
         :param message_object: discord.Message object
         :param user_IDs: IDs of users to ship
         """
+
+        os.mkdir("cache/avatar/")
+
         if len(message_object.mentions) is 2:
             user1 = message_object.mentions[0]
             user2 = message_object.mentions[1]
