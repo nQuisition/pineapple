@@ -36,8 +36,8 @@ class Plugin(object):
         :param message_object: discord.Message object
         :param user_IDs: IDs of users to ship
         """
-
-        os.mkdir("cache/avatar/")
+        if not os.path.exists("cache/avatar/"):
+            os.mkdir("cache/avatar/")
 
         if len(message_object.mentions) is 2:
             user1 = message_object.mentions[0]
