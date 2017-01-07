@@ -1,6 +1,5 @@
 from util import Events
 from PIL import Image
-import discord.utils
 import urllib.request
 import re
 import os
@@ -29,32 +28,26 @@ class Plugin(object):
         :param args: List of words in the message
         """
         if command == "ship":
-            await self.ship(message_object, args[1])
+            await self.ship(message_object)
 
-    async def ship(self, message_object, user_IDs):
+    async def ship(self, message_object):
         """
         Execute the example_command command. All calls to self.pm.client should be asynchronous (await)!
         :param message_object: discord.Message object
         :param user_IDs: IDs of users to ship
         """
-        ##Retrieve user information
-        user_IDs = user_IDs.split()
-        # isolates user ID numbers
-        user_IDs = [re.sub("[^0-9]", "", id) for id in user_IDs]
-        if len(user_IDs) < 2:
-            await self.pm.client.send_message(message_object.channel,
-                                              "Please mention two users!")
-            return
-        # assigns users to arguments
-        # is there a way to get profile info without accessing the discord.py User class?
-        user1 = discord.utils.get(message_object.server.members, id=user_IDs[0])
-        user2 = discord.utils.get(message_object.server.members, id=user_IDs[1])
-        
-        if user1 is None or user2 is None:
+        if len(message_object.mentions) is 2:
+            user1 = message_object.mentions[0]
+            user2 = message_object.mentions[1]
+        elif len(message_object.mentions) is 1:
+            user1 = message_object.mentions[0]
+            user2 = message_object.mentions[0]
+        else:
             await self.pm.client.send_message(message_object.channel,
                                               "Please **mention** two users!")
             return
-        ##generate ship name
+
+        # generate ship name
         u1_parts = re.split(SYLLABLE, user1.display_name)
         # needed to maintain vowels in split
         u1_parts = [u1_parts[i] + u1_parts[i + 1] for i in range(len(u1_parts) - 1)[0::2]]
@@ -63,47 +56,29 @@ class Plugin(object):
         # concatenate half of u1 syllables with u2 syllables(integer division, ew...)
         name = u1_parts[:len(u1_parts) // 2] + u2_parts[len(u2_parts) // 2:]
         name = "".join(name)
-        # checks if last letter is omitted(bugfix, can be made more elegant)
+        # checks if last letter is omitted(bug fix, can be made more elegant)
         if name[-1] is not user2.display_name[-1]:
             name = name + user2.display_name[-1]
 
-        ##Generate Ship Image(clean up)
+        # Generate Ship Image(clean up)
         # download/access images first
-        hdr = {'User-Agent': 'Mozilla/5.0'}
-
-        req = urllib.request.Request(user1.avatar_url, headers=hdr)
-        page = urllib.request.urlopen(req)
-        data = page.read()
-        f = open("user1.png", 'wb+')
-        f.write(data)
-        f.close()
+        user1_img = self.get_avatar(user1)
 
         if user1 is user2:
-            images = [Image.open('user1.png').resize((256,256)), Image.open('images/ship/ship.png'), Image.open('images/ship/hand.png')]
+            images = [Image.open(user1_img).resize((256, 256)), Image.open('images/ship/ship.png'),
+                      Image.open('images/ship/hand.png')]
         else:
-            req = urllib.request.Request(user2.avatar_url, headers=hdr)
-            page = urllib.request.urlopen(req)
-            data = page.read()
-            f = open("user2.png", 'wb+')
-            f.write(data)
-            f.close()
-            images = [Image.open('user1.png').resize((256,256)), Image.open('images/ship/ship.png'), Image.open('user2.png').resize((256,256))]
+            user2_img = self.get_avatar(user2)
+            images = [Image.open(user1_img).resize((256, 256)), Image.open('images/ship/ship.png'),
+                      Image.open(user2_img).resize((256, 256))]
 
         # combines images horizontally
         with open("ship.png", 'wb+') as f:
-            
-            widths, heights = zip(*(i.size for i in images))
-            total_width = sum(widths)
-            max_height = max(heights)
-            
-
-            new_im = Image.new('RGB', (total_width, max_height))
-
-            x_offset = 0
-            for im in images:
-                new_im.paste(im, (x_offset, 0))
-                x_offset += im.size[0]
-            new_im.save(f)
+            new_im = Image.new('RGBA', (768, 256), (0, 0, 0, 0))
+            new_im.paste(images[0], (0, 0))
+            new_im.paste(images[1], (256, 0), mask=images[1])
+            new_im.paste(images[2], (512, 0))
+            new_im.save(f, "PNG")
 
         with open("ship.png", 'rb') as f:
             await self.pm.client.send_message(message_object.channel,
@@ -114,3 +89,23 @@ class Plugin(object):
             for img in temp_images:
                 os.remove(img)
 
+    @staticmethod
+    def get_avatar(user):
+        if user.avatar_url is "" or None:
+            url = user.default_avatar_url
+            path = "cache/avatar/default_" + user.id + ".png"
+        else:
+            url = user.avatar_url
+            path = "cache/avatar/" + user.avatar + ".png"
+        if os.path.isfile(path):
+            return path
+        else:
+            hdr = {'User-Agent': 'Mozilla/5.0'}
+            req = urllib.request.Request(url, headers=hdr)
+            page = urllib.request.urlopen(req)
+            data = page.read()
+            f = open(path, 'wb+')
+            f.write(data)
+            f.close()
+
+            return path
