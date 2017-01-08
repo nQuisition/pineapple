@@ -1,7 +1,7 @@
 from util import Events
 import sqlite3
 import datetime
-
+import discord
 
 class Plugin(object):
     def __init__(self, pm):
@@ -22,13 +22,14 @@ class Plugin(object):
                 staff = 0
                 staff_roles = self.pm.botPreferences.admin + self.pm.botPreferences.mod
                 for member in message_object.server.members:
-                    is_staff = False
-                    for role in member.roles:
-                        if role.name in staff_roles:
-                            staff += 1
-                            is_staff = True
-                        if is_staff:
-                            break
+                    if member.status is discord.Status.online:
+                        is_staff = False
+                        for role in member.roles:
+                            if role.name in staff_roles:
+                                staff += 1
+                                is_staff = True
+                            if is_staff:
+                                break
 
                 cur = con.cursor()
 
