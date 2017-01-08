@@ -15,6 +15,7 @@ class PluginManager(object):
     leave = {}
     typing = {}
     delete = {}
+    message = {}
 
     # References to various managers
     botPreferences = None
@@ -65,6 +66,7 @@ class PluginManager(object):
             events = plugin.register_events()
             self.comlist[basename(name).lower()] = []
             self.bind_event("Command", self.commands, plugin, events, self.comlist, name)
+            self.bind_event("Message", self.message, plugin, events, self.comlist, name)
             self.bind_event("UserJoin", self.join, plugin, events, self.comlist, name)
             self.bind_event("UserLeave", self.leave, plugin, events, self.comlist, name)
             self.bind_event("MessageDelete", self.delete, plugin, events, self.comlist, name)
@@ -83,6 +85,12 @@ class PluginManager(object):
                                                "You don't have the required permissions to do that (" + rank.name + ")")
         except KeyError:
             pass
+
+    async def handle_message(self, message):
+        if message.author.nick != self.botPreferences.nickName:
+            for obj in self.message:
+                name, rank = self.message[obj]
+                await name.handle_message(message)
 
     async def handle_typing(self, channel, user, when):
         for obj in self.typing:
@@ -110,12 +118,12 @@ class PluginManager(object):
     #   Utility methods
     ###
     @staticmethod
-    def bind_event(name, container, plugin, events, comlist, comname):
+    def bind_event(name, container, plugin, events, com_list, com_name):
         for cmd in (cmd for cmd in events if type(cmd).__name__ == name):
             # Data is stored as a tuple (Plugin, Required Rank) with the event binding's name as key in a dictionary
             container[cmd.name] = (plugin, cmd.minimum_rank)
             if name == "Command":
-                comlist[basename(comname).lower()].append([cmd.name, cmd.desc])
+                com_list[basename(com_name).lower()].append([cmd.name, cmd.desc])
 
     def user_has_permission(self, user, permission_level):
         """

@@ -17,6 +17,17 @@ class Command(object):
         self.desc = desc
 
 
+class Message(object):
+    """
+    Message event, fires when a message is posted in chat
+    """
+
+    def __init__(self, name, rank=Ranks.Default, desc=""):
+        self.name = name
+        self.minimum_rank = rank
+        self.desc = desc
+
+
 class BotMention(object):
     """
     BotMention event, fires when the bot gets mentioned
