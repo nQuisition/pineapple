@@ -1,6 +1,7 @@
 config.ini
 config.ini.default
-
+cache/avatar/*
+log.sqlite
 #temp
 plugins/temp/*
 

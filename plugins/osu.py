@@ -20,13 +20,13 @@ class Plugin(object):
 
     async def handle_command(self, message_object, command, args):
         if command == "osu":
-            await self.osu(message_object, args[1])
+            await self.osu(message_object, args[1].strip())
         if command == "ctb":
-            await self.taiko(message_object, args[1])
+            await self.taiko(message_object, args[1].strip())
         if command == "taiko":
-            await self.taiko(message_object, args[1])
+            await self.taiko(message_object, args[1].strip())
         if command == "mania":
-            await self.mania(message_object, args[1])
+            await self.mania(message_object, args[1].strip())
 
     async def osu(self, message_object, username):
         try:

@@ -17,7 +17,7 @@ class Plugin(object):
             if "all" in args[1]:
                 await self.all_help(message_object)
             elif args[1] is not "":
-                await self.show_help(message_object, args[1])
+                await self.show_help(message_object, args[1].lower())
             else:
                 await self.show_help_assigned(message_object)
         if command == "info":
