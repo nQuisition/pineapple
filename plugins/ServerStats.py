@@ -1,6 +1,8 @@
 from util import Events
 from util.Ranks import Ranks
 import operator
+import discord
+
 
 class Plugin(object):
     def __init__(self, pm):
@@ -9,9 +11,12 @@ class Plugin(object):
     @staticmethod
     def register_events():
         return [Events.Command("rolestat", Ranks.Mod,
-                               desc="Shows the amount of users in each role")]
+                               desc="Shows the amount of users in each role"),
+                Events.Command("serverinfo", desc="Shows information about the server")]
 
     async def handle_command(self, message_object, command, args):
+        if command == "serverinfo":
+            await self.server_info(message_object)
         if command == "rolestat":
             await self.rolestat(message_object)
 
@@ -33,3 +38,16 @@ class Plugin(object):
             msg += role + ": " + str(count) + " users\n"
 
         await self.pm.client.send_message(message_object.channel, msg)
+
+    async def server_info(self, message_object):
+        server = message_object.server
+        msg = "**Name:** " + server.name + " (" + server.id + ")\n"
+        msg += "**Total members:** " + str(server.member_count) + "\n"
+        msg += "**Server owner:** " + server.owner.name + "\n"
+        msg += "**Server region:** " + str(server.region) + "\n"
+        msg += "**Created at:** " + server.created_at.strftime("%B %d, %Y")
+
+        em = discord.Embed(description="Server Icon", colour=0xFFFFFF)
+        em.set_image(url=server.icon_url)
+        msg = await self.pm.client.send_message(message_object.channel, msg)
+        await self.pm.client.edit_message(msg, embed=em)
