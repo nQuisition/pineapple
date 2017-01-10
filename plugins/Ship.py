@@ -36,8 +36,10 @@ class Plugin(object):
         :param message_object: discord.Message object
         :param user_IDs: IDs of users to ship
         """
-        if not os.path.exists("cache/avatar/"):
-            os.mkdir("cache/avatar/")
+        if not os.path.exists("cache/"):
+            os.mkdir("cache/")
+            if not os.path.exists("cache/avatar/"):
+                os.mkdir("cache/avatar/")
 
         if len(message_object.mentions) is 2:
             user1 = message_object.mentions[0]
@@ -94,6 +96,8 @@ class Plugin(object):
 
     @staticmethod
     def get_avatar(user):
+        if not os.path.exists("cache/"):
+            os.makedirs("cache")
         if user.avatar_url is "" or None:
             url = user.default_avatar_url
             path = "cache/avatar/default_" + user.id + ".png"
