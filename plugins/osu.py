@@ -150,6 +150,7 @@ class Plugin(object):
                         data = await self.get_data(row[1], id)
                         if data["pp_rank"] != "0":
                             data["discord_id"] = row[0]
+                            data["pp_rank"] = int(data["pp_rank"])
                             unsorted.append(data)
                     except:
                         continue
@@ -181,8 +182,9 @@ class Plugin(object):
                         else:
                             emoji = str(index) + "#:"
 
-                        msg += emoji + " " + data["username"] + "  #" + data["pp_rank"] + " (" + str(int(float(data[
-                            "pp_raw"]))) + "pp)" + " (" + name + ") \n"
+                        msg += emoji + " " + data["username"] + "  #" + str(data["pp_rank"]) + " (" + str(
+                            int(float(data[
+                                          "pp_raw"]))) + "pp)" + " (" + name + ") \n"
                         index += 1
                     except:
                         traceback.print_exc()
@@ -208,6 +210,10 @@ class Plugin(object):
 
                     cur.execute("UPDATE users SET Username = ? WHERE Id = ?",
                                 (name, str(user_id)))
+
+                    await self.pm.client.send_message(message_object.channel,
+                                                      message_object.author.mention +
+                                                      " your osu! username has been set to **" + name + "**")
             except:
                 traceback.print_exc()
         else:
