@@ -2,6 +2,7 @@ from util import Events
 from util.Ranks import Ranks
 import operator
 import discord
+from datetime import datetime
 
 
 class Plugin(object):
@@ -12,13 +13,16 @@ class Plugin(object):
     def register_events():
         return [Events.Command("rolestat", Ranks.Mod,
                                desc="Shows the amount of users in each role"),
-                Events.Command("serverinfo", desc="Shows information about the server")]
+                Events.Command("serverinfo", desc="Shows information about the server"),
+                Events.Command("joined", desc="Shows the date a user joined the server")]
 
     async def handle_command(self, message_object, command, args):
         if command == "serverinfo":
             await self.server_info(message_object)
         if command == "rolestat":
             await self.rolestat(message_object)
+        if command == "joined":
+            await self.joined(message_object)
 
     async def rolestat(self, message_object):
         server = message_object.server
@@ -51,3 +55,15 @@ class Plugin(object):
         em.set_image(url=server.icon_url)
         msg = await self.pm.client.send_message(message_object.channel, msg)
         await self.pm.client.edit_message(msg, embed=em)
+
+    async def joined(self, message_object):
+        user = message_object.author
+        if len(message_object.mentions) >= 1:
+            user = message_object.mentions[0]
+
+        joined = user.joined_at
+        now = datetime.now()
+        diff = now - joined
+        await self.pm.client.send_message(message_object.channel,
+                                          user.mention + " joined this server " + str(diff.days) +
+                                          " days ago on: " + joined.strftime("%H:%M:%S %d-%m-%Y"))
