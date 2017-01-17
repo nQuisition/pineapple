@@ -134,6 +134,9 @@ class PluginManager(object):
         :return: True/False, whether used is allowed to trigger this event
         """
         highest_rank = Ranks.Default
+        if not hasattr(user, 'server'):
+            return True
+
         for rank in user.roles:
             if rank.name in self.botPreferences.admin and highest_rank < Ranks.Admin:
                 highest_rank = Ranks.Admin
