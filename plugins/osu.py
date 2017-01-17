@@ -146,10 +146,13 @@ class Plugin(object):
                 unsorted = list()
 
                 for row in rows:
-                    data = await self.get_data(row[1], id)
-                    if data["pp_rank"] != "0":
-                        data["discord_id"] = row[0]
-                        unsorted.append(data)
+                    try:
+                        data = await self.get_data(row[1], id)
+                        if data["pp_rank"] != "0":
+                            data["discord_id"] = row[0]
+                            unsorted.append(data)
+                    except:
+                        continue
 
                 sortedusers = sorted(unsorted, key=operator.itemgetter("pp_rank"))
                 for data in sortedusers:
