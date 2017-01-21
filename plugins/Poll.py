@@ -19,5 +19,5 @@ class Plugin(object):
             prompt = "Yay or Nay?"
         poll_msg = await self.pm.client.send_message(
             message_object.channel, prompt)
-        await self.pm.client.add_reaction(poll_msg, '\U0001f1fd')
         await self.pm.client.add_reaction(poll_msg, '\U0001f1f4')
+        await self.pm.client.add_reaction(poll_msg, '\U0001f1fd')
