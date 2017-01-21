@@ -22,3 +22,8 @@ password =
 
 [OSU]
 apikey =
+
+[Trello]
+apikey =
+token =
+board =
