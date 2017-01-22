@@ -35,7 +35,9 @@ class Plugin(object):
                         hstr += "`" + self.pm.botPreferences.commandPrefix + c + "`: \n_" + d + "_\n"
                     else:
                         hstr += "`" + self.pm.botPreferences.commandPrefix + c + "`\n"
-        await self.pm.client.send_message(message_object.channel, hstr)
+        await self.pm.client.send_message(message_object.author, hstr)
+        if not message_object.channel.is_private:
+            await self.pm.client.delete_message(message_object)
 
     async def info(self, message_object):
         await self.pm.client.send_message(message_object.channel, 'Info about the bot will be here soon(tm)')
@@ -49,10 +51,12 @@ class Plugin(object):
             hstr = "**{0}**:\n".format(args)
             for c, d in self.pm.comlist[args + ".py"]:
                 hstr = hstr + "`" + self.pm.botPreferences.commandPrefix + c + "`: " + d + "\n"
-            await self.pm.client.send_message(message_object.channel, hstr)
+            await self.pm.client.send_message(message_object.author, hstr)
         except KeyError:
-            await self.pm.client.send_message(message_object.channel,
+            await self.pm.client.send_message(message_object.author,
                                               ":exclamation: That\'s not a valid plugin name")
+        if not message_object.channel.is_private:
+            await self.pm.client.delete_message(message_object)
 
     async def show_help_assigned(self, message_object):
         x = "Bot Help\n```"
@@ -61,4 +65,6 @@ class Plugin(object):
 
         x += "```\n`" + self.pm.botPreferences.commandPrefix + "help [help_topic]` to evoke a help topic.\n`" + \
              self.pm.botPreferences.commandPrefix + "help all` for all commands."
-        await self.pm.client.send_message(message_object.channel, x)
+        await self.pm.client.send_message(message_object.author, x)
+        if not message_object.channel.is_private:
+            await self.pm.client.delete_message(message_object)
