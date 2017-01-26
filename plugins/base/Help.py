@@ -61,7 +61,8 @@ class Plugin(object):
     async def show_help_assigned(self, message_object):
         x = "Bot Help\n```"
         for name, commands in self.pm.comlist.items():
-            x = x + name[:-3] + " "
+            if len(commands) > 0:
+                x = x + name[:-3] + " "
 
         x += "```\n`" + self.pm.botPreferences.commandPrefix + "help [help_topic]` to evoke a help topic.\n`" + \
              self.pm.botPreferences.commandPrefix + "help all` for all commands."
