@@ -134,12 +134,13 @@ class Plugin(object):
             elif mode == "mania":
                 id = 3
             else:
+                mode = "osu"
                 id = 0
             con = sqlite3.connect("cache/osu_leaderboard.sqlite",
                                   detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
             with con:
                 cur = con.cursor()
-                cur.execute("SELECT * FROM users")
+                cur.execute("SELECT * FROM users LIMIT 10")  # TODO: Improve loading to show more users
                 rows = cur.fetchall()
                 index = 1
                 msg = "Leaderboard for " + mode + ":\n"

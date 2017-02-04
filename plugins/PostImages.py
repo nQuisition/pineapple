@@ -17,7 +17,8 @@ class Plugin(object):
                 Events.Command("rekt", desc="When someone just got rekt"),
                 Events.Command("kiss", desc="Share a kiss"),
                 Events.Command("boop", desc="boop~"),
-                Events.Command("smug", desc="smug face")]
+                Events.Command("smug", desc="smug face"),
+                Events.Command("fistbump", desc="Fist bump someone")]
 
     async def handle_command(self, message_object, command, args):
         if command == "pat":
@@ -36,6 +37,8 @@ class Plugin(object):
             await self.boop(message_object)
         if command == "smug":
             await self.smug(message_object)
+        if command == "fistbump":
+            await self.fist_bump(message_object, args[1])
 
     async def pat(self, message_object, user):
         files = glob.glob(os.getcwd() + "/images/pat/" + '*.gif')
@@ -103,4 +106,14 @@ class Plugin(object):
         files.extend(glob.glob(os.getcwd() + "/images/smug/" + '*.jpg'))
         file = random.choice(files)
         #await self.pm.client.delete_message(message_object)
+        await self.pm.client.send_file(message_object.channel, file)
+
+    async def fist_bump(self, message_object, user):
+        files = glob.glob(os.getcwd() + "/images/fistbump/" + '*.gif')
+        files.extend(glob.glob(os.getcwd() + "/images/fistbump/" + '*.png'))
+        files.extend(glob.glob(os.getcwd() + "/images/fistbump/" + '*.jpg'))
+        file = random.choice(files)
+        await self.pm.client.delete_message(message_object)
+        await self.pm.client.send_message(message_object.channel,
+                                          "**" + user + "** you got a fist bump from **" + message_object.author.name + "**")
         await self.pm.client.send_file(message_object.channel, file)
