@@ -6,7 +6,7 @@ import sqlite3
 import traceback
 import operator
 import discord
-
+from PIL import Image
 
 class Plugin(object):
     def __init__(self, pm):
@@ -28,13 +28,13 @@ class Plugin(object):
 
     async def handle_command(self, message_object, command, args):
         if command == "osu":
-            await self.osu(message_object, args[1].strip())
+            await self.osu_mode(message_object, args[1].strip(), 0)
         if command == "ctb":
-            await self.taiko(message_object, args[1].strip())
+            await self.osu_mode(message_object, args[1].strip(), 2)
         if command == "taiko":
-            await self.taiko(message_object, args[1].strip())
+            await self.osu_mode(message_object, args[1].strip(), 1)
         if command == "mania":
-            await self.mania(message_object, args[1].strip())
+            await self.osu_mode(message_object, args[1].strip(), 3)
         if command == "leaderboard":
             await self.leaderboard(message_object, args[1].strip())
         if command == "setosu":
@@ -43,60 +43,21 @@ class Plugin(object):
             id = message_object.mentions[0].id
             await self.delete_osu(id)
 
-    async def osu(self, message_object, username):
+    async def osu_mode(self, message_object, username, mode):
         try:
-            await self.get_badge(message_object.channel, username, 0)
-            display_data = await self.get_data(username, 0)
-            await self.pm.client.send_message(message_object.channel,
-                                              "Username: " + display_data["username"] + "\n" + "Rank: " + display_data[
-                                                  "pp_rank"] + "\n" + "Accuracy: " + display_data[
-                                                  "accuracy"] + "\n" + "PP: " + display_data[
-                                                  "pp_raw"] + "\n" + "Country: " + display_data[
-                                                  "country"] + "\n" + "Rank in country: " + display_data[
-                                                  "pp_country_rank"])
-        except:
-            await self.pm.client.send_message(message_object.channel, "Error unknown user **" + username + "**")
-
-    async def taiko(self, message_object, username):
-        try:
-            await self.get_badge(message_object.channel, username, 1)
-            display_data = await self.get_data(username, 1)
-            await self.pm.client.send_message(message_object.channel,
-                                              "Username: " + display_data["username"] + "\n" + "Rank: " + display_data[
-                                                  "pp_rank"] + "\n" + "Accuracy: " + display_data[
-                                                  "accuracy"] + "\n" + "PP: " + display_data[
-                                                  "pp_raw"] + "\n" + "Country: " + display_data[
-                                                  "country"] + "\n" + "Rank in country: " + display_data[
-                                                  "pp_country_rank"])
-        except:
-            await self.pm.client.send_message(message_object.channel, "Error unknown user **" + username + "**")
-
-    async def ctb(self, message_object, username):
-        try:
-            await self.get_badge(message_object.channel, username, 2)
-            display_data = await self.get_data(username, 2)
-            await self.pm.client.send_message(message_object.channel,
-                                              "Username: " + display_data["username"] + "\n" + "Rank: " + display_data[
-                                                  "pp_rank"] + "\n" + "Accuracy: " + display_data[
-                                                  "accuracy"] + "\n" + "PP: " + display_data[
-                                                  "pp_raw"] + "\n" + "Country: " + display_data[
-                                                  "country"] + "\n" + "Rank in country: " + display_data[
-                                                  "pp_country_rank"])
-        except:
-            await self.pm.client.send_message(message_object.channel, "Error unknown user **" + username + "**")
-
-    async def mania(self, message_object, username):
-        try:
-            await self.get_badge(message_object.channel, username, 3)
-            display_data = await self.get_data(username, 3)
-            # Update leaderboard
-            await self.pm.client.send_message(message_object.channel,
-                                              "Username: " + display_data["username"] + "\n" + "Rank: " + display_data[
-                                                  "pp_rank"] + "\n" + "Accuracy: " + display_data[
-                                                  "accuracy"] + "\n" + "PP: " + display_data[
-                                                  "pp_raw"] + "\n" + "Country: " + display_data[
-                                                  "country"] + "\n" + "Rank in country: " + display_data[
-                                                  "pp_country_rank"])
+            if len(username) is 0 or username is None:
+                username = await self.get_osu_name(message_object)
+                if username is None:
+                    return
+            await self.get_badge(message_object.channel, username, mode)
+            # display_data = await self.get_data(username, mode)
+            # await self.pm.client.send_message(message_object.channel,
+            #                                  "Username: " + display_data["username"] + "\n" + "Rank: " + display_data[
+            #                                      "pp_rank"] + "\n" + "Accuracy: " + display_data[
+            #                                      "accuracy"] + "\n" + "PP: " + display_data[
+            #                                      "pp_raw"] + "\n" + "Country: " + display_data[
+            #                                      "country"] + "\n" + "Rank in country: " + display_data[
+            #                                      "pp_country_rank"])
         except:
             await self.pm.client.send_message(message_object.channel, "Error unknown user **" + username + "**")
 
@@ -107,7 +68,14 @@ class Plugin(object):
         filename = os.path.join(directory, username + "test.jpg")
         image_url = self.base_url.format(id, username)
         urllib.request.urlretrieve(image_url, filename)
-        await self.pm.client.send_file(channel, filename)
+
+        # Check if image is valid
+        try:
+            im = Image.open(filename)
+            im.close()
+            await self.pm.client.send_file(channel, filename)
+        except IOError:
+            await self.pm.client.send_message(channel, "No stats found for this gamemode.")
         os.remove(filename)
 
     async def get_data(self, username, id):
@@ -231,3 +199,20 @@ class Plugin(object):
                 cur.execute("DELETE FROM users WHERE Id=?", (id,))
         except:
             traceback.print_exc()
+
+    async def get_osu_name(self, msg):
+        con = sqlite3.connect("cache/osu_leaderboard.sqlite",
+                              detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
+        with con:
+            cur = con.cursor()
+            cur.execute("SELECT Username FROM users WHERE Id = ?", (msg.author.id,))
+            rows = cur.fetchall()
+
+            for row in rows:
+                    return row[0]
+
+            await self.pm.client.send_message(msg.channel,
+                                              "No username set for " + msg.author.mention +
+                                              ". You can set one by using the `setosu <osu name>` command")
+            return None
+
