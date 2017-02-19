@@ -1,6 +1,7 @@
 from util import Events
 from util.Ranks import Ranks
 import requests
+import urllib.request
 import os
 import discord
 import random
@@ -32,18 +33,26 @@ class Plugin(object):
             await self.search(message_object, args[1], nsfw=False)
         if command == "nsfw":
             await self.search(message_object, args[1], nsfw=True)
-        if command == "remove":
+        if command == "blacklist":
             await self.remove(message_object, args[1])
 
     async def search(self, message_object, text, nsfw):
         text = text.lower()  # moves all tags to lowercase
         search_tags = set(text.split())  # splits tags on second_place
-        if "rating:questionable" in search_tags:
-            search_tags.discard("rating:questionable")  # no loopholes
+        if len(search_tags) is 0:
+            await self.pm.client.send_message(message_object.channel, "Please enter tags to search.:thinking:")
+            return
+        search_tags.discard("rating:questionable")  # no loopholes
+        search_tags.discard("rating:safe")  # no loopholes
+        search_tags.discard("rating:explicit")  # no loopholes
+        
+        if len(search_tags.intersection(self.blacklist)) > 0: #if all tags filtered, exit
+            await self.pm.client.send_message(message_object.channel, "The tags used have been blacklisted by an Admin. :cry:")
+            return
         if not nsfw:
             search_tags.add("rating:safe")  # append safe tag to URL if not nsfw
         else:
-            search_tags.add("rating:questionable")  # append safe tag to URL if not nsfw
+            search_tags.add("-rating:safe")  # append safe tag to URL if not nsfw
         request_url = self.base_url
         for tag in search_tags.difference(self.blacklist):
             request_url += (tag + "%20")  # add tags not contained in blacklist to search
@@ -63,10 +72,16 @@ class Plugin(object):
         response = response.json()[random.randint(0, len(response.json()) - 1)]
         gel_url = self.base_src + str(response["id"])  # this is the link to the gelbooru page
         image_url = "http:" + response["file_url"]
-
-        em = discord.Embed(colour=random.randint(0x0, 0xFFFFFF))
-        em.set_image(url=image_url)
-        await self.pm.client.send_message(message_object.channel, embed=em)
+        filename = "cache/temp" + image_url[-5:]
+        ##embeds are inconsistent, saves file instead.
+        #em = discord.Embed(colour=random.randint(0x0, 0xFFFFFF))
+        #em.set_image(url=image_url)  
+        #await self.pm.client.send_message(message_object.channel, embed=em)
+        
+        #downloads image to server
+        urllib.request.urlretrieve(image_url, filename)
+        await self.pm.client.send_file(message_object.channel, filename)
+        os.remove(filename)
         await self.pm.client.send_message(message_object.channel, "**Source:** " + gel_url)
 
     async def remove(self, message_object, text):
@@ -76,4 +91,4 @@ class Plugin(object):
             self.blk_file.write(item + "\n")
             self.blacklist.add(item)
         await self.pm.client.send_message(message_object.channel,
-                                          "**Tags added**")
+                                          "**{} Tags added**".format(len(block_tags)))
