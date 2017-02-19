@@ -69,9 +69,21 @@ class Plugin(object):
                                                                       "tag(s) :cry:")
             return
 
-        response = response.json()[random.randint(0, len(response.json()) - 1)]
-        gel_url = self.base_src + str(response["id"])  # this is the link to the gelbooru page
-        image_url = "http:" + response["file_url"]
+        img_response = response.json()[random.randint(0, len(response.json()) - 1)]
+        retries = 5 #retry search 10 times
+        response_tags = set(img_response["tags"].split())
+        while(len(response_tags.intersection(self.blacklist)) > 0):
+            img_response = response.json()[random.randint(0, len(response.json()) - 1)] #find new image from query
+            response_tags = set(img_response["tags"].split()) #split tags from results
+            retries -= 1 #decrement recount timer
+            if retries is 0:
+                await self.pm.client.send_message(message_object.channel, "Can't find an image that matches your "
+                                                                          "tag(s) :cry:")
+                return
+
+
+        gel_url = self.base_src + str(img_response["id"])  # this is the link to the gelbooru page
+        image_url = "http:" + img_response["file_url"]
         filename = "cache/temp" + image_url[-5:]
         ##embeds are inconsistent, saves file instead.
         #em = discord.Embed(colour=random.randint(0x0, 0xFFFFFF))
