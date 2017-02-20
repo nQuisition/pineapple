@@ -77,9 +77,9 @@ class PluginManager(object):
     ###
     async def handle_command(self, message_object, command, args):
         try:
-            target, rank = self.commands[command]
+            target, rank = self.commands[command.lower()]
             if self.user_has_permission(message_object.author, rank):
-                await target.handle_command(message_object, command, args)
+                await target.handle_command(message_object, command.lower(), args)
             else:
                 await self.client.send_message(message_object.channel,
                                                "You don't have the required permissions to do that (" + rank.name + ")")

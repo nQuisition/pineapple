@@ -35,7 +35,12 @@ class Plugin(object):
                         hstr += "`" + self.pm.botPreferences.commandPrefix + c + "`: \n_" + d + "_\n"
                     else:
                         hstr += "`" + self.pm.botPreferences.commandPrefix + c + "`\n"
-        await self.pm.client.send_message(message_object.author, hstr)
+
+        # Split text into pieces of 1000 chars
+        help_strings = list(map(''.join, zip(*[iter(hstr)]*1000)))
+        for string in help_strings:
+            await self.pm.client.send_message(message_object.author, string)
+
         if not message_object.channel.is_private:
             await self.pm.client.delete_message(message_object)
 
