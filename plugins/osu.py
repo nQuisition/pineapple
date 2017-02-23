@@ -108,7 +108,7 @@ class Plugin(object):
                                   detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
             with con:
                 cur = con.cursor()
-                cur.execute("SELECT * FROM users LIMIT 10")  # TODO: Improve loading to show more users
+                cur.execute("SELECT * FROM users")  # TODO: Improve loading to show more users
                 rows = cur.fetchall()
                 index = 1
                 msg = "Leaderboard for " + mode + ":\n"
@@ -157,7 +157,8 @@ class Plugin(object):
                         index += 1
                     except:
                         traceback.print_exc()
-                await self.pm.client.edit_message(lb_msg, msg)
+                await self.pm.client.delete_message(lb_msg)
+                await self.pm.client.send_message(message_object.channel, msg)
         except:
             traceback.print_exc()
 

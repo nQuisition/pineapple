@@ -45,9 +45,10 @@ class Plugin(object):
         search_tags.discard("rating:questionable")  # no loopholes
         search_tags.discard("rating:safe")  # no loopholes
         search_tags.discard("rating:explicit")  # no loopholes
-        
-        if len(search_tags.intersection(self.blacklist)) > 0: #if all tags filtered, exit
-            await self.pm.client.send_message(message_object.channel, "The tags used have been blacklisted by an Admin. :cry:")
+
+        if len(search_tags.intersection(self.blacklist)) > 0:  # if all tags filtered, exit
+            await self.pm.client.send_message(message_object.channel,
+                                              "The tags used have been blacklisted by an Admin. :cry:")
             return
         if not nsfw:
             search_tags.add("rating:safe")  # append safe tag to URL if not nsfw
@@ -70,29 +71,33 @@ class Plugin(object):
             return
 
         img_response = response.json()[random.randint(0, len(response.json()) - 1)]
-        retries = 5 #retry search 10 times
+        retries = 5  # retry search 10 times
         response_tags = set(img_response["tags"].split())
-        while(len(response_tags.intersection(self.blacklist)) > 0):
-            img_response = response.json()[random.randint(0, len(response.json()) - 1)] #find new image from query
-            response_tags = set(img_response["tags"].split()) #split tags from results
-            retries -= 1 #decrement recount timer
+        while len(response_tags.intersection(self.blacklist)) > 0:
+            img_response = response.json()[random.randint(0, len(response.json()) - 1)]  # find new image from query
+            response_tags = set(img_response["tags"].split())  # split tags from results
+            retries -= 1  # decrement recount timer
             if retries is 0:
                 await self.pm.client.send_message(message_object.channel, "Can't find an image that matches your "
                                                                           "tag(s) :cry:")
                 return
 
-
         gel_url = self.base_src + str(img_response["id"])  # this is the link to the gelbooru page
         image_url = "http:" + img_response["file_url"]
         filename = "cache/temp" + image_url[-5:]
-        ##embeds are inconsistent, saves file instead.
-        #em = discord.Embed(colour=random.randint(0x0, 0xFFFFFF))
-        #em.set_image(url=image_url)  
-        #await self.pm.client.send_message(message_object.channel, embed=em)
-        
-        #downloads image to server
+        # embeds are inconsistent, saves file instead.
+        # em = discord.Embed(colour=random.randint(0x0, 0xFFFFFF))
+        # em.set_image(url=image_url)
+        # await self.pm.client.send_message(message_object.channel, embed=em)
+
+        # downloads image to server
         urllib.request.urlretrieve(image_url, filename)
-        await self.pm.client.send_file(message_object.channel, filename)
+        if os.path.getsize(filename) > 8000000:
+            await self.pm.client.send_message(message_object.channel, "The image that was found was too large to "
+                                                                      "upload. Click here to view it: " + image_url)
+        else:
+            await self.pm.client.send_file(message_object.channel, filename)
+
         os.remove(filename)
         await self.pm.client.send_message(message_object.channel, "**Source:** " + gel_url)
 
