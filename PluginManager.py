@@ -87,7 +87,7 @@ class PluginManager(object):
             pass
 
     async def handle_message(self, message):
-        if message.author.nick != self.botPreferences.nickName:
+        if hasattr(message.author, 'nick') and message.author.nick != self.botPreferences.nickName:
             for obj in self.message:
                 name, rank = self.message[obj]
                 await name.handle_message(message)
