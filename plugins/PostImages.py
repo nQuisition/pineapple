@@ -27,10 +27,10 @@ class Plugin(object):
             await self.post_image_to_user(message_object, args[1], "pat",
                                           "you got a pat from **" + message_object.author.name + "**")
         if command == "kiss":
-            await self.post_image_to_user(message_object, args[1], "pat",
+            await self.post_image_to_user(message_object, args[1], "kiss",
                                           "you got a kiss from **" + message_object.author.name + "**")
         if command == "fistbump":
-            await self.post_image_to_user(message_object, args[1], "pat",
+            await self.post_image_to_user(message_object, args[1], "fistbump",
                                           "you got a fistbump from **" + message_object.author.name + "**")
         if command == "hug":
             await self.post_image_to_user(message_object, args[1], "hug",
