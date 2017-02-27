@@ -91,7 +91,14 @@ class Plugin(object):
         # await self.pm.client.send_message(message_object.channel, embed=em)
 
         # downloads image to server
-        urllib.request.urlretrieve(image_url, filename)
+        hdr = {'User-Agent': 'Mozilla/5.0'}
+        req = urllib.request.Request(image_url, headers=hdr)
+        page = urllib.request.urlopen(req)
+        data = page.read()
+        f = open(filename, 'wb+')
+        f.write(data)
+        f.close()
+
         if os.path.getsize(filename) > 8000000:
             await self.pm.client.send_message(message_object.channel, "The image that was found was too large to "
                                                                       "upload. Click here to view it: " + image_url)
