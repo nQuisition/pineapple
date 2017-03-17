@@ -101,12 +101,12 @@ class Plugin(object):
 
         if os.path.getsize(filename) > 8000000:
             await self.pm.client.send_message(message_object.channel, "The image that was found was too large to "
-                                                                      "upload. Click here to view it: " + image_url)
+                                                                      "upload. " + image_url)
         else:
             await self.pm.client.send_file(message_object.channel, filename)
+            await self.pm.client.send_message(message_object.channel, "**Source:** <" + gel_url + ">")
 
         os.remove(filename)
-        await self.pm.client.send_message(message_object.channel, "**Source:** " + gel_url)
 
     async def remove(self, message_object, text):
         text = text.lower()  # moves all tags to lowercase

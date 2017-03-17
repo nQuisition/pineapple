@@ -14,7 +14,8 @@ class Plugin(object):
         Define events that this plugin will listen to
         :return: A list of util.Events
         """
-        return [Events.Command("scale")]
+        #return [Events.Command("scale")]
+        return []
 
     async def handle_command(self, message_object, command, args):
         """
