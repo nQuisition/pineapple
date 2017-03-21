@@ -1,7 +1,7 @@
 from util import Events
 from util.Ranks import Ranks
 from discord import Channel
-
+from discord import errors
 
 class Plugin(object):
     def __init__(self, pm):
@@ -42,20 +42,25 @@ class Plugin(object):
                 voice = await self.pm.client.join_voice_channel(channel)
             else:
                 voice = self.pm.client.voice_client_in(message_object.server)
-            self.player = await voice.create_ytdl_player(url, ytdl_options={"default_search": "ytsearch"})
 
-            self.player.start()
+            try:
+                self.player = await voice.create_ytdl_player(url, ytdl_options={"default_search": "ytsearch"})
 
-            # Format stream duration
-            m, s = divmod(self.player.duration, 60)
-            h, m = divmod(m, 60)
-            if h is 0:
-                duration = str(m) + ":" + str(s)
-            else:
-                duration = str(h) + ":" + str(m) + ":" + str(s)
+                self.player.start()
 
-            await self.pm.client.send_message(message_object.channel, "Now playing **" + self.player.title +
-                                              "** (" + duration + ") in " + channel.name)
+                # Format stream duration
+                m, s = divmod(self.player.duration, 60)
+                h, m = divmod(m, 60)
+                if h is 0:
+                    duration = str(m) + ":" + str(s)
+                else:
+                    duration = str(h) + ":" + str(m) + ":" + str(s)
+
+                await self.pm.client.send_message(message_object.channel, "Now playing **" + self.player.title +
+                                                  "** (" + duration + ") in " + channel.name)
+            except errors.ClientException:
+                await self.pm.client.send_message(message_object.channel, "Please install ffmpeg on your system (make "
+                                                                          "sure it's in your PATH on Windows)")
         else:
             await self.pm.client.send_message(message_object.channel, message_object.author.mention +
                                               " please join a voice channel in order to start the bot!")

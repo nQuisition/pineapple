@@ -39,8 +39,8 @@ class Plugin(object):
         """
         if not os.path.exists("cache/"):
             os.mkdir("cache/")
-            if not os.path.exists("cache/avatar/"):
-                os.mkdir("cache/avatar/")
+        if not os.path.exists("cache/avatar/"):
+            os.mkdir("cache/avatar/")
 
         if len(message_object.mentions) is 2:
             user1 = message_object.mentions[0]
