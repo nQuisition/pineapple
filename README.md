@@ -35,7 +35,12 @@ https://discordapp.com/oauth2/authorize?&client_id=CLIENT_ID&scope=bot&permissio
 4. Select your server and add the bot to that server
 # Common issues
 
-###ImportError: cannot import name 'quote_plus'
+### ImportError: cannot import name 'quote_plus'
+
 This error happens when you install trello instead of py-trello. You can use
 `pip install py-trello` to fix this this issue.
+
+### The bot is pointing to a non existing info channel with th welcome message.
+
+This is because we still hard code the channel ID in the bot for use on our own server. You can change the unique ID in the 'JoinLeave.py' file tou your own Info channel's unique ID 
 
