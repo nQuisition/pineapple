@@ -219,7 +219,8 @@ class Plugin(object):
         else:
             await self.delete_osu(user_id)
 
-    @staticmethod async def delete_osu(server_id, member_id):
+    @staticmethod
+    async def delete_osu(server_id, member_id):
         """
         Delete a user from the osu! user database
         :param server_id: Server ID
