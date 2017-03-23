@@ -129,6 +129,7 @@ class PluginManager(object):
         """
         Checks whether one of the user's roles has the right level for the requested permission_level
         Roles are defined in config.ini and parsed in BotPreferences
+        :param server_id: Discord server ID
         :param user: discord.Member object containing the user that triggered the event
         :param permission_level: Minimal permission level specified by the triggered event
         :return: True/False, whether used is allowed to trigger this event

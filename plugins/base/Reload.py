@@ -27,3 +27,6 @@ class Plugin(object):
     async def reload(self):
         self.pm.load_plugins()
         self.pm.register_events()
+
+        for instance in self.pm.client.servers:
+            self.pm.botPreferences.bind_roles(instance.id)
