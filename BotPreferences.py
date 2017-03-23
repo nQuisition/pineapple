@@ -1,4 +1,7 @@
 from configparser import ConfigParser, NoSectionError, NoOptionError
+import os
+import sqlite3
+from util import Ranks
 
 
 class BotPreferences(object):
@@ -24,23 +27,50 @@ class BotPreferences(object):
     member = list()
     default = list()
 
-    def __init__(self):
+    servers = dict()
+
+    def __init__(self, pm):
+        self.pluginManager = pm
+
         """
         Load the config file into memory and read their values
         """
         self.config = ConfigParser()
         self.reload_config()
 
-    def bind_roles(self, name, container):
+    def bind_roles(self, server_id):
         """
-        This method will read all the (comma separated) roles from the config file and assign them to the specified
-        permission level
+        This method will read all the roles from the server database and add them to their container
         :param name: Permission level name in config file
         :param container: Container list to add the groups to
         """
-        roles = self.get_config_value(name, "groups").split(",")
-        for role in roles:
-            container.append(role.strip())
+        self.servers[server_id] = None
+
+        if not os.path.exists("cache/"):
+            os.makedirs("cache")
+
+        # Connect to SQLite file for server in cache/SERVERID.sqlite
+        con = sqlite3.connect("cache/" + server_id + ".sqlite",
+                              detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
+
+        with con:
+            cur = con.cursor()
+            cur.execute("CREATE TABLE IF NOT EXISTS rank_binding(DiscordGroup TEXT PRIMARY KEY, Rank TEXT)")
+            cur.execute("SELECT * FROM rank_binding")
+            rows = cur.fetchall()
+
+            rc = Ranks.RankContainer()
+
+            rc.default.append("@everyone")
+
+            for row in rows:
+                if row[1] == "Admin":
+                    rc.admin.append(row[0])
+                if row[1] == "Mod":
+                    rc.mod.append(row[0])
+                if row[1] == "Member":
+                    rc.member.append(row[0])
+            self.servers[server_id] = rc
 
     def reload_config(self):
         """
@@ -56,12 +86,6 @@ class BotPreferences(object):
 
         # Command prefix
         self.commandPrefix = self.get_config_value("client", "prefix")
-
-        # Bind roles
-        self.bind_roles("Admin", self.admin)
-        self.bind_roles("Mod", self.mod)
-        self.bind_roles("Member", self.member)
-        self.bind_roles("Default", self.default)
 
     def get_config_value(self, category, item):
         """

@@ -28,7 +28,7 @@ class PluginManager(object):
         :param client: discord.Client object
         """
         self.dir = directory
-        self.botPreferences = BotPreferences.BotPreferences()
+        self.botPreferences = BotPreferences.BotPreferences(self)
         self.client = client
         self.comlist = {}
 
@@ -78,7 +78,7 @@ class PluginManager(object):
     async def handle_command(self, message_object, command, args):
         try:
             target, rank = self.commands[command.lower()]
-            if self.user_has_permission(message_object.author, rank):
+            if self.user_has_permission(message_object.server.id, message_object.author, rank):
                 await target.handle_command(message_object, command.lower(), args)
             else:
                 await self.client.send_message(message_object.channel,
@@ -95,13 +95,13 @@ class PluginManager(object):
     async def handle_typing(self, channel, user, when):
         for obj in self.typing:
             name, rank = self.typing[obj]
-            if self.user_has_permission(user, rank):
+            if self.user_has_permission(channel.server.id, user, rank):
                 await name.handle_typing(channel, user, when)
 
     async def handle_message_delete(self, message):
         for obj in self.delete:
             name, rank = self.delete[obj]
-            if self.user_has_permission(message.author, rank):
+            if self.user_has_permission(message.server.id, message.author, rank):
                 await name.handle_message_delete(message)
 
     async def handle_member_join(self, member):
@@ -125,7 +125,7 @@ class PluginManager(object):
             if name == "Command":
                 com_list[basename(com_name).lower()].append([cmd.name, cmd.desc])
 
-    def user_has_permission(self, user, permission_level):
+    def user_has_permission(self, server_id, user, permission_level):
         """
         Checks whether one of the user's roles has the right level for the requested permission_level
         Roles are defined in config.ini and parsed in BotPreferences
@@ -137,11 +137,14 @@ class PluginManager(object):
         if not hasattr(user, 'server'):
             return True
 
-        for rank in user.roles:
-            if rank.name in self.botPreferences.admin and highest_rank < Ranks.Admin:
-                highest_rank = Ranks.Admin
-            elif rank.name in self.botPreferences.mod and highest_rank < Ranks.Mod:
-                highest_rank = Ranks.Mod
-            elif rank.name in self.botPreferences.member and highest_rank < Ranks.Member:
-                highest_rank = Ranks.Member
-        return highest_rank >= permission_level
+        try:
+            for rank in user.roles:
+                if rank.name in self.botPreferences.servers[server_id].admin and highest_rank < Ranks.Admin:
+                    highest_rank = Ranks.Admin
+                elif rank.name in self.botPreferences.servers[server_id].mod and highest_rank < Ranks.Mod:
+                    highest_rank = Ranks.Mod
+                elif rank.name in self.botPreferences.servers[server_id].member and highest_rank < Ranks.Member:
+                    highest_rank = Ranks.Member
+            return highest_rank >= permission_level
+        except:
+            return False

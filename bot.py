@@ -26,6 +26,9 @@ async def on_ready():
     # Change nickname to nickname in configuration
     for instance in client.servers:
         await client.change_nickname(instance.me, pm.botPreferences.nickName)
+
+        # Load rank bindings
+        pm.botPreferences.bind_roles(instance.id)
     await client.change_presence(game=discord.Game(name='Use ' + pm.botPreferences.commandPrefix + 'help for help'))
 
 
