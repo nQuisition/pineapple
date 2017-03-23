@@ -16,7 +16,7 @@ This guide will be for installing the bot on Ubuntu.
 5. Next to Token, click Click to reveal to see your token
 6. Enter your token inside the configuration file for the bot.
 
-## running the bot
+## Running the bot
 
 1. Clone the repo locally using `git clone https://github.com/peter765/pineapple.git`.
 2. Edit the config.ini.default with the necessary information.
@@ -28,11 +28,20 @@ This guide will be for installing the bot on Ubuntu.
 
 ## Adding the bot to your server
 
+Self hosted bot:
 1. Make sure you have Manage Server permissions.
 2. go to [the discord developers page](https://discordapp.com/developers/applications/me) and click on your application. At the top, you will find the bot account's Client ID.
 3. Replace "CLIENT_ID" in the following link the Client ID from your application page, and then open that URL in a browser.
 https://discordapp.com/oauth2/authorize?&client_id=CLIENT_ID&scope=bot&permissions=0
 4. Select your server and add the bot to that server
+
+Pre-hosted bot:
+Not yet public. Soon(tm)
+
+Bot setup in server:
+5. The server owner can add a group to the bot's rank system, use the "addadmin <groupname>" command. The group name is case sensitive.
+6. Add other groups to the admin role with "addadmin" or to moderator with "addmod" or to verified member with "addmember"
+
 # Common issues
 
 ### ImportError: cannot import name 'quote_plus'
@@ -44,3 +53,7 @@ This error happens when you install trello instead of py-trello. You can use
 
 This is because we still hard code the channel ID in the bot for use on our own server. You can change the unique ID in the 'JoinLeave.py' file tou your own Info channel's unique ID 
 
+### Please install ffmpeg on your system (make sure it's in your PATH on Windows)
+
+If you get this message when trying to use the music bot, please install ffmpeg on your system. Make sure the ffmpeg.exe is in your environment variable PATH (when on Windows)
+FFMPEG Site: https://ffmpeg.org/
