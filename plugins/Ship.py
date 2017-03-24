@@ -39,8 +39,8 @@ class Plugin(object):
         """
         if not os.path.exists("cache/"):
             os.mkdir("cache/")
-        if not os.path.exists("cache/avatar/"):
-            os.mkdir("cache/avatar/")
+            if not os.path.exists("cache/avatar/"):
+                os.mkdir("cache/avatar/")
 
         if len(message_object.mentions) is 2:
             user1 = message_object.mentions[0]
@@ -56,6 +56,8 @@ class Plugin(object):
         # generate ship name
         n1 = user1.display_name
         n2 = user2.display_name
+        div1 = 2 #declare division values for later. This will only change if either name has a length of 1 or 0 post-split
+        div2 = 2
         u1_parts = re.split(SYLLABLE, n1)
         # needed to maintain vowels in split
         u1_parts = [u1_parts[i] + u1_parts[i + 1] for i in range(len(u1_parts) - 1)[0::2]]
@@ -63,18 +65,25 @@ class Plugin(object):
         u2_parts = [u2_parts[i] + u2_parts[i + 1] for i in range(len(u2_parts) - 1)[0::2]]
         # concatenate half of u1 syllables with u2 syllables(integer division, ew...)
 
-        # dumb fix for words that cannot be split (non-latin character sets?)
-        if len(u1_parts) is 0:
+        # dumb fix for words that cannot be split (non-latin character sets?) also make sure that integer division doesnt truncate the result off the face of the earth
+        if len(u1_parts) is 1:
+            u1_parts = [u1_parts[0]]
+            div1 = 1 
+        elif len(u1_parts) is 0:
             u1_parts = [n1]
-        if len(u2_parts) is 0:
-            u2_parts = [n2]
+            div1 = 1
+        if len(u2_parts) is 1:
+            u2_parts = [u2_parts[0]]
+            div2 = 1
+        elif len(u2_parts) is 0:
+            u1_parts = [n2]
+            div2 = 1
 
-        name = u1_parts[:len(u1_parts) // 2] + u2_parts[len(u2_parts) // 2:]
+        name = u1_parts[:len(u1_parts) // div1] + u2_parts[len(u2_parts) // div2:]
         name = "".join(name)
         # checks if last letter is omitted(bug fix, can be made more elegant)
         if name[-1] is not user2.display_name[-1]:
             name = name + user2.display_name[-1]
-
         # Generate Ship Image(clean up)
         # download/access images first
         user1_img = self.get_avatar(user1)
