@@ -71,13 +71,11 @@ class Plugin(object):
             div1 = 1 
         elif len(u1_parts) is 0:
             u1_parts = [n1]
-            div1 = 1
         if len(u2_parts) is 1:
             u2_parts = [u2_parts[0]]
             div2 = 1
         elif len(u2_parts) is 0:
-            u1_parts = [n2]
-            div2 = 1
+            u2_parts = [n2]
 
         name = u1_parts[:len(u1_parts) // div1] + u2_parts[len(u2_parts) // div2:]
         name = "".join(name)
