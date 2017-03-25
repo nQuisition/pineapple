@@ -104,7 +104,7 @@ class Plugin(object):
         with open("ship.png", 'rb') as f:
             await self.pm.client.send_file(
                 message_object.channel, f, filename=None, content="""
-                **{}** *Lmao look at this gay shit*""".format(name))
+                **{}** *The ship has sailed~!*""".format(name))
             f.close()
             temp_images = [img for img in os.listdir(".") if img.endswith(".png") or img.endswith(".jpg")]
             for img in temp_images:
