@@ -6,7 +6,7 @@ import os
 import unicodedata
 
 # rudimentary regex match for finding syllables
-SYLLABLE = "([aeiouyAEIOUY]|[0-9])"
+SYLLABLE = "([aeiouyAEIOUY]|[0-9]|[ ])"
 
 
 class Plugin(object):
@@ -57,7 +57,6 @@ class Plugin(object):
         n1 = user1.display_name
         n2 = user2.display_name
         div1 = 2 #declare division values for later. This will only change if either name has a length of 1 or 0 post-split
-        div2 = 2
         u1_parts = re.split(SYLLABLE, n1)
         # needed to maintain vowels in split
         u1_parts = [u1_parts[i] + u1_parts[i + 1] for i in range(len(u1_parts) - 1)[0::2]]
@@ -71,13 +70,13 @@ class Plugin(object):
             div1 = 1 
         elif len(u1_parts) is 0:
             u1_parts = [n1]
+            div1 = 1
         if len(u2_parts) is 1:
             u2_parts = [u2_parts[0]]
-            div2 = 1
         elif len(u2_parts) is 0:
             u2_parts = [n2]
 
-        name = u1_parts[:len(u1_parts) // div1] + u2_parts[len(u2_parts) // div2:]
+        name = u1_parts[:len(u1_parts) // div1] + u2_parts[len(u2_parts) // 2:]
         name = "".join(name)
         # checks if last letter is omitted(bug fix, can be made more elegant)
         if name[-1] is not user2.display_name[-1]:
@@ -105,7 +104,7 @@ class Plugin(object):
         with open("ship.png", 'rb') as f:
             await self.pm.client.send_file(
                 message_object.channel, f, filename=None, content="""
-                **{}** *The ship has sailed~!*""".format(name))
+                **{}** *Lmao look at this gay shit*""".format(name))
             f.close()
             temp_images = [img for img in os.listdir(".") if img.endswith(".png") or img.endswith(".jpg")]
             for img in temp_images:
