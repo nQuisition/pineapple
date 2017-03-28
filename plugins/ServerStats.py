@@ -65,5 +65,5 @@ class Plugin(object):
         now = datetime.now()
         diff = now - joined
         await self.pm.clientWrap.send_message(self.name, message_object.channel,
-                                              user.mention + " joined this server " + str(diff.days) +
+                                              user.display_name + " joined this server " + str(diff.days) +
                                               " days ago on: " + joined.strftime("%H:%M:%S %d-%m-%Y"))
