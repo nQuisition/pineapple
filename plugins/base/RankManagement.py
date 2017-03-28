@@ -7,6 +7,7 @@ from util.Ranks import Ranks
 class Plugin(object):
     def __init__(self, pm):
         self.pm = pm
+        self.name = "RankManagement"
 
     @staticmethod
     def register_events():
@@ -37,7 +38,6 @@ class Plugin(object):
                 cur = con.cursor()
                 cur.execute("CREATE TABLE IF NOT EXISTS rank_binding(DiscordGroup TEXT PRIMARY KEY, Rank TEXT)")
                 cur.execute("INSERT OR IGNORE INTO rank_binding(DiscordGroup, Rank) VALUES(?, ?)", (group, "Admin"))
-                await self.pm.client.send_message(message_object.channel, "Group " + group + " was added as Admin")
 
     async def bind(self, message_object, group, rank):
         if message_object.author is message_object.server.owner:
@@ -52,4 +52,5 @@ class Plugin(object):
                 cur = con.cursor()
                 cur.execute("CREATE TABLE IF NOT EXISTS rank_binding(DiscordGroup TEXT PRIMARY KEY, Rank TEXT)")
                 cur.execute("INSERT OR IGNORE INTO rank_binding(DiscordGroup, Rank) VALUES(?, ?)", (group, rank))
-                await self.pm.client.send_message(message_object.channel, "Group " + group + " was added as " + rank)
+                await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                                      "Group " + group + " was added as " + rank)

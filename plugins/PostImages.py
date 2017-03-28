@@ -7,6 +7,7 @@ import random
 class Plugin(object):
     def __init__(self, pm):
         self.pm = pm
+        self.name = "PostImages"
 
     @staticmethod
     def register_events():
@@ -59,11 +60,12 @@ class Plugin(object):
         await self.pm.client.delete_message(message_object)
 
         if user is None or user == "":
-            await self.pm.client.send_message(message_object.channel, "Please specify a target to " + type + ".")
+            await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                                  "Please specify a target to " + type + ".")
             return
 
-        await self.pm.client.send_message(message_object.channel,
-                                          "**" + user + "** " + message)
+        await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                              "**" + user + "** " + message)
         await self.pm.client.send_file(message_object.channel, file)
 
     async def post_image(self, message_object, type):

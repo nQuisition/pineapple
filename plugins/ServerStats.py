@@ -8,6 +8,7 @@ from datetime import datetime
 class Plugin(object):
     def __init__(self, pm):
         self.pm = pm
+        self.name = "ServerStats"
 
     @staticmethod
     def register_events():
@@ -41,7 +42,7 @@ class Plugin(object):
         for role, count in reversed(sorted_x):
             msg += role + ": " + str(count) + " users\n"
 
-        await self.pm.client.send_message(message_object.channel, msg)
+        await self.pm.clientWrap.send_message(self.name, message_object.channel, msg)
 
     async def server_info(self, message_object):
         server = message_object.server
@@ -51,10 +52,9 @@ class Plugin(object):
         msg += "**Server region:** " + str(server.region) + "\n"
         msg += "**Created at:** " + server.created_at.strftime("%B %d, %Y")
 
-        em = discord.Embed(description="Server Icon", colour=0xFFFFFF)
+        em = discord.Embed(description=msg, colour=self.pm.clientWrap.get_color(self.name))
         em.set_image(url=server.icon_url)
-        msg = await self.pm.client.send_message(message_object.channel, msg)
-        await self.pm.client.edit_message(msg, embed=em)
+        await self.pm.client.send_message(message_object.channel, "", embed=em)
 
     async def joined(self, message_object):
         user = message_object.author
@@ -64,6 +64,6 @@ class Plugin(object):
         joined = user.joined_at
         now = datetime.now()
         diff = now - joined
-        await self.pm.client.send_message(message_object.channel,
-                                          user.mention + " joined this server " + str(diff.days) +
-                                          " days ago on: " + joined.strftime("%H:%M:%S %d-%m-%Y"))
+        await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                              user.mention + " joined this server " + str(diff.days) +
+                                              " days ago on: " + joined.strftime("%H:%M:%S %d-%m-%Y"))

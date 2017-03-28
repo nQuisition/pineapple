@@ -3,6 +3,7 @@ import glob
 import importlib.util
 import BotPreferences
 from util.Ranks import Ranks
+import ClientWrapper
 
 
 class PluginManager(object):
@@ -20,6 +21,7 @@ class PluginManager(object):
     # References to various managers
     botPreferences = None
     client = None
+    clientWrap = None
 
     def __init__(self, directory, client):
         """
@@ -30,6 +32,7 @@ class PluginManager(object):
         self.dir = directory
         self.botPreferences = BotPreferences.BotPreferences(self)
         self.client = client
+        self.clientWrap = ClientWrapper.ClientWrapper(self)
         self.comlist = {}
 
     def load_plugins(self):
@@ -93,10 +96,13 @@ class PluginManager(object):
                 await name.handle_message(message)
 
     async def handle_typing(self, channel, user, when):
-        for obj in self.typing:
-            name, rank = self.typing[obj]
-            if self.user_has_permission(channel.server.id, user, rank):
-                await name.handle_typing(channel, user, when)
+        try:
+            for obj in self.typing:
+                name, rank = self.typing[obj]
+                if self.user_has_permission(channel.server.id, user, rank):
+                    await name.handle_typing(channel, user, when)
+        except AttributeError:
+            pass
 
     async def handle_message_delete(self, message):
         for obj in self.delete:

@@ -12,6 +12,7 @@ SYLLABLE = "([aeiouyAEIOUY]|[0-9]|[ ])"
 class Plugin(object):
     def __init__(self, pm):
         self.pm = pm
+        self.name = "Ship"
 
     @staticmethod
     def register_events():
@@ -49,14 +50,14 @@ class Plugin(object):
             user1 = message_object.mentions[0]
             user2 = message_object.mentions[0]
         else:
-            await self.pm.client.send_message(message_object.channel,
-                                              "Please **mention** two users!")
+            await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                                  "Please **mention** two users!")
             return
 
         # generate ship name
         n1 = user1.display_name
         n2 = user2.display_name
-        div1 = 2 #declare division values for later. This will only change if either name has a length of 1 or 0 post-split
+        div1 = 2  # declare division values for later. This will only change if either name has a length of 1 or 0 post-split
         u1_parts = re.split(SYLLABLE, n1)
         # needed to maintain vowels in split
         u1_parts = [u1_parts[i] + u1_parts[i + 1] for i in range(len(u1_parts) - 1)[0::2]]
@@ -67,7 +68,7 @@ class Plugin(object):
         # dumb fix for words that cannot be split (non-latin character sets?) also make sure that integer division doesnt truncate the result off the face of the earth
         if len(u1_parts) is 1:
             u1_parts = [u1_parts[0]]
-            div1 = 1 
+            div1 = 1
         elif len(u1_parts) is 0:
             u1_parts = [n1]
             div1 = 1

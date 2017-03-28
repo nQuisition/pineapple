@@ -16,6 +16,7 @@ class Plugin(object):
         self.api_key = self.pm.botPreferences.get_config_value("OSU", "apikey")
         # base_url controls parameters for lammmy generation. Use python string format to change mode/username
         self.base_url = "http://lemmmy.pw/osusig/sig.php?mode={}&pp=0&removemargin&darktriangles&colour=pink&uname={}"
+        self.name = "osu"
 
     @staticmethod
     def register_events():
@@ -61,7 +62,8 @@ class Plugin(object):
             #                                      "country"] + "\n" + "Rank in country: " + display_data[
             #                                      "pp_country_rank"])
         except:
-            await self.pm.client.send_message(message_object.channel, "Error unknown user **" + username + "**")
+            await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                                  "Error unknown user **" + username + "**")
 
     async def get_badge(self, channel, username, id):
         """
@@ -84,7 +86,7 @@ class Plugin(object):
             im.close()
             await self.pm.client.send_file(channel, filename)
         except IOError:
-            await self.pm.client.send_message(channel, "No stats found for this game mode.")
+            await self.pm.clientWrap.send_message(self.name, channel, "No stats found for this game mode.")
         os.remove(filename)
 
     async def get_data(self, username, game_mode_id):
@@ -109,11 +111,11 @@ class Plugin(object):
         if not os.path.exists("cache/"):
             os.makedirs("cache")
         if mode is "":
-            await self.pm.client.send_message(message_object.channel,
-                                              "Please specify the game mode (osu, taiko, ctb, mania)")
+            await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                                  "Please specify the game mode (osu, taiko, ctb, mania)")
             return
         try:
-            lb_msg = await self.pm.client.send_message(message_object.channel, "Loading leaderboard...")
+            lb_msg = await self.pm.clientWrap.send_message(self.name, message_object.channel, "Loading leaderboard...")
             if mode == "osu":
                 game_mode_id = 0
             elif mode == "taiko":
@@ -134,7 +136,7 @@ class Plugin(object):
                 cur.execute("SELECT * FROM osu_users")  # TODO: Improve loading to show more users
                 rows = cur.fetchall()
                 index = 1
-                msg = "Leaderboard for " + mode + ":\n"
+                msg = "**Leaderboard for " + mode + ":**    \n"
                 unsorted = list()
 
                 for row in rows:
@@ -145,6 +147,7 @@ class Plugin(object):
                             data["pp_rank"] = int(data["pp_rank"])
                             unsorted.append(data)
                     except:
+                        traceback.print_exc()
                         continue
 
                 sortedusers = sorted(unsorted, key=operator.itemgetter("pp_rank"))
@@ -180,7 +183,7 @@ class Plugin(object):
                     except:
                         traceback.print_exc()
                 await self.pm.client.delete_message(lb_msg)
-                await self.pm.client.send_message(message_object.channel, msg)
+                await self.pm.clientWrap.send_message(self.name, message_object.channel, msg)
         except:
             traceback.print_exc()
 
@@ -211,9 +214,9 @@ class Plugin(object):
                     cur.execute("UPDATE osu_users SET Username = ? WHERE Id = ?",
                                 (name, str(user_id)))
 
-                    await self.pm.client.send_message(message_object.channel,
-                                                      message_object.author.mention +
-                                                      " your osu! username has been set to **" + name + "**")
+                    await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                                          message_object.author.mention +
+                                                          " your osu! username has been set to **" + name + "**")
             except:
                 traceback.print_exc()
         else:
@@ -259,7 +262,7 @@ class Plugin(object):
             for row in rows:
                 return row[0]
 
-            await self.pm.client.send_message(msg.channel,
-                                              "No username set for " + msg.author.mention +
-                                              ". You can set one by using the `setosu <osu name>` command")
+            await self.pm.clientWrap.send_message(self.name, msg.channel,
+                                                  "No username set for " + msg.author.mention +
+                                                  ". You can set one by using the `setosu <osu name>` command")
             return None

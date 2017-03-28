@@ -3,10 +3,12 @@ from util.Ranks import Ranks
 from discord import Channel
 from discord import errors
 
+
 class Plugin(object):
     def __init__(self, pm):
         self.pm = pm
         self.player = None
+        self.name = "MusicBot"
 
     @staticmethod
     def register_events():
@@ -56,14 +58,16 @@ class Plugin(object):
                 else:
                     duration = str(h) + ":" + str(m) + ":" + str(s)
 
-                await self.pm.client.send_message(message_object.channel, "Now playing **" + self.player.title +
-                                                  "** (" + duration + ") in " + channel.name)
+                await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                                      "Now playing **" + self.player.title +
+                                                      "** (" + duration + ") in " + channel.name)
             except errors.ClientException:
-                await self.pm.client.send_message(message_object.channel, "Please install ffmpeg on your system (make "
-                                                                          "sure it's in your PATH on Windows)")
+                await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                                      "Please install ffmpeg on your system (make "
+                                                      "sure it's in your PATH on Windows)")
         else:
-            await self.pm.client.send_message(message_object.channel, message_object.author.mention +
-                                              " please join a voice channel in order to start the bot!")
+            await self.pm.clientWrap.send_message(self.name, message_object.channel, message_object.author.mention +
+                                                  " please join a voice channel in order to start the bot!")
 
     async def stop(self, message_object):
         # Kill all playing connections
