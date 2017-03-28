@@ -64,8 +64,8 @@ class Plugin(object):
                                                   "Please specify a target to " + type + ".")
             return
 
-        await self.pm.clientWrap.send_message(self.name, message_object.channel,
-                                              "**" + user + "** " + message)
+        await self.pm.client.send_message(message_object.channel,
+                                          "**" + user + "** " + message)
         await self.pm.client.send_file(message_object.channel, file)
 
     async def post_image(self, message_object, type):
