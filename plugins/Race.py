@@ -54,7 +54,7 @@ class Plugin(object):
         self.race.participants = list()
         self.race.finish_pos = 1
         race_start = await self.pm.client.send_message(message_object.channel,
-                                                       message_object.author.name + " has started a race! \n"
+                                                       message_object.author.display_name + " has started a race! \n"
                                                                                     "Type !joinrace [emoji] to "
                                                                                     "join the race (10s)")
         # Give users time to join
@@ -138,13 +138,10 @@ class Plugin(object):
             await self.pm.client.delete_message(not_running)
 
     async def user_join_as_emoji(self, message_object, emoji):
-        if message_object.author.nick is not None:
-            self.race.participants.append(self.Race.Participant(message_object.author.nick, emoji))
-        else:
-            self.race.participants.append(self.Race.Participant(message_object.author.name, emoji))
+        self.race.participants.append(self.Race.Participant(message_object.author.display_name, emoji))
 
         await self.pm.client.send_message(message_object.channel,
-                                          message_object.author.name + " has joined the race as " +
+                                          message_object.author.display_name + " has joined the race as " +
                                           emoji)
         await asyncio.sleep(3)
         await self.pm.client.delete_message(message_object)

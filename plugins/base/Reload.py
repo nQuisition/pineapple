@@ -22,6 +22,7 @@ class Plugin(object):
         :param args: List of words in the message
         """
         if command == "reload":
+            await self.pm.client.delete_message(message_object)
             await self.reload()
 
     async def reload(self):

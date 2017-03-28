@@ -26,16 +26,16 @@ class Plugin(object):
     async def handle_command(self, message_object, command, args):
         if command == "pat":
             await self.post_image_to_user(message_object, args[1], "pat",
-                                          "you got a pat from **" + message_object.author.name + "**")
+                                          "you got a pat from **" + message_object.author.display_name + "**")
         if command == "kiss":
             await self.post_image_to_user(message_object, args[1], "kiss",
-                                          "you got a kiss from **" + message_object.author.name + "**")
+                                          "you got a kiss from **" + message_object.author.display_name + "**")
         if command == "fistbump":
             await self.post_image_to_user(message_object, args[1], "fistbump",
-                                          "you got a fistbump from **" + message_object.author.name + "**")
+                                          "you got a fistbump from **" + message_object.author.display_name + "**")
         if command == "hug":
             await self.post_image_to_user(message_object, args[1], "hug",
-                                          "you got a hug from **" + message_object.author.name + "**")
+                                          "you got a hug from **" + message_object.author.display_name + "**")
         if command == "lewd":
             await self.post_image(message_object, "lewd")
         if command == "weeb":
