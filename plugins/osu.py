@@ -43,12 +43,18 @@ class Plugin(object):
         if command == "setosu":
             await self.set_osu(message_object, args[1])
         if command == "deleteosu":
-            user_id = message_object.mentions[0].id
-            await self.delete_osu(message_object.server.id, user_id)
+            if len(message_object.mentions) is 1:
+                user_id = message_object.mentions[0].id
+                await self.delete_osu(message_object.server.id, user_id)
+                await self.pm.clientWrap.send_message(self.name, message_object.channel, "osu! username deleted for " +
+                                                      message_object.mentions[0].display_name)
+            else:
+                await self.pm.clientWrap.send_message(self.name, message_object.channel, "Please mention ONE user to "
+                                                                                         "delete")
 
     async def osu_mode(self, message_object, username, mode):
         try:
-            if len(username) is 0 or username is None:
+            if len(username) is 0 or username is "":
                 username = await self.get_osu_name(message_object)
                 if username is None:
                     return
@@ -62,6 +68,7 @@ class Plugin(object):
             #                                      "country"] + "\n" + "Rank in country: " + display_data[
             #                                      "pp_country_rank"])
         except:
+            traceback.print_exc()
             await self.pm.clientWrap.send_message(self.name, message_object.channel,
                                                   "Error unknown user **" + username + "**")
 
@@ -133,6 +140,8 @@ class Plugin(object):
                                   detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
             with con:
                 cur = con.cursor()
+                cur.execute(
+                    "CREATE TABLE IF NOT EXISTS osu_users(Id TEXT PRIMARY KEY, Username TEXT)")
                 cur.execute("SELECT * FROM osu_users")  # TODO: Improve loading to show more users
                 rows = cur.fetchall()
                 index = 1
@@ -215,7 +224,7 @@ class Plugin(object):
                                 (name, str(user_id)))
 
                     await self.pm.clientWrap.send_message(self.name, message_object.channel,
-                                                          message_object.author.mention +
+                                                          message_object.author.display_name +
                                                           " your osu! username has been set to **" + name + "**")
             except:
                 traceback.print_exc()
@@ -256,6 +265,8 @@ class Plugin(object):
                               detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
         with con:
             cur = con.cursor()
+            cur.execute(
+                "CREATE TABLE IF NOT EXISTS osu_users(Id TEXT PRIMARY KEY, Username TEXT)")
             cur.execute("SELECT Username FROM osu_users WHERE Id = ?", (msg.author.id,))
             rows = cur.fetchall()
 
@@ -263,6 +274,6 @@ class Plugin(object):
                 return row[0]
 
             await self.pm.clientWrap.send_message(self.name, msg.channel,
-                                                  "No username set for " + msg.author.mention +
+                                                  "No username set for " + msg.author.display_name +
                                                   ". You can set one by using the `setosu <osu name>` command")
             return None

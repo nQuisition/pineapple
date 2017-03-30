@@ -40,7 +40,7 @@ class Plugin(object):
         # Split text into pieces of 1000 chars
         help_strings = list(map(''.join, zip(*[iter(hstr)] * 1000)))
         for string in help_strings:
-            await self.pm.clientWrap.send_message(self.name, message_object.author, string)
+            await self.pm.client.send_message(message_object.author, string)
 
         if not message_object.channel.is_private:
             await self.pm.client.delete_message(message_object)
