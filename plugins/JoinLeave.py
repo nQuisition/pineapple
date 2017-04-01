@@ -18,7 +18,10 @@ class Plugin(object):
                 Events.Command("ban", rank=Ranks.Mod)]
 
     async def handle_member_join(self, member):
+        print("User joined")
+        print(member.display_name)
         if self.enabled:
+            print("Join message enabled")
             welcome = glob.glob(os.getcwd() + "/images/" + 'hi.gif')
             file = random.choice(welcome)
             await asyncio.sleep(1)
@@ -27,6 +30,7 @@ class Plugin(object):
                                               " Please read <#234865303442423814> and tell an admin/mod which "
                                               "role you would like")
             await self.pm.client.send_file(member.server.default_channel, file)
+            print("Message sent")
 
     async def handle_member_leave(self, member):
         if self.enabled:

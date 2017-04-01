@@ -84,6 +84,7 @@ async def on_message_delete(message):
 
 @client.event
 async def on_member_join(member):
+    print("Member join event")
     await pm.handle_member_join(member)
 
 

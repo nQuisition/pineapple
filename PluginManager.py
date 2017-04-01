@@ -111,8 +111,10 @@ class PluginManager(object):
                 await name.handle_message_delete(message)
 
     async def handle_member_join(self, member):
+        print("Handling join event")
         for obj in self.join:
             name, rank = self.join[obj]
+            print("Found plugin")
             await name.handle_member_join(member)
 
     async def handle_member_leave(self, member):
