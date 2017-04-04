@@ -39,7 +39,7 @@ async def on_message(message):
     :param message: discord.Message object containing the received message
     """
     try:
-        if message.content.startswith(pm.botPreferences.commandPrefix):
+        if message.content.startswith(pm.botPreferences.commandPrefix) and client.user.id != message.author.id:
             # Send the received message off to the Plugin Manager to handle the command
             words = message.content.partition(' ')
             await pm.handle_command(message, words[0][len(pm.botPreferences.commandPrefix):], words[1:])
