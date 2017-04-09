@@ -21,7 +21,8 @@ class Plugin(object):
                 Events.Command("smug", desc="smug face"),
                 Events.Command("fistbump", desc="Fist bump someone"),
                 Events.Command("hug", desc="Hug someone"),
-                Events.Command("dressage", desc="Dancing horses.")]
+                Events.Command("dressage", desc="Dancing horses."),
+                Events.Command("thanks", desc="Thank someone")]
 
     async def handle_command(self, message_object, command, args):
         if command == "pat":
@@ -50,6 +51,8 @@ class Plugin(object):
             await self.post_image(message_object, "smug")
         if command == "dressage":
             await self.post_image(message_object, "dressage")
+        if command == "thanks":
+            await self.post_image(message_object, "thanks")
 
     async def post_image_to_user(self, message_object, user, type, message):
         files = glob.glob(os.getcwd() + "/images/" + type + "/" + '*.gif')
