@@ -22,7 +22,7 @@ class Plugin(object):
                 Events.Command("fistbump", desc="Fist bump someone"),
                 Events.Command("hug", desc="Hug someone"),
                 Events.Command("dressage", desc="Dancing horses."),
-                Events.Command("stop", desc="Stop it."),
+                Events.Command("stopit", desc="Stop it."),
                 Events.Command("smash", desc="Lemme smash."),
                 Events.Command("dab", desc="Dab like a pro"),
                 Events.Command("thanks", desc="Thank someone")]
@@ -55,7 +55,7 @@ class Plugin(object):
         if command == "dressage":
             await self.post_image(message_object, "dressage")
         if command == "stopit":
-            await self.post_image(message_object, "stop")
+            await self.post_image(message_object, "stopit")
         if command == "smash":
             await self.post_image(message_object, "smash")
         if command == "dab":
