@@ -1,6 +1,8 @@
 from PluginManager import PluginManager
 import discord
 import traceback
+import asyncio
+
 
 print("Starting Pineapple")
 print("Starting Discord Client")
@@ -30,6 +32,7 @@ async def on_ready():
         # Load rank bindings
         pm.botPreferences.bind_roles(instance.id)
     await client.change_presence(game=discord.Game(name='Use ' + pm.botPreferences.commandPrefix + 'help for help'))
+    await pm.handle_loop()
 
 
 @client.event
@@ -92,6 +95,7 @@ async def on_member_join(member):
 async def on_member_remove(member):
     await pm.handle_member_leave(member)
 
-
 # Run the client and login with the bot token (yes, this needs to be down here)
 client.run(pm.botPreferences.token)
+
+

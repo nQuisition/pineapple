@@ -100,3 +100,13 @@ class Typing(object):
     def __init__(self, name, rank=Ranks.Default):
         self.name = name
         self.minimum_rank = rank
+
+
+class Loop(object):
+    """
+    Looping event, will constantly be executed in a loop
+    """
+
+    def __init__(self, name, rank=Ranks.Default):
+        self.name = name
+        self.minimum_rank = rank

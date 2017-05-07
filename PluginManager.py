@@ -4,6 +4,7 @@ import importlib.util
 import BotPreferences
 from util.Ranks import Ranks
 import ClientWrapper
+import asyncio
 
 
 class PluginManager(object):
@@ -17,6 +18,7 @@ class PluginManager(object):
     typing = {}
     delete = {}
     message = {}
+    loop = {}
 
     # References to various managers
     botPreferences = None
@@ -34,6 +36,7 @@ class PluginManager(object):
         self.client = client
         self.clientWrap = ClientWrapper.ClientWrapper(self)
         self.comlist = {}
+        self.loop_running = True
 
     def load_plugins(self):
         """
@@ -48,6 +51,7 @@ class PluginManager(object):
         self.leave.clear()
         self.typing.clear()
         self.delete.clear()
+        self.loop.clear()
 
         # Find all python files in the plugin directory
         modules = glob.glob(dirname(__file__) + "/" + self.dir + "/**/*.py", recursive=True)
@@ -74,6 +78,7 @@ class PluginManager(object):
             self.bind_event("UserLeave", self.leave, plugin, events, self.comlist, name)
             self.bind_event("MessageDelete", self.delete, plugin, events, self.comlist, name)
             self.bind_event("Typing", self.typing, plugin, events, self.comlist, name)
+            self.bind_event("Loop", self.loop, plugin, events, self.comlist, name)
 
     ###
     #   Handling events
@@ -111,16 +116,21 @@ class PluginManager(object):
                 await name.handle_message_delete(message)
 
     async def handle_member_join(self, member):
-        print("Handling join event")
         for obj in self.join:
             name, rank = self.join[obj]
-            print("Found plugin")
             await name.handle_member_join(member)
 
     async def handle_member_leave(self, member):
         for obj in self.leave:
             name, rank = self.leave[obj]
             await name.handle_member_leave(member)
+
+    async def handle_loop(self):
+        while self.loop_running:
+            for obj in self.loop:
+                name, rank = self.loop[obj]
+                await name.handle_loop()
+            await asyncio.sleep(5)
 
     ###
     #   Utility methods
