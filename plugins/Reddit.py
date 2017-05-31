@@ -54,7 +54,8 @@ class Plugin(object):
             for subscription in subreddits:
 
                 try:
-                    d = feedparser.parse("https://www.reddit.com/r/" + subscription["subreddit"] + "/new.rss")
+                    d = feedparser.parse("https://www.reddit.com/r/" + subscription["subreddit"] +
+                                         "/search?q=ups%3A10..9999999999&sort=new&restrict_sr=on&syntax=cloudsearch")
 
                     if subscription["channel"] not in self.last_post:
                         # No entries seen yet, set last post as last seen but don't post anything
