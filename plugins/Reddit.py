@@ -1,11 +1,13 @@
-from util import Events
-from util.Ranks import Ranks
-import feedparser
-import discord
 import os
 import sqlite3
 import time
 import traceback
+
+import discord
+import feedparser
+
+from util import Events
+from util.Ranks import Ranks
 
 
 class Plugin(object):
@@ -59,27 +61,33 @@ class Plugin(object):
 
                     if subscription["channel"] not in self.last_post:
                         # No entries seen yet, set last post as last seen but don't post anything
-                        self.last_post[subscription["channel"]] = {"id": d.entries[0].id,
+                        new_ids = [d.entries[0].id]
+
+                        self.last_post[subscription["channel"]] = {"ids": new_ids,
                                                                    "date": time.mktime(d.entries[0].updated_parsed)}
-                    elif self.last_post[subscription["channel"]]["id"] == d.entries[0].id:
+                    elif d.entries[0].id in self.last_post[subscription["channel"]]["ids"]:
                         # Entry is still the same, don't do anything
                         continue
-                    elif self.last_post[subscription["channel"]]["id"] != d.entries[0].id:
+                    elif d.entries[0].id not in self.last_post[subscription["channel"]]["ids"]:
                         # print(self.last_post[subscription["channel"]]["date"])
                         # print(time.mktime(d.entries[0].updated_parsed))
                         if self.last_post[subscription["channel"]]["date"] < time.mktime(d.entries[0].updated_parsed):
                             # New post found, update last post ID and notify server
-                            self.last_post[subscription["channel"]] = {"id": d.entries[0].id,
+                            new_ids = self.update_ids(self.last_post[subscription["channel"]]["ids"], d.entries[0].id)
+
+                            self.last_post[subscription["channel"]] = {"ids": new_ids,
                                                                        "date": time.mktime(d.entries[0].updated_parsed)}
 
                             await self.pm.client.send_message(discord.Object(id=int(subscription["channel"])),
                                                               "**New post on /r/" + subscription["subreddit"] +
                                                               " by " + d.entries[0].author + "**\n" + d.entries[0].link)
                         else:
-                            self.last_post[subscription["channel"]] = {"id": d.entries[0].id,
+                            new_ids = self.update_ids(self.last_post[subscription["channel"]]["ids"], d.entries[0].id)
+
+                            self.last_post[subscription["channel"]] = {"ids": new_ids,
                                                                        "date": time.mktime(d.entries[0].updated_parsed)}
                 except:
-                    # traceback.print_exc()
+                    traceback.print_exc()
                     continue
 
     async def enable_notification(self, message_object, subreddit):
@@ -96,3 +104,11 @@ class Plugin(object):
             cur.execute(
                 'INSERT OR REPLACE INTO reddit_notification(Channel, Subreddit) VALUES(?,?)',
                 (message_object.channel.id, subreddit))
+
+    @staticmethod
+    def update_ids(ids, new_id):
+        if new_id in ids:
+            return new_id
+        else:
+            ids.insert(0, new_id)
+            return ids[:20]
