@@ -63,7 +63,7 @@ class Plugin(object):
                     if subscription["channel"] not in self.last_post:
                         # No entries seen yet, set last post as last seen but don't post anything
                         new_ids = []
-                        for i in range(0, 10):
+                        for i in range(0, 15):
                             new_ids.insert(0, d.entries[i].id)
                         self.last_post[subscription["channel"]] = {"ids": new_ids,
                                                                    "date": time.mktime(d.entries[0].updated_parsed)}
@@ -73,7 +73,7 @@ class Plugin(object):
                             # Entry is still the same, don't do anything
                             continue
                         elif d.entries[i].id not in self.last_post[subscription["channel"]]["ids"]:
-                            if self.last_post[subscription["channel"]]["date"] < time.mktime(
+                            if time.mktime(d.entries[i].updated_parsed) > time.mktime(
                                     d.entries[len(d.entries)-1].updated_parsed):
                                 # New post found, update last post ID and notify server
                                 new_ids = self.update_ids(self.last_post[subscription["channel"]]["ids"],
