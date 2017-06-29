@@ -2,6 +2,7 @@
 from util import Events
 from discord import Emoji
 
+
 class Plugin(object):
     def __init__(self, pm):
         self.pm = pm
@@ -19,5 +20,5 @@ class Plugin(object):
             prompt = "Yay or Nay?"
         poll_msg = await self.pm.client.send_message(
             message_object.channel, prompt)
-        await self.pm.client.add_reaction(poll_msg, '\U0001f1f4')
-        await self.pm.client.add_reaction(poll_msg, '\U0001f1fd')
+        await self.pm.client.add_reaction(poll_msg, '\U00002714')
+        await self.pm.client.add_reaction(poll_msg, '\U00002716')
