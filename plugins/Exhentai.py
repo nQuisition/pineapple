@@ -1,8 +1,5 @@
+# from pprint import pprint
 import json
-import posixpath
-import urllib.parse
-from pprint import pprint
-
 import requests
 import re
 
@@ -24,7 +21,6 @@ class Plugin(object):
 
     async def handle_message(self, message_object):
         exhentailinks = re.findall(r'(https://exhentai.org/g/([0-9]+)/([0-9a-f]{10})/)', message_object.content)
-
         for entry in exhentailinks:
             checkvalid = requests.head(entry[0])
             if checkvalid.ok:
