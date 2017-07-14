@@ -1,0 +1,17 @@
+[client]
+token = TOKEN_HERE
+nick = PineappleBot
+prefix = !
+debug = 0
+
+[MAL]
+username =
+password =
+
+[OSU]
+apikey =
+
+[Trello]
+apikey =
+token =
+board =
