@@ -23,7 +23,7 @@ This guide will be for installing the bot on Ubuntu.
 3. Rename config.ini.default to config.ini.
 4. Update pip with `python3.5 -m pip install --upgrade pip` for Ubuntu 14.04 or `python3 -m pip install --upgrade pip` for 16.04 and later.
 5. Use `pip install -r requirements.txt` to install dependencies.
-6. Install py-trello using `pip install -r py-trello`.
+6. Install py-trello using `sudo pip install -r py-trello`.
 7. Run the bot using `python3.5 bot.py` for Ubuntu 14.04 or `python3 bot.py` for 16.04 and later.
 
 ## Adding the bot to your server
