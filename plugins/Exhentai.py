@@ -26,7 +26,7 @@ class Plugin(object):
         Prints exhentai gallery info when a message contains an (average formatted) exhentai-url
         :param message_object: discord.Message object containing the message
         """
-
+        # why cant i push my repo plz
         # RegEx for finding all exhentai-links formatted like copied from exhentai adressbar
         # maybe broaden it up to match e-hentai / http / written www if still good performance-wise
         regex_result_list = re.findall(r'(https://exhentai.org/g/([0-9]+)/([0-9a-f]{10})/)', message_object.content)
