@@ -56,7 +56,7 @@ class Plugin(object):
             # print whole json
             # await self.pm.client.send_message(message_object.channel,json.dumps(response.json(), sort_keys=True, indent=4))
 
-            # print all json pretty
+            # print whole json pretty
             # outstring = pprint.pformat(json_data, indent=4)
             # await self.pm.clientWrap.send_message(self.name, message_object.channel, outstring)
 
@@ -78,6 +78,7 @@ class Plugin(object):
     def build_title_string(json_data):
         return 'Title: ' + pprint.pformat(json_data['gmetadata'][0]['title'])
 
+    # TODO: (core) Don't print empty string for japanese title if none given
     @staticmethod
     def build_title_jpn_string(json_data):
         return 'Japanese Title: ' + pprint.pformat(json_data['gmetadata'][0]['title_jpn'])
