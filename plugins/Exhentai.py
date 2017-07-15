@@ -5,11 +5,12 @@ import re
 from util import Events
 
 # API-URL and type of headers sent by POST-request
-url = "https://api.e-hentai.org/api.php"
+api_url = "https://api.e-hentai.org/api.php"
 json_request_headers = "{'content-type': 'application/json'}"
 
 
 # json_request_headers = "{'content-type': 'application/json; charset=UTF-8'}"
+
 
 class Plugin(object):
     def __init__(self, pm):
@@ -21,15 +22,18 @@ class Plugin(object):
         return [Events.Message("Exhentai")]
 
     async def handle_message(self, message_object):
+        """
+        Prints exhentai gallery info when a message contains an (average formatted) exhentai-url
+        :param message_object: discord.Message object containing the message
+        """
 
-        # Genius RegEx for finding all exhentai-links formatted like copied from exh adressbar
+        # RegEx for finding all exhentai-links formatted like copied from exhentai adressbar
         # maybe broaden it up to match e-hentai / http / written www if still good performance-wise
         regex_result_list = re.findall(r'(https://exhentai.org/g/([0-9]+)/([0-9a-f]{10})/)', message_object.content)
 
-        # loop over all found links that match genius RegEx
+        # loop over all found links that match RegEx
         # 3 API message api send requests per link, might get out of hand
         for link_tuple in regex_result_list:
-
             # TODO: (Core) Print error on wrong link
             # TODO: (Performance) Do not download API Data twice, maybe even cache API data but thats hardly worth the time
             # Key missing, or incorrect key provided.-Error has to catched
@@ -46,12 +50,10 @@ class Plugin(object):
             gallery_id = link_tuple[1]
             gallery_token = link_tuple[2]
 
-            response = requests.post(url, self.build_payload(gallery_id, gallery_token), json_request_headers)
+            response = requests.post(api_url, self.build_payload(gallery_id, gallery_token), json_request_headers)
 
             # create json from Response using built-in parser
             json_data = response.json()
-
-            # Debug-Snippets
 
             # print whole json
             # await self.pm.client.send_message(message_object.channel,json.dumps(response.json(), sort_keys=True, indent=4))
@@ -68,7 +70,8 @@ class Plugin(object):
             await self.pm.client.send_message(message_object.channel, json_data['gmetadata'][0]['thumb'])
 
             # print message including tag-section
-            await self.pm.clientWrap.send_message(self.name, message_object.channel, self.build_tag_section(json_data) + "\n")
+            await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                                  self.build_tag_section(json_data) + "\n")
 
     @staticmethod
     def build_payload(gallery_id, gallery_token):
@@ -88,4 +91,4 @@ class Plugin(object):
     def build_tag_section(json_data):
         # the list returned by accessing the json-data at that tags-key will get each element extracted
         # ", " will be printed to seperate them and the tags written like male:shotacon will get replaced to male : shotacon
-        return (", ".join(json_data['gmetadata'][0]['tags'])).replace(":"," : ")
+        return (", ".join(json_data['gmetadata'][0]['tags'])).replace(":", " : ")
