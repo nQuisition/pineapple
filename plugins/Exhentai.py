@@ -23,10 +23,6 @@ class Plugin(object):
     def register_events():
         return [Events.Message("Exhentai")]
 
-    @staticmethod
-    def build_payload(gallery_id, gallery_token):
-        return '{"method": "gdata","gidlist": [[' + gallery_id + ',"' + gallery_token + '"]],"namespace": 1}'
-
     async def handle_message(self, message_object):
         # Genius RegEx for finding all exhentai-links formatted like copied from exh adressbar
         regex_result_list = re.findall(r'(https://exhentai.org/g/([0-9]+)/([0-9a-f]{10})/)', message_object.content)
@@ -57,11 +53,29 @@ class Plugin(object):
             outstring = pprint.pformat(json_data, indent=4)
 
             # TODO: BUILD PRETTY LINK TEMPLATE
+
+
             # await self.pm.client.send_message(message_object.channel,json.dumps(response.json(), sort_keys=True, indent=4))
-            await self.pm.clientWrap.send_message(self.name, message_object.channel, outstring)
-            # await self.pm.clientWrap.send_message(self.name , message_object.channel,json.dumps(response.json(), sort_keys=True, indent=4),False)
+            # await self.pm.clientWrap.send_message(self.name, message_object.channel, outstring)
+            await self.pm.clientWrap.send_message(self.name, message_object.channel, self.build_title_string(
+                json_data) + "\n" + self.build_title_jpn_string(json_data) + "\n")
+            await self.pm.client.send_message(message_object.channel, json_data['gmetadata'][0]['thumb'])
+            await self.pm.clientWrap.send_message(self.name, message_object.channel, pprint.pformat(json_data['gmetadata'][0]['tags']))
+            await self.pm.client.send_message(message_object.channel, "\n\n")
             # https://exhentai.org/g/66211541/d5c164c9b6/ error gallery not found
             # https://exhentai.org/g/108711/5f57a5eb11/ error wrong gallery token
             #
             #    await self.pm.clientWrap.send_message(self.name, message_object.channel, str(
             #        response.raise_for_status()) + "\n" + "Error while getting data from E-Hentai API.\n")
+
+    @staticmethod
+    def build_payload(gallery_id, gallery_token):
+        return '{"method": "gdata","gidlist": [[' + gallery_id + ',"' + gallery_token + '"]],"namespace": 1}'
+
+    @staticmethod
+    def build_title_string(json_data):
+        return 'Title: ' + pprint.pformat(json_data['gmetadata'][0]['title'])
+
+    @staticmethod
+    def build_title_jpn_string(json_data):
+        return 'Japanese Title: ' + pprint.pformat(json_data['gmetadata'][0]['title_jpn'])
