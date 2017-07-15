@@ -29,7 +29,6 @@ class Plugin(object):
         # possible id is a positive integer and possible token is a 10digit hex string
         regex_result_list = re.findall(r'(https://exhentai.org/g/([0-9]+)/([0-9a-f]{10})/)', message_object.content)
         # regex_result_list = re.findall(r'(^(http|https)://(?:www)?exhentai.org/g/([0-9]+)/([0-9a-f]{10})/)', message_object.content)
-        # this is probably the more robust RegEx which probably breaks the code because its hardcoded
 
         # loop over all found links that match RegEx; 3 API message api send requests per iteration, might get out of hand
         for link_tuple in regex_result_list:
