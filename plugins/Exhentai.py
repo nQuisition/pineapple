@@ -1,11 +1,8 @@
 import pprint
-import json
 import requests
 import re
 
 from util import Events
-
-# TODO: FIND OUT HOW TO CREATE JSON OBJECT FROM REQUEST, ACCESS JSON DATA
 
 # API-URL and type of headers sent by POST-request
 url = "https://api.e-hentai.org/api.php"
@@ -25,48 +22,50 @@ class Plugin(object):
 
     async def handle_message(self, message_object):
         # Genius RegEx for finding all exhentai-links formatted like copied from exh adressbar
+        # maybe broaden it up to match e-hentai / http / written www if still good performance-wise
         regex_result_list = re.findall(r'(https://exhentai.org/g/([0-9]+)/([0-9a-f]{10})/)', message_object.content)
+
         # loop over all found links that match genius RegEx
-        for tuple in regex_result_list:
-            # TODO: CACHE ALREADY DOWNLOADED HEADERS WITH TIMESTAMP
+        for link_tuple in regex_result_list:
+            # TODO: (Core) Print error on wrong link
+            # TODO: (Performance) Do not download API Data twice, maybe even cache but thats hardly worth the time
             # Key missing, or incorrect key provided.-Error has to catched
             # Gallery not found. If you just added this gallery, [...]-Error has to get catched
-            # actually everything matching the RegEx will never return something but HTTP 200
+            # but everything matching the RegEx will never return something but HTTP 200
+            # maybe if server is down
+
 
             # Setting the 2nd and 3rd tuple value of the RegEx to properly named variables.
             # These tuples are automatically generated from the re.findall-command with given RegEx
-            gallery_id = tuple[1]
-            gallery_token = tuple[2]
-
-            # TODO: IGNORE DOUBLE LOOKUP LIST ENTRIES WITH SAME HEADER / SAME ID&TOKEN
-            # maybe even cache API results for some time
-
-            # TODO: refactor
-            # This is the required JSON-string for requesting data from the E-Hentai API
+            # the regex_result_list contains of a tuple with the different substrings in it
+            # link_tuple[0] is the whole string
+            # link_tuple[1] and [2] are the first and second matched substrings
+            gallery_id = link_tuple[1]
+            gallery_token = link_tuple[2]
 
             response = requests.post(url, self.build_payload(gallery_id, gallery_token), json_request_headers)
 
             # create json from Response using built-in parser
             json_data = response.json()
 
-            # print a pretty formatted JSON-String to chat containing info about the given galleries
-            outstring = pprint.pformat(json_data, indent=4)
+            # TODO: (core) Make the taglist look pretty when printed
 
-            # TODO: BUILD PRETTY LINK TEMPLATE
-
-
+            # Debug-Snippets
+            # print whole json
             # await self.pm.client.send_message(message_object.channel,json.dumps(response.json(), sort_keys=True, indent=4))
+
+            # print all json pretty
+            # outstring = pprint.pformat(json_data, indent=4)
             # await self.pm.clientWrap.send_message(self.name, message_object.channel, outstring)
+
             await self.pm.clientWrap.send_message(self.name, message_object.channel, self.build_title_string(
                 json_data) + "\n" + self.build_title_jpn_string(json_data) + "\n")
             await self.pm.client.send_message(message_object.channel, json_data['gmetadata'][0]['thumb'])
-            await self.pm.clientWrap.send_message(self.name, message_object.channel, pprint.pformat(json_data['gmetadata'][0]['tags']))
-            await self.pm.client.send_message(message_object.channel, "\n\n")
-            # https://exhentai.org/g/66211541/d5c164c9b6/ error gallery not found
-            # https://exhentai.org/g/108711/5f57a5eb11/ error wrong gallery token
-            #
-            #    await self.pm.clientWrap.send_message(self.name, message_object.channel, str(
-            #        response.raise_for_status()) + "\n" + "Error while getting data from E-Hentai API.\n")
+            await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                                  pprint.pformat(json_data['gmetadata'][0]['tags']))
+
+            # maybe put some kind of line-seperator in between 2 posts
+            # await self.pm.client.send_message(message_object.channel, "<seperator>\n")
 
     @staticmethod
     def build_payload(gallery_id, gallery_token):
