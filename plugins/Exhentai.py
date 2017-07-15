@@ -68,7 +68,7 @@ class Plugin(object):
             await self.pm.client.send_message(message_object.channel, json_data['gmetadata'][0]['thumb'])
 
             # print message including tag-section
-            await self.pm.clientWrap.send_message(self.name, message_object.channel, self.build_tag_section() + "\n")
+            await self.pm.clientWrap.send_message(self.name, message_object.channel, self.build_tag_section(json_data) + "\n")
 
     @staticmethod
     def build_payload(gallery_id, gallery_token):
@@ -86,5 +86,6 @@ class Plugin(object):
     # TODO: (core) Make the taglist look pretty when printed
     @staticmethod
     def build_tag_section(json_data):
-        return pprint.pformat(json_data['gmetadata'][0]['tags'])
-
+        # the list returned by accessing the json-data at that tags-key will get each element extracted
+        # ", " will be printed to seperate them and the tags written like male:shotacon will get replaced to male : shotacon
+        return (", ".join(json_data['gmetadata'][0]['tags'])).replace(":"," : ")
