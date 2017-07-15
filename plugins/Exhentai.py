@@ -9,9 +9,6 @@ api_url = "https://api.e-hentai.org/api.php"
 json_request_headers = "{'content-type': 'application/json'}"
 
 
-# json_request_headers = "{'content-type': 'application/json; charset=UTF-8'}"
-
-
 class Plugin(object):
     def __init__(self, pm):
         self.pm = pm
@@ -29,7 +26,10 @@ class Plugin(object):
 
         # RegEx for finding all exhentai-links formatted like copied from exhentai adressbar
         # maybe broaden it up to match e-hentai / http / written www if still good performance-wise
+        # possible id is a positive integer and possible token is a 10digit hex string
         regex_result_list = re.findall(r'(https://exhentai.org/g/([0-9]+)/([0-9a-f]{10})/)', message_object.content)
+        # regex_result_list = re.findall(r'(^(http|https)://(?:www)?exhentai.org/g/([0-9]+)/([0-9a-f]{10})/)', message_object.content)
+        # this is probably the more robust RegEx which probably breaks the code because its hardcoded
 
         # loop over all found links that match RegEx; 3 API message api send requests per iteration, might get out of hand
         for link_tuple in regex_result_list:
@@ -46,8 +46,8 @@ class Plugin(object):
             # link_tuple[0] is the whole string
             # link_tuple[1] and [2] are the first and second matched substrings
 
-            gallery_id = link_tuple[1]
-            gallery_token = link_tuple[2]
+            gallery_id = link_tuple[-2]
+            gallery_token = link_tuple[-1]
 
             response = requests.post(api_url, self.build_payload(gallery_id, gallery_token), json_request_headers)
 
