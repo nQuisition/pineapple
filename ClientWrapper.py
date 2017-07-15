@@ -7,13 +7,9 @@ class ClientWrapper(object):
         self.pluginManager = pm
         self.client = pm.client
 
-    async def send_message(self, name, channel, message, embed=True):
-        if embed:
-            em = discord.Embed(description=message, colour=self.get_color(name))
-            msg = await self.client.send_message(channel, embed=em)
-            return msg
-        normal = message
-        msg = await self.client.send_message(channel, normal)
+    async def send_message(self, name, channel, message):
+        em = discord.Embed(description=message, colour=self.get_color(name))
+        msg = await self.client.send_message(channel, embed=em)
         return msg
 
     @staticmethod
