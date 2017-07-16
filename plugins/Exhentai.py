@@ -64,7 +64,6 @@ class Plugin(object):
 
         for link_tuple in regex_result_list_unique:
             # TODO: (Core) Catch json "field 'title' not found"-error on wrong link
-            # TODO: (Core) Do not download / print API Data twice, maybe even cache API data
             # Key missing, or incorrect key provided.-Error has to catched
             # Gallery not found. If you just added this gallery, [...]-Error has to get catched
             # but everything matching the RegEx will never return something but HTTP 200
