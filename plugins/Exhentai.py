@@ -8,7 +8,6 @@ from util import Events
 api_url = "https://api.e-hentai.org/api.php"
 json_request_headers = "{'content-type': 'application/json'}"
 
-
 class Plugin(object):
     def __init__(self, pm):
         self.pm = pm
@@ -20,7 +19,7 @@ class Plugin(object):
 
     @staticmethod
     def return_unique_set(iterable, key=None):
-    # taken from unique_everseen instead of importing an extra dependency
+        # taken from unique_everseen instead of importing an extra dependency
 
         seenset = set()
         seenset_add = seenset.add
@@ -59,34 +58,24 @@ class Plugin(object):
         # maybe broaden it up to match e-hentai / http / written www if still good performance-wise
         # possible id is a positive integer and possible token is a 10digit hex string
         regex_result_list = re.findall(r'(https://exhentai.org/g/([0-9]+)/([0-9a-f]{10})/)', message_object.content)
-        # regex_result_list = re.findall(r'(^(http|https)://(?:www)?exhentai.org/g/([0-9]+)/([0-9a-f]{10})/)', message_object.content)
         regex_result_list_unique = list(tuple(self.return_unique_set(regex_result_list)))
 
         for link_tuple in regex_result_list_unique:
             # TODO: (Core) Catch json "field 'title' not found"-error on wrong link
             # Key missing, or incorrect key provided.-Error has to catched
             # Gallery not found. If you just added this gallery, [...]-Error has to get catched
-            # but everything matching the RegEx will never return something but HTTP 200
-            # maybe if server is down 404 or the regex is broadened you will get 301 / 302 for moved if www/non-www forwarding happens
+            # only possible to check by evaluating reponse json
 
             # Setting the 2nd last and last tuple value of the RegEx to properly named variables.
-            # These tuples are automatically generated from the re.findall-command with given RegEx
             # the regex_result_list contains of a tuple with the different substrings in it
-            # link_tuple[0] is the whole string
-            # link_tuple[1] and [2] are the first and second matched substrings
+            # link_tuple[0] is the whole string, link_tuple[n] are the regex matches
 
             gallery_id = link_tuple[-2]
             gallery_token = link_tuple[-1]
 
             # create json from POST-response using requests built-in parser
-            json_data = requests.post(api_url, self.build_payload(gallery_id, gallery_token), json_request_headers).json()
-
-            # print whole json
-            # await self.pm.client.send_message(message_object.channel,json.dumps(response.json(), sort_keys=True, indent=4))
-
-            # print whole json pretty
-            # outstring = pprint.pformat(json_data, indent=4)
-            # await self.pm.clientWrap.send_message(self.name, message_object.channel, outstring)
+            json_data = requests.post(api_url, self.build_payload(gallery_id, gallery_token),
+                                      json_request_headers).json()
 
             # Build the title-message
             await self.pm.clientWrap.send_message(self.name, message_object.channel, self.build_title_string(
