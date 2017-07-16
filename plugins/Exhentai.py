@@ -33,7 +33,7 @@ class Plugin(object):
         # loop over all found links that match RegEx; 3 API message api send requests per iteration, might get out of hand
         for link_tuple in regex_result_list:
             # TODO: (Core) Print error on wrong link
-            # TODO: (Performance) Do not download API Data twice, maybe even cache API data but thats hardly worth the time
+            # TODO: (Core) Do not download / print API Data twice, maybe even cache API data
             # Key missing, or incorrect key provided.-Error has to catched
             # Gallery not found. If you just added this gallery, [...]-Error has to get catched
             # but everything matching the RegEx will never return something but HTTP 200
