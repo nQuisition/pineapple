@@ -18,6 +18,37 @@ class Plugin(object):
     def register_events():
         return [Events.Message("Exhentai")]
 
+    @staticmethod
+    def return_unique_set(iterable, key=None):
+    # taken from unique_everseen instead of importing an extra dependency
+
+        seenset = set()
+        seenset_add = seenset.add
+        seenlist = []
+        seenlist_add = seenlist.append
+        if key is None:
+            for element in iterable:
+                try:
+                    if element not in seenset:
+                        seenset_add(element)
+                        yield element
+                except TypeError as e:
+                    if element not in seenlist:
+                        seenlist_add(element)
+                        yield element
+        else:
+            for element in iterable:
+                k = key(element)
+                try:
+                    if k not in seenset:
+                        seenset_add(k)
+                        yield element
+                except TypeError as e:
+                    if k not in seenlist:
+                        seenlist_add(k)
+                        yield element
+        return seenlist
+
     async def handle_message(self, message_object):
         """
         Prints exhentai gallery info when a message contains an (average formatted) exhentai-url
@@ -29,17 +60,17 @@ class Plugin(object):
         # possible id is a positive integer and possible token is a 10digit hex string
         regex_result_list = re.findall(r'(https://exhentai.org/g/([0-9]+)/([0-9a-f]{10})/)', message_object.content)
         # regex_result_list = re.findall(r'(^(http|https)://(?:www)?exhentai.org/g/([0-9]+)/([0-9a-f]{10})/)', message_object.content)
+        regex_result_list_unique = list(tuple(self.return_unique_set(regex_result_list)))
 
-        # loop over all found links that match RegEx; 3 API message api send requests per iteration, might get out of hand
-        for link_tuple in regex_result_list:
-            # TODO: (Core) Print error on wrong link
+        for link_tuple in regex_result_list_unique:
+            # TODO: (Core) Catch json "field 'title' not found"-error on wrong link
             # TODO: (Core) Do not download / print API Data twice, maybe even cache API data
             # Key missing, or incorrect key provided.-Error has to catched
             # Gallery not found. If you just added this gallery, [...]-Error has to get catched
             # but everything matching the RegEx will never return something but HTTP 200
             # maybe if server is down 404 or the regex is broadened you will get 301 / 302 for moved if www/non-www forwarding happens
 
-            # Setting the 2nd and 3rd tuple value of the RegEx to properly named variables.
+            # Setting the 2nd last and last tuple value of the RegEx to properly named variables.
             # These tuples are automatically generated from the re.findall-command with given RegEx
             # the regex_result_list contains of a tuple with the different substrings in it
             # link_tuple[0] is the whole string
@@ -48,10 +79,8 @@ class Plugin(object):
             gallery_id = link_tuple[-2]
             gallery_token = link_tuple[-1]
 
-            response = requests.post(api_url, self.build_payload(gallery_id, gallery_token), json_request_headers)
-
-            # create json from Response using built-in parser
-            json_data = response.json()
+            # create json from POST-response using requests built-in parser
+            json_data = requests.post(api_url, self.build_payload(gallery_id, gallery_token), json_request_headers).json()
 
             # print whole json
             # await self.pm.client.send_message(message_object.channel,json.dumps(response.json(), sort_keys=True, indent=4))
