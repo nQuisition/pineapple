@@ -54,10 +54,7 @@ class Plugin(object):
         :param message_object: discord.Message object containing the message
         """
 
-        # RegEx for finding all exhentai-links formatted like copied from exhentai adressbar
-        # maybe broaden it up to match e-hentai / http / written www if still good performance-wise
-        # possible id is a positive integer and possible token is a 10digit hex string
-        regex_result_list = re.findall(r'(https://(ex|e-)hentai.org/g/([0-9]+)/([0-9a-f]{10})/)', message_object.content)
+        regex_result_list = re.findall(r'(http(s|)://(www.|)(ex|e-)hentai.org/g/([0-9]+)/([0-9a-f]{10})/)', message_object.content)
         regex_result_list_unique = (tuple(self.return_unique_set(regex_result_list)))
 
         for link_tuple in regex_result_list_unique:
