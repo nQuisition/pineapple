@@ -54,7 +54,8 @@ class Plugin(object):
         :param message_object: discord.Message object containing the message
         """
 
-        regex_result_list = re.findall(r'(http(s|)://(www.|)(ex|e-)hentai.org/g/([0-9]+)/([0-9a-f]{10})/)', message_object.content)
+        regex_result_list = re.findall(
+            r'((?<=http)((?<=s)|)://|)((?<=www.)|)((?<=ex)|(?<=e-))hentai.org/g/([0-9]+)/([0-9a-f]{10})(/|)', message_object.content)
         regex_result_list_unique = (tuple(self.return_unique_set(regex_result_list)))
 
         for link_tuple in regex_result_list_unique:
@@ -63,13 +64,13 @@ class Plugin(object):
             # the regex_result_list contains of a tuple with the different substrings in it
             # link_tuple[0] is the whole string, link_tuple[n] are the regex matches
 
-            gallery_id = link_tuple[-2]
-            gallery_token = link_tuple[-1]
+            gallery_id = link_tuple[4]
+            gallery_token = link_tuple[5]
 
             # create json from POST-response using requests built-in parser
             json_data = requests.post(api_url, self.build_payload(gallery_id, gallery_token),
                                       json_request_headers).json()
-            pprint.pprint(json_data)
+            #pprint.pprint(json_data)
             if 'gmetadata' in json_data and json_data['gmetadata'][0].get('error') is None:
                 # Build the title-message
 
