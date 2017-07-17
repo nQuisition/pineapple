@@ -58,7 +58,7 @@ class Plugin(object):
             hstr = "**{0}**:\n".format(args)
             for c, d in self.pm.comlist[args + ".py"]:
                 hstr = hstr + "`" + self.pm.botPreferences.commandPrefix + c + "`: " + d + "\n"
-                await self.pm.clientWrap.send_message(self.name, message_object.author, hstr)
+            await self.pm.clientWrap.send_message(self.name, message_object.author, hstr)
         except KeyError:
             await self.pm.clientWrap.send_message(self.name, message_object.author,
                                                   ":exclamation: That\'s not a valid plugin name")
