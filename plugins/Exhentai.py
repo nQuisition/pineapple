@@ -19,8 +19,7 @@ class Plugin(object):
 
     @staticmethod
     def return_unique_set(iterable, key=None):
-        # taken from unique_everseen instead of importing an extra dependency
-
+        # taken from more_itertools.unique_everseen instead of importing an extra dependency
         seenset = set()
         seenset_add = seenset.add
         seenlist = []
@@ -58,7 +57,7 @@ class Plugin(object):
         # maybe broaden it up to match e-hentai / http / written www if still good performance-wise
         # possible id is a positive integer and possible token is a 10digit hex string
         regex_result_list = re.findall(r'(https://exhentai.org/g/([0-9]+)/([0-9a-f]{10})/)', message_object.content)
-        regex_result_list_unique = list(tuple(self.return_unique_set(regex_result_list)))
+        regex_result_list_unique = (tuple(self.return_unique_set(regex_result_list)))
 
         for link_tuple in regex_result_list_unique:
 
@@ -72,8 +71,8 @@ class Plugin(object):
             # create json from POST-response using requests built-in parser
             json_data = requests.post(api_url, self.build_payload(gallery_id, gallery_token),
                                       json_request_headers).json()
-
-            if not 'error' in json_data['gmetadata'][0]:
+            pprint.pprint(json_data)
+            if 'gmetadata' in json_data and json_data['gmetadata'][0].get('error') is None:
 
                 # Build the title-message
 
