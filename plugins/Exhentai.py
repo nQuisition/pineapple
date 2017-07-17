@@ -74,7 +74,10 @@ class Plugin(object):
                                       json_request_headers).json()
 
             if not 'error' in json_data['gmetadata'][0]:
+
                 # Build the title-message
+
+
                 await self.pm.clientWrap.send_message(self.name, message_object.channel, self.build_title_string(
                     json_data) + "\n" + self.build_title_jpn_string(json_data) + "\n")
 
@@ -94,11 +97,11 @@ class Plugin(object):
     def build_title_string(json_data):
         return 'Title: ' + pprint.pformat(json_data['gmetadata'][0]['title'])
 
-    # TODO: (core) Don't print empty string for japanese title if none given
     @staticmethod
     def build_title_jpn_string(json_data):
-        if 'title_jpn' in json_data['gmetadata'][0]:
+        if json_data['gmetadata'][0]['title_jpn']:
             return 'Japanese Title: ' + pprint.pformat(json_data['gmetadata'][0]['title_jpn'])
+        return ""
 
     # TODO: (core) Make the taglist look pretty when printed
     @staticmethod
