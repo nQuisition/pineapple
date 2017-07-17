@@ -8,6 +8,7 @@ from util import Events
 api_url = "https://api.e-hentai.org/api.php"
 json_request_headers = "{'content-type': 'application/json'}"
 
+
 class Plugin(object):
     def __init__(self, pm):
         self.pm = pm
@@ -56,7 +57,7 @@ class Plugin(object):
         # RegEx for finding all exhentai-links formatted like copied from exhentai adressbar
         # maybe broaden it up to match e-hentai / http / written www if still good performance-wise
         # possible id is a positive integer and possible token is a 10digit hex string
-        regex_result_list = re.findall(r'(https://exhentai.org/g/([0-9]+)/([0-9a-f]{10})/)', message_object.content)
+        regex_result_list = re.findall(r'(https://(ex|e-)hentai.org/g/([0-9]+)/([0-9a-f]{10})/)', message_object.content)
         regex_result_list_unique = (tuple(self.return_unique_set(regex_result_list)))
 
         for link_tuple in regex_result_list_unique:
@@ -73,20 +74,16 @@ class Plugin(object):
                                       json_request_headers).json()
             pprint.pprint(json_data)
             if 'gmetadata' in json_data and json_data['gmetadata'][0].get('error') is None:
-
                 # Build the title-message
 
-
-                await self.pm.clientWrap.send_message(self.name, message_object.channel, self.build_title_string(
-                    json_data) + "\n" + self.build_title_jpn_string(json_data) + "\n")
+                await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                                      self.build_title_string(json_data) + "\n" +
+                                                      self.build_title_jpn_string(json_data) + "\n" +
+                                                      "*" + self.build_tag_section(json_data) + "*")
 
                 # Send the cover as its own String (non-embed) for preview
-                await self.pm.client.send_message(message_object.channel, json_data['gmetadata'][0]['thumb'])
-
-                # print message including tag-section
-                await self.pm.clientWrap.send_message(self.name, message_object.channel,
-                                                      self.build_tag_section(json_data) + "\n")
-
+                await self.pm.client.send_message(message_object.channel,
+                                                  json_data['gmetadata'][0]['thumb'])
 
     @staticmethod
     def build_payload(gallery_id, gallery_token):
@@ -94,16 +91,16 @@ class Plugin(object):
 
     @staticmethod
     def build_title_string(json_data):
-        return 'Title: ' + pprint.pformat(json_data['gmetadata'][0]['title'])
+        return '**Title:** ' + pprint.pformat(json_data['gmetadata'][0]['title'])
 
     @staticmethod
     def build_title_jpn_string(json_data):
         if json_data['gmetadata'][0]['title_jpn']:
-            return 'Japanese Title: ' + pprint.pformat(json_data['gmetadata'][0]['title_jpn'])
+            return '**Japanese Title:** ' + pprint.pformat(json_data['gmetadata'][0]['title_jpn'])
         return ""
 
     # TODO: (core) Make the taglist look pretty when printed
     @staticmethod
     def build_tag_section(json_data):
         # ", " is the line separator. Tags (eg. "female:schoolgirl") will be added spaces around the ":"
-        return (", ".join(json_data['gmetadata'][0]['tags'])).replace(":", " : ")
+        return (", ".join(json_data['gmetadata'][0]['tags'])).replace(":", ": ")
