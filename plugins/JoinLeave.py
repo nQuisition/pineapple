@@ -49,12 +49,13 @@ class Plugin(object):
             await self.pm.client.send_message(message_object.channel, "Welcome messages: **" + str(self.enabled) + "**")
 
         if command == "ban" and len(message_object.mentions) == 1:
-            leave = glob.glob(os.getcwd() + "/images/" + "bye.gif")
-            file = random.choice(leave)
+            files = glob.glob(os.getcwd() + "/images/" + "leave" + "/" + '*.gif')
+            files.extend(glob.glob(os.getcwd() + "/images/" + "leave" + "/" + '*.png'))
+            files.extend(glob.glob(os.getcwd() + "/images/" + "leave" + "/" + '*.jpg'))
+            file = random.choice(files)
             await asyncio.sleep(1)
-            msg1 = await self.pm.client.send_message(message_object.channel,
-                                                     "Bye " + message_object.mentions[0].display_name)
-            msg2 = await self.pm.client.send_file(message_object.channel, file)
+            msg1 = await self.pm.client.send_file(message_object.channel, file,
+                                                  content="Bye " + message_object.mentions[0].display_name)
 
             await asyncio.sleep(10)
             try:
@@ -65,13 +66,18 @@ class Plugin(object):
                 await self.pm.client.delete_message(msg1)
             except:
                 print("Failed to delete message")
+
+            files = glob.glob(os.getcwd() + "/images/" + "join" + "/" + '*.gif')
+            files.extend(glob.glob(os.getcwd() + "/images/" + "join" + "/" + '*.png'))
+            files.extend(glob.glob(os.getcwd() + "/images/" + "join" + "/" + '*.jpg'))
+            file = random.choice(files)
+            await asyncio.sleep(5)
+            msg2 = await self.pm.client.send_file(message_object.channel, file,
+                                           content="Welcome to the server " + message_object.mentions[0].mention +
+                                                   " Please read <#234865303442423814> and tell an admin/mod which "
+                                                   "role you would like")
+            await asyncio.sleep(10)
             try:
                 await self.pm.client.delete_message(msg2)
-            except:
-                print("Failed to delete message")
-            jk = await self.pm.client.send_message(message_object.channel, "Nah, just kidding.")
-            await asyncio.sleep(5)
-            try:
-                await self.pm.client.delete_message(jk)
             except:
                 print("Failed to delete message")
