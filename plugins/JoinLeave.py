@@ -25,11 +25,10 @@ class Plugin(object):
             welcome = glob.glob(os.getcwd() + "/images/" + 'hi.gif')
             file = random.choice(welcome)
             await asyncio.sleep(1)
-            await self.pm.client.send_message(member.server.default_channel,
-                                              "Welcome to the server " + member.mention +
-                                              " Please read <#234865303442423814> and tell an admin/mod which "
-                                              "role you would like")
-            await self.pm.client.send_file(member.server.default_channel, file)
+            await self.pm.client.send_file(member.server.default_channel, file,
+                                           content="Welcome to the server " + member.mention +
+                                                   " Please read <#234865303442423814> and tell an admin/mod which "
+                                                   "role you would like")
             print("Message sent")
 
     async def handle_member_leave(self, member):
@@ -37,8 +36,7 @@ class Plugin(object):
             leave = glob.glob(os.getcwd() + "/images/" + "bye.gif")
             file = random.choice(leave)
             await asyncio.sleep(1)
-            await self.pm.client.send_message(member.server.default_channel, "Bye " + member.display_name)
-            await self.pm.client.send_file(member.server.default_channel, file)
+            await self.pm.client.send_file(member.server.default_channel, file, content="Bye " + member.display_name)
 
     async def handle_command(self, message_object, command, args):
         if command == "togglewelcome":
@@ -46,19 +44,30 @@ class Plugin(object):
             await self.pm.client.delete_message(message_object)
             await self.pm.client.send_message(message_object.channel, "Welcome messages: **" + str(self.enabled) + "**")
 
-        if command == "ban":
-            if len(message_object.mentions) == 1:
-                leave = glob.glob(os.getcwd() + "/images/" + "bye.gif")
-                file = random.choice(leave)
-                await asyncio.sleep(1)
-                msg1 = await self.pm.client.send_message(message_object.channel,
-                                                         "Bye " + message_object.mentions[0].display_name)
-                msg2 = await self.pm.client.send_file(message_object.channel, file)
+        if command == "ban" and len(message_object.mentions) == 1:
+            leave = glob.glob(os.getcwd() + "/images/" + "bye.gif")
+            file = random.choice(leave)
+            await asyncio.sleep(1)
+            msg1 = await self.pm.client.send_message(message_object.channel,
+                                                     "Bye " + message_object.mentions[0].display_name)
+            msg2 = await self.pm.client.send_file(message_object.channel, file)
 
-                await asyncio.sleep(5)
+            await asyncio.sleep(10)
+            try:
                 await self.pm.client.delete_message(message_object)
+            except:
+                print("Failed to delete message")
+            try:
                 await self.pm.client.delete_message(msg1)
+            except:
+                print("Failed to delete message")
+            try:
                 await self.pm.client.delete_message(msg2)
-                jk = await self.pm.client.send_message(message_object.channel, "Nah, just kidding.")
-                await asyncio.sleep(5)
+            except:
+                print("Failed to delete message")
+            jk = await self.pm.client.send_message(message_object.channel, "Nah, just kidding.")
+            await asyncio.sleep(5)
+            try:
                 await self.pm.client.delete_message(jk)
+            except:
+                print("Failed to delete message")
