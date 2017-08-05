@@ -22,8 +22,10 @@ class Plugin(object):
         print(member.display_name)
         if self.enabled:
             print("Join message enabled")
-            welcome = glob.glob(os.getcwd() + "/images/" + 'hi.gif')
-            file = random.choice(welcome)
+            files = glob.glob(os.getcwd() + "/images/" + "join" + "/" + '*.gif')
+            files.extend(glob.glob(os.getcwd() + "/images/" + "join" + "/" + '*.png'))
+            files.extend(glob.glob(os.getcwd() + "/images/" + "join" + "/" + '*.jpg'))
+            file = random.choice(files)
             await asyncio.sleep(1)
             await self.pm.client.send_file(member.server.default_channel, file,
                                            content="Welcome to the server " + member.mention +
@@ -33,8 +35,10 @@ class Plugin(object):
 
     async def handle_member_leave(self, member):
         if self.enabled:
-            leave = glob.glob(os.getcwd() + "/images/" + "bye.gif")
-            file = random.choice(leave)
+            files = glob.glob(os.getcwd() + "/images/" + "leave" + "/" + '*.gif')
+            files.extend(glob.glob(os.getcwd() + "/images/" + "leave" + "/" + '*.png'))
+            files.extend(glob.glob(os.getcwd() + "/images/" + "leave" + "/" + '*.jpg'))
+            file = random.choice(files)
             await asyncio.sleep(1)
             await self.pm.client.send_file(member.server.default_channel, file, content="Bye " + member.display_name)
 
