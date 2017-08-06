@@ -195,7 +195,7 @@ class Plugin(object):
 
                 for user in self.leaderboard_data:
                     if self.leaderboard_data[user]["pp_rank"] != "0" and self.leaderboard_data[user]["pp_rank"] is not None:
-                        self.leaderboard_data[user]["discord_id"] = users[user.lower()]
+                        self.leaderboard_data[user]["discord_id"] = users[user.lower().replace(" ", "_")]
                         self.leaderboard_data[user]["discord_name"] = user
                         self.leaderboard_data[user]["pp_rank"] = int(self.leaderboard_data[user]["pp_rank"])
                         unsorted.append(self.leaderboard_data[user])
