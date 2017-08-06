@@ -233,7 +233,12 @@ class Plugin(object):
                                           "pp_raw"]))) + "pp)" + " (" + name + ") \n"
                         index += 1
                     except:
-                        traceback.print_exc()
+                        await self.pm.client.send_message(message_object.channel, "Error: " + str(e))
+                        if self.pm.botPreferences.get_config_value("client", "debug") == "1":
+                            traceback.print_exc()
+                        self.leaderboard_lock = False
+                        self.leaderboard_data = dict()
+                        self.request_count = 0
 
                 await self.pm.clientWrap.edit_message(self.name, lb_msg, msg)
 
@@ -241,7 +246,9 @@ class Plugin(object):
                 self.leaderboard_data = dict()
                 self.request_count = 0
         except:
-            traceback.print_exc()
+            await self.pm.client.send_message(message_object.channel, "Error: " + str(e))
+            if self.pm.botPreferences.get_config_value("client", "debug") == "1":
+                traceback.print_exc()
             self.leaderboard_lock = False
             self.leaderboard_data = dict()
             self.request_count = 0
