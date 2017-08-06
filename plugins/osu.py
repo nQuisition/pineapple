@@ -232,7 +232,7 @@ class Plugin(object):
                             int(float(data[
                                           "pp_raw"]))) + "pp)" + " (" + name + ") \n"
                         index += 1
-                    except:
+                    except Exception as e:
                         await self.pm.client.send_message(message_object.channel, "Error: " + str(e))
                         if self.pm.botPreferences.get_config_value("client", "debug") == "1":
                             traceback.print_exc()
@@ -245,7 +245,7 @@ class Plugin(object):
                 self.leaderboard_lock = False
                 self.leaderboard_data = dict()
                 self.request_count = 0
-        except:
+        except Exception as e:
             await self.pm.client.send_message(message_object.channel, "Error: " + str(e))
             if self.pm.botPreferences.get_config_value("client", "debug") == "1":
                 traceback.print_exc()
