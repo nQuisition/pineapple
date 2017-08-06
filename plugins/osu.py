@@ -174,7 +174,7 @@ class Plugin(object):
 
                 users = dict()
                 for row in rows:
-                    users[row[1]] = row[0]
+                    users[row[1].lower()] = row[0]
                 print(users)
 
                 await self.pm.clientWrap.edit_message(self.name, lb_msg, "Fetching data from osu! API...")
@@ -184,7 +184,7 @@ class Plugin(object):
                 for user in users:
                     self.request_count += 1
                     http_client.fetch(
-                        'https://osu.ppy.sh/api/get_user?m=' + str(game_mode_id) + '&k=' + self.api_key + '&u=' + user,
+                        'https://osu.ppy.sh/api/get_user?m=' + str(game_mode_id) + '&k=' + self.api_key + '&u=' + user.lower(),
                         self.handle_request, method='GET')
                 ioloop.IOLoop.instance().start()
 
@@ -195,7 +195,7 @@ class Plugin(object):
 
                 for user in self.leaderboard_data:
                     if self.leaderboard_data[user]["pp_rank"] != "0" and self.leaderboard_data[user]["pp_rank"] is not None:
-                        self.leaderboard_data[user]["discord_id"] = users[user]
+                        self.leaderboard_data[user]["discord_id"] = users[user.lower()]
                         self.leaderboard_data[user]["discord_name"] = user
                         self.leaderboard_data[user]["pp_rank"] = int(self.leaderboard_data[user]["pp_rank"])
                         unsorted.append(self.leaderboard_data[user])
