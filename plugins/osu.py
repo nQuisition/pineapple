@@ -6,7 +6,9 @@ import sqlite3
 import traceback
 import operator
 import discord
+import json
 from PIL import Image
+from tornado import ioloop, httpclient
 
 
 # noinspection SpellCheckingInspection
@@ -17,6 +19,9 @@ class Plugin(object):
         # base_url controls parameters for lammmy generation. Use python string format to change mode/username
         self.base_url = "http://lemmmy.pw/osusig/sig.php?mode={}&pp=0&removemargin&darktriangles&colour=pink&uname={}"
         self.name = "osu"
+        self.leaderboard_lock = False
+        self.request_count = 0
+        self.leaderboard_data = dict()
 
     @staticmethod
     def register_events():
@@ -108,6 +113,17 @@ class Plugin(object):
         response = requests.get(url, verify=True)
         return response.json()[0]
 
+    def handle_request(self, response):
+        try:
+            print(response.body)
+            json_data = json.loads(response.body.decode('utf-8'))[0]
+            self.leaderboard_data[json_data["username"]] = json_data
+        except:
+            print("Failed to fetch user data, http error")
+        self.request_count -= 1
+        if self.request_count == 0:
+            ioloop.IOLoop.instance().stop()
+
     async def leaderboard(self, message_object, mode):
         """
         Print the osu! leaderboard for a specific game mode
@@ -115,6 +131,14 @@ class Plugin(object):
         :param mode: Game mode name
         :return: None
         """
+        if self.leaderboard_lock:
+            await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                                  "Leaderboard is currently being loaded. Please wait.")
+            return
+        else:
+            self.leaderboard_lock = True
+            self.leaderboard_data = dict()
+            self.request_count = 0
         if not os.path.exists("cache/"):
             os.makedirs("cache")
         if mode is "":
@@ -148,18 +172,37 @@ class Plugin(object):
                 msg = "**Leaderboard for " + mode + ":**    \n"
                 unsorted = list()
 
+                users = dict()
                 for row in rows:
-                    try:
-                        data = await self.get_data(row[1], game_mode_id)
-                        if data["pp_rank"] != "0":
-                            data["discord_id"] = row[0]
-                            data["pp_rank"] = int(data["pp_rank"])
-                            unsorted.append(data)
-                    except:
-                        traceback.print_exc()
-                        continue
+                    users[row[1].lower().replace(" ", "_")] = row[0]
+                print(users)
 
+                await self.pm.clientWrap.edit_message(self.name, lb_msg, "Fetching data from osu! API...")
+
+                self.request_count = 0
+                http_client = httpclient.AsyncHTTPClient()
+                for user in users:
+                    self.request_count += 1
+                    http_client.fetch(
+                        'https://osu.ppy.sh/api/get_user?m=' + str(game_mode_id) + '&k=' + self.api_key + '&u=' + user.lower(),
+                        self.handle_request, method='GET')
+                ioloop.IOLoop.instance().start()
+
+                while self.request_count != 0:
+                    print("Waiting for requests to finish...")
+
+                await self.pm.clientWrap.edit_message(self.name, lb_msg, "Processing data from osu! API...")
+
+                for user in self.leaderboard_data:
+                    if self.leaderboard_data[user]["pp_rank"] != "0" and self.leaderboard_data[user]["pp_rank"] is not None:
+                        self.leaderboard_data[user]["discord_id"] = users[user.lower().replace(" ", "_")]
+                        self.leaderboard_data[user]["discord_name"] = user
+                        self.leaderboard_data[user]["pp_rank"] = int(self.leaderboard_data[user]["pp_rank"])
+                        unsorted.append(self.leaderboard_data[user])
                 sortedusers = sorted(unsorted, key=operator.itemgetter("pp_rank"))
+
+                await self.pm.clientWrap.edit_message(self.name, lb_msg,
+                                                      "Fetching information from Discord and building message")
                 for data in sortedusers:
                     try:
                         user = await self.pm.client.get_user_info(data["discord_id"])
@@ -189,12 +232,26 @@ class Plugin(object):
                             int(float(data[
                                           "pp_raw"]))) + "pp)" + " (" + name + ") \n"
                         index += 1
-                    except:
-                        traceback.print_exc()
-                await self.pm.client.delete_message(lb_msg)
-                await self.pm.clientWrap.send_message(self.name, message_object.channel, msg)
-        except:
-            traceback.print_exc()
+                    except Exception as e:
+                        await self.pm.client.send_message(message_object.channel, "Error: " + str(e))
+                        if self.pm.botPreferences.get_config_value("client", "debug") == "1":
+                            traceback.print_exc()
+                        self.leaderboard_lock = False
+                        self.leaderboard_data = dict()
+                        self.request_count = 0
+
+                await self.pm.clientWrap.edit_message(self.name, lb_msg, msg)
+
+                self.leaderboard_lock = False
+                self.leaderboard_data = dict()
+                self.request_count = 0
+        except Exception as e:
+            await self.pm.client.send_message(message_object.channel, "Error: " + str(e))
+            if self.pm.botPreferences.get_config_value("client", "debug") == "1":
+                traceback.print_exc()
+            self.leaderboard_lock = False
+            self.leaderboard_data = dict()
+            self.request_count = 0
 
     async def set_osu(self, message_object, name):
         """
