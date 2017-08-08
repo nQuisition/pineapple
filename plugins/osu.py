@@ -174,7 +174,7 @@ class Plugin(object):
 
                 users = dict()
                 for row in rows:
-                    users[row[1].lower()] = row[0]
+                    users[row[1].lower().replace(" ", "_")] = row[0]
                 print(users)
 
                 await self.pm.clientWrap.edit_message(self.name, lb_msg, "Fetching data from osu! API...")
