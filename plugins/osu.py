@@ -194,8 +194,10 @@ class Plugin(object):
                 await self.pm.clientWrap.edit_message(self.name, lb_msg, "Processing data from osu! API...")
 
                 for user in self.leaderboard_data:
-                    if self.leaderboard_data[user]["pp_rank"] != "0" and self.leaderboard_data[user]["pp_rank"] is not None:
-                        self.leaderboard_data[user]["discord_id"] = users[user.lower().replace(" ", "_")]
+                    users_key = user.lower().replace(" ", "_")
+                    if self.leaderboard_data[user]["pp_rank"] != "0" and self.leaderboard_data[user]["pp_rank"] is not None\
+                            and users_key in users:
+                        self.leaderboard_data[user]["discord_id"] = users[users_key]
                         self.leaderboard_data[user]["discord_name"] = user
                         self.leaderboard_data[user]["pp_rank"] = int(self.leaderboard_data[user]["pp_rank"])
                         unsorted.append(self.leaderboard_data[user])
