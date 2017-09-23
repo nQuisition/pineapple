@@ -184,7 +184,8 @@ class Plugin(object):
                 for user in users:
                     self.request_count += 1
                     http_client.fetch(
-                        'https://osu.ppy.sh/api/get_user?m=' + str(game_mode_id) + '&k=' + self.api_key + '&u=' + user.lower(),
+                        'https://osu.ppy.sh/api/get_user?m=' + str(
+                            game_mode_id) + '&k=' + self.api_key + '&u=' + user.lower(),
                         self.handle_request, method='GET')
                 ioloop.IOLoop.instance().start()
 
@@ -195,7 +196,8 @@ class Plugin(object):
 
                 for user in self.leaderboard_data:
                     users_key = user.lower().replace(" ", "_")
-                    if self.leaderboard_data[user]["pp_rank"] != "0" and self.leaderboard_data[user]["pp_rank"] is not None\
+                    if self.leaderboard_data[user]["pp_rank"] != "0" and self.leaderboard_data[user][
+                        "pp_rank"] is not None \
                             and users_key in users:
                         self.leaderboard_data[user]["discord_id"] = users[users_key]
                         self.leaderboard_data[user]["discord_name"] = user
@@ -242,7 +244,14 @@ class Plugin(object):
                         self.leaderboard_data = dict()
                         self.request_count = 0
 
-                await self.pm.clientWrap.edit_message(self.name, lb_msg, msg)
+                await self.pm.client.delete_message(lb_msg)
+
+                if len(msg) > 1500:
+                    lb_strings = list(map(''.join, zip(*[iter(msg)] * 1000)))
+                    for string in lb_strings:
+                        await self.pm.clientWrap.send_message(self.name, message_object.channel, string)
+                else:
+                    await self.pm.clientWrap.send_message(self.name, message_object.channel, msg)
 
                 self.leaderboard_lock = False
                 self.leaderboard_data = dict()
