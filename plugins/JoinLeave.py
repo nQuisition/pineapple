@@ -62,8 +62,10 @@ class Plugin(object):
         cache_enabled = self.enabled
         self.enabled = False
         await self.pm.client.ban(message_object.mentions[0])
+        await self.pm.client.delete_message(message_object)
         await asyncio.sleep(5)
         self.enabled = cache_enabled
+
 
     async def fake_ban(self, message_object):
         files = glob.glob(os.getcwd() + "/images/" + "leave" + "/" + '*.gif')
