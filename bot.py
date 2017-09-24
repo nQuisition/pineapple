@@ -2,20 +2,26 @@ from PluginManager import PluginManager
 import discord
 import traceback
 import asyncio
+import logging
 
+logging.basicConfig(filename='pineapple.log', filemode='a', level=logging.INFO,
+                    format=('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 
-print("Starting Pineapple")
-print("Starting Discord Client")
+logger = logging.getLogger('discord')
+logger.setLevel(logging.NOTSET)
+
+logging.info("Starting Pineapple")
+logging.info("Starting Discord Client")
 # Creates a discord client, which we will use to connect and interact with the server.
 # All methods with @client.event annotations are event handlers for this client.
 client = discord.Client()
 
-print("Loading plugins")
+logging.info("Loading plugins")
 # Loads and initializes the plugin manager for the bot
 pm = PluginManager("plugins", client)
 pm.load_plugins()
 pm.register_events()
-print("Plugins loaded and registered")
+logging.info("Plugins loaded and registered")
 
 
 @client.event
@@ -23,7 +29,7 @@ async def on_ready():
     """
     Event handler, fires when the bot has connected and is logged in
     """
-    print('Logged in as ' + client.user.name + " (" + client.user.id + ")")
+    logging.info('Logged in as ' + client.user.name + " (" + client.user.id + ")")
 
     # Change nickname to nickname in configuration
     for instance in client.servers:
@@ -87,7 +93,6 @@ async def on_message_delete(message):
 
 @client.event
 async def on_member_join(member):
-    print("Member join event")
     await pm.handle_member_join(member)
 
 
@@ -95,7 +100,6 @@ async def on_member_join(member):
 async def on_member_remove(member):
     await pm.handle_member_leave(member)
 
+
 # Run the client and login with the bot token (yes, this needs to be down here)
 client.run(pm.botPreferences.token)
-
-

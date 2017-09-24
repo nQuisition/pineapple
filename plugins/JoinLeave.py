@@ -4,6 +4,7 @@ import os
 import random
 import asyncio
 from util.Ranks import Ranks
+import logging
 
 
 class Plugin(object):
@@ -14,15 +15,13 @@ class Plugin(object):
     @staticmethod
     def register_events():
         return [Events.UserJoin("welcome_msg"), Events.UserLeave("leave_msg"),
-                Events.Command("togglewelcome", rank=Ranks.Admin),
+                Events.Command("togglewelcome", rank=Ranks.Mod),
                 Events.Command("ban", rank=Ranks.Mod),
-                Events.Command("shadowban", rank=Ranks.Admin)]
+                Events.Command("shadowban", rank=Ranks.Mod)]
 
     async def handle_member_join(self, member):
-        print("User joined")
-        print(member.display_name)
+        logging.info("User joined " + member.display_name)
         if self.enabled:
-            print("Join message enabled")
             files = glob.glob(os.getcwd() + "/images/" + "join" + "/" + '*.gif')
             files.extend(glob.glob(os.getcwd() + "/images/" + "join" + "/" + '*.png'))
             files.extend(glob.glob(os.getcwd() + "/images/" + "join" + "/" + '*.jpg'))
@@ -32,7 +31,6 @@ class Plugin(object):
                                            content="Welcome to the server " + member.mention +
                                                    " Please read <#234865303442423814> and tell an admin/mod which "
                                                    "role you would like")
-            print("Message sent")
 
     async def handle_member_leave(self, member):
         if self.enabled:
@@ -54,18 +52,21 @@ class Plugin(object):
             await self.shadow_ban(message_object)
 
     async def toggle_welcome(self, message_object):
+        logging.info("Welcome/leave messages toggled by "
+                     + message_object.author.name + "#" + str(message_object.author.discriminator))
         self.enabled = not self.enabled
         await self.pm.client.delete_message(message_object)
         await self.pm.client.send_message(message_object.channel, "Welcome messages: **" + str(self.enabled) + "**")
 
     async def shadow_ban(self, message_object):
+        logging.info("Shadow ban on " + message_object.mentions[0].display_name + " executed by "
+                     + message_object.author.name + "#" + str(message_object.author.discriminator))
         cache_enabled = self.enabled
         self.enabled = False
         await self.pm.client.ban(message_object.mentions[0])
         await self.pm.client.delete_message(message_object)
         await asyncio.sleep(5)
         self.enabled = cache_enabled
-
 
     async def fake_ban(self, message_object):
         files = glob.glob(os.getcwd() + "/images/" + "leave" + "/" + '*.gif')
