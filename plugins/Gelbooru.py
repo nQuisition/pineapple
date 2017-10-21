@@ -86,7 +86,7 @@ class Plugin(object):
                 return
 
         gel_url = self.base_src + str(img_response["id"])  # this is the link to the gelbooru page
-        image_url = "http:" + img_response["file_url"]
+        image_url = img_response["file_url"]
         filename = "cache/temp" + image_url[-5:]
 
         # downloads image to server
@@ -177,20 +177,23 @@ class Plugin(object):
 
     @staticmethod
     def get_blacklist(message_object):
-        # Connect to SQLite file for server in cache/SERVERID.sqlite
-        if not os.path.exists("cache/"):
-            os.mkdir("cache/")
-        con = sqlite3.connect("cache/" + message_object.server.id + ".sqlite",
-                              detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
-        tags = list()
-        with con:
-            cur = con.cursor()
-            cur.execute("SELECT * FROM booru_blacklist")  # TODO: Improve loading to show more users
-            rows = cur.fetchall()
-            msg = "Blacklisted tags: "
-            for row in rows:
-                try:
-                    tags.append(row[0])
-                except:
-                    continue
-        return tags
+        try:
+            # Connect to SQLite file for server in cache/SERVERID.sqlite
+            if not os.path.exists("cache/"):
+                os.mkdir("cache/")
+            con = sqlite3.connect("cache/" + message_object.server.id + ".sqlite",
+                                  detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
+            tags = list()
+            with con:
+                cur = con.cursor()
+                cur.execute("SELECT * FROM booru_blacklist")
+                rows = cur.fetchall()
+
+                for row in rows:
+                    try:
+                        tags.append(row[0])
+                    except:
+                        continue
+            return tags
+        except:
+            return list()
