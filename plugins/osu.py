@@ -64,14 +64,6 @@ class Plugin(object):
                 if username is None:
                     return
             await self.get_badge(message_object.channel, username, mode)
-            # display_data = await self.get_data(username, mode)
-            # await self.pm.client.send_message(message_object.channel,
-            #                                  "Username: " + display_data["username"] + "\n" + "Rank: " + display_data[
-            #                                      "pp_rank"] + "\n" + "Accuracy: " + display_data[
-            #                                      "accuracy"] + "\n" + "PP: " + display_data[
-            #                                      "pp_raw"] + "\n" + "Country: " + display_data[
-            #                                      "country"] + "\n" + "Rank in country: " + display_data[
-            #                                      "pp_country_rank"])
         except:
             traceback.print_exc()
             await self.pm.clientWrap.send_message(self.name, message_object.channel,
