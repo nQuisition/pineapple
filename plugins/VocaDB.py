@@ -1,6 +1,6 @@
 from util import Events
 import requests
-
+import discord
 
 class Plugin(object):
     def __init__(self, pm):
@@ -17,7 +17,7 @@ class Plugin(object):
 
     async def song(self, message_object, args):
         request_url = "https://vocadb.net/api/songs?query=" + args[1] + \
-                      "&sort=FavoritedTimes&maxResults=3&fields=PVs&lang=Romaji"
+                      "&sort=FavoritedTimes&maxResults=2&fields=PVs&lang=Romaji"
         response = requests.get(request_url)
         try:
             if len(response.json()["items"]) is 0:
@@ -31,6 +31,7 @@ class Plugin(object):
 
         results = response.json()
         msg = ""
+        pv_posted = False
         for result in results["items"]:
             msg += "**Title:** " + result["name"] + "\n"
             msg += "**Artist:** " + result["artistString"] + "\n"
@@ -38,7 +39,11 @@ class Plugin(object):
 
             for pv in result["pvs"][0:2]:
                 msg += "\n"
-                msg += pv["url"]
+                if not pv_posted and pv["service"] == "Youtube":
+                    msg += pv["url"]
+                    pv_posted = True
+                else:
+                    msg += "<" + pv["url"] + ">"
             msg += "\n\n"
 
-        await self.pm.clientWrap.send_message(self.name, message_object.channel, msg)
+        await self.pm.client.send_message(message_object.channel, msg)
