@@ -242,7 +242,7 @@ class Plugin(object):
                     lb_strings = list(map(''.join, zip(*[iter(msg)] * 1000)))
                     for string in lb_strings:
                         await self.pm.clientWrap.send_message(self.name, message_object.channel, string)
-                        await asyncio.sleep(1)
+                        await asyncio.sleep(2)
                 else:
                     await self.pm.clientWrap.send_message(self.name, message_object.channel, msg)
 
