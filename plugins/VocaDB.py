@@ -17,7 +17,7 @@ class Plugin(object):
 
     async def song(self, message_object, args):
         request_url = "https://vocadb.net/api/songs?query=" + args[1] + \
-                      "&sort=FavoritedTimes&maxResults=2&fields=PVs&lang=Romaji"
+                      "&sort=FavoritedTimes&maxResults=2&fields=PVs&lang=Romaji&preferAccurateMatches=true&nameMatchMode=Auto"
         response = requests.get(request_url)
         try:
             if len(response.json()["items"]) is 0:
