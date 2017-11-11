@@ -96,9 +96,9 @@ class Plugin(object):
                 em = discord.Embed(description="a",
                                    colour=self.pm.clientWrap.get_color(self.name))
                 em.set_image(url=json_data["thumbUrl"])
-                await self.pm.client.send_file(message_object.channel, filename,
-                                               content="**Title:** " + json_data["name"] +
-                                                       "\n**Author:** " + json_data["author"] +
-                                                       "\n**Date:** " + json_data["publishDate"] +
-                                                       "\n**Link:** " + json_data["url"])
+                #await self.pm.client.send_file(message_object.channel, filename,
+                #                               content="**Title:** " + json_data["name"] +
+                #                                       "\n**Author:** " + json_data["author"] +
+                #                                       "\n**Date:** " + json_data["publishDate"] +
+                #                                       "\n**Link:** " + json_data["url"])
                 os.remove(filename)
