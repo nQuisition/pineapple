@@ -77,10 +77,10 @@ class Plugin(object):
         :param id: Game mode ID
         :return: None
         """
-        directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "temp")
+        directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../temp")
         if not os.path.exists(directory):
             os.makedirs(directory)
-        filename = os.path.join(directory, username + "test.jpg")
+        filename = os.path.join(directory, username + "_profile.jpg")
         image_url = self.base_url.format(id, username)
         urllib.request.urlretrieve(image_url, filename)
 
