@@ -64,11 +64,6 @@ class Plugin(object):
         regex_result_list_unique = (tuple(self.return_unique_set(regex_result_list)))
 
         for link_tuple in regex_result_list_unique:
-
-            # Setting the 2nd last and last tuple value of the RegEx to properly named variables.
-            # the regex_result_list contains of a tuple with the different substrings in it
-            # link_tuple[0] is the whole string, link_tuple[n] are the regex matches
-
             video_id = link_tuple[6]
 
             # create json from POST-response using requests built-in parser
@@ -96,9 +91,8 @@ class Plugin(object):
                 em = discord.Embed(description="a",
                                    colour=self.pm.clientWrap.get_color(self.name))
                 em.set_image(url=json_data["thumbUrl"])
-                #await self.pm.client.send_file(message_object.channel, filename,
-                #                               content="**Title:** " + json_data["name"] +
-                #                                       "\n**Author:** " + json_data["author"] +
-                #                                       "\n**Date:** " + json_data["publishDate"] +
-                #                                       "\n**Link:** " + json_data["url"])
+                await self.pm.client.send_file(message_object.channel, filename,
+                                               content="**Title:** " + json_data["name"] +
+                                                       "\n**Author:** " + json_data["author"] +
+                                                       "\n**Date:** " + json_data["publishDate"])
                 os.remove(filename)
