@@ -76,7 +76,7 @@ class Plugin(object):
                 directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../temp")
                 if not os.path.exists(directory):
                     os.makedirs(directory)
-                filename = os.path.join(directory, str(json_data["id"]) + ".jpg")
+                filename = os.path.join(directory, str(json_data["id"]) + ".png")
                 urllib.request.urlretrieve(json_data["thumbUrl"], filename)
 
                 # Resize image
