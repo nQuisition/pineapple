@@ -1,7 +1,7 @@
 import pprint
 import requests
 import re
-
+import discord
 from util import Events
 
 # API-URL and type of headers sent by POST-request
@@ -55,7 +55,8 @@ class Plugin(object):
         """
 
         regex_result_list = re.findall(
-            r'((?<=http)((?<=s)|)://|)((?<=www.)|)((?<=ex)|(?<=e-))hentai.org/g/([0-9]+)/([0-9a-f]{10})(/|)', message_object.content)
+            r'((?<=http)((?<=s)|)://|)((?<=www.)|)((?<=ex)|(?<=e-))hentai.org/g/([0-9]+)/([0-9a-f]{10})(/|)',
+            message_object.content)
         regex_result_list_unique = (tuple(self.return_unique_set(regex_result_list)))
 
         for link_tuple in regex_result_list_unique:
@@ -70,18 +71,14 @@ class Plugin(object):
             # create json from POST-response using requests built-in parser
             json_data = requests.post(api_url, self.build_payload(gallery_id, gallery_token),
                                       json_request_headers).json()
-            #pprint.pprint(json_data)
+            # pprint.pprint(json_data)
             if 'gmetadata' in json_data and json_data['gmetadata'][0].get('error') is None:
-                # Build the title-message
-
-                await self.pm.clientWrap.send_message(self.name, message_object.channel,
-                                                      self.build_title_string(json_data) + "\n" +
-                                                      self.build_title_jpn_string(json_data) + "\n" +
-                                                      "*" + self.build_tag_section(json_data) + "*")
-
-                # Send the cover as its own String (non-embed) for preview
-                await self.pm.client.send_message(message_object.channel,
-                                                  json_data['gmetadata'][0]['thumb'])
+                em = discord.Embed(description=self.build_title_string(json_data) + "\n" +
+                                               self.build_title_jpn_string(json_data) + "\n" +
+                                               "*" + self.build_tag_section(json_data) + "*",
+                                   colour=self.pm.clientWrap.get_color(self.name))
+                em.set_image(url=json_data['gmetadata'][0]['thumb'])
+                await self.pm.client.send_message(message_object.channel, "", embed=em)
 
     @staticmethod
     def build_payload(gallery_id, gallery_token):
