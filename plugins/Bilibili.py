@@ -10,7 +10,7 @@ from PIL import Image
 # API-URL and type of headers sent by POST-request
 bilibili_api_url = "http://vocadb.net/api/pvs?pvUrl=http://acg.tv/"
 json_request_headers = "{'content-type': 'application/json'}"
-vocadb_api_url = "http://vocadb.net/api/songs/bypv?pvService=Bilibili&pvId="
+vocadb_api_url = "http://vocadb.net/api/songs/bypv?pvService=Bilibili&lang=English&pvId="
 
 
 class Plugin(object):
@@ -58,8 +58,12 @@ class Plugin(object):
                         vocadb_url += "\n**VocaDB (original):** <https://vocadb.net/S/" + str(
                             vocadb_data["originalVersionId"]) + ">"
 
-                    msg = "**Title:** " + vocadb_data["defaultName"]
-                    msg += "\n**Type:** " + vocadb_data["songType"]
+                    if vocadb_data["songType"] == "Original":
+                        song_type = ""
+                    else:
+                        song_type = " (" + vocadb_data["songType"] + ")"
+
+                    msg = "**Title:** " + vocadb_data["name"] + song_type
                     msg += "\n**Author:** " + vocadb_data["artistString"]
                     msg += "\n**Date:** " + dateutil.parser.parse(vocadb_data["createDate"]).strftime("%B %d, %Y")
                     msg += vocadb_url
