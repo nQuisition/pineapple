@@ -1,15 +1,16 @@
-import pprint
 import requests
 import re
-import discord
 from util import Events
 import os
 import urllib
+import datetime
+import dateutil.parser
 from PIL import Image
 
 # API-URL and type of headers sent by POST-request
-api_url = "http://vocadb.net/api/pvs?pvUrl=http://acg.tv/"
+bilibili_api_url = "http://vocadb.net/api/pvs?pvUrl=http://acg.tv/"
 json_request_headers = "{'content-type': 'application/json'}"
+vocadb_api_url = "http://vocadb.net/api/songs/bypv?pvService=Bilibili&pvId="
 
 
 class Plugin(object):
@@ -31,20 +32,40 @@ class Plugin(object):
 
         for url_data in regex_result_list_unique:
             video_id = url_data[6]
-            request_data = requests.get(api_url + video_id)
+            bilibili_api_response = requests.get(bilibili_api_url + video_id)
 
-            if request_data.status_code is 200:
-                json_data = request_data.json()
+            if bilibili_api_response.status_code is 200:
+                json_data = bilibili_api_response.json()
 
                 # Fetch and process thumbnail
                 filename = await self.download_thumbnail(json_data)
                 await self.resize_thumbnail(filename)
 
-                # Send raw bilibili info
-                await self.pm.client.send_file(message_object.channel, filename,
-                                               content="**Title:** " + json_data["name"] +
-                                                       "\n**Author:** " + json_data["author"] +
-                                                       "\n**Date:** " + json_data["publishDate"])
+                vocadb_api_response = requests.get(vocadb_api_url + video_id[2:])
+
+                if vocadb_api_response.content is b'null':
+                    # Send raw bilibili info
+                    await self.pm.client.send_file(message_object.channel, filename,
+                                                   content="**Title:** " + json_data["name"] +
+                                                           "\n**Author:** " + json_data["author"] +
+                                                           "\n**Date:** " + dateutil.parser.parse(
+                                                       json_data["publishData"]).strftime("%B %d, %Y"))
+                else:
+                    vocadb_data = vocadb_api_response.json()
+
+                    vocadb_url = "\n**VocaDB:** <https://vocadb.net/S/" + str(vocadb_data["id"]) + ">"
+                    if "originalVersionId" in vocadb_data:
+                        vocadb_url += "\n**VocaDB (original):** <https://vocadb.net/S/" + str(
+                            vocadb_data["originalVersionId"]) + ">"
+
+                    msg = "**Title:** " + vocadb_data["defaultName"]
+                    msg += "\n**Type:** " + vocadb_data["songType"]
+                    msg += "\n**Author:** " + vocadb_data["artistString"]
+                    msg += "\n**Date:** " + dateutil.parser.parse(vocadb_data["createDate"]).strftime("%B %d, %Y")
+                    msg += vocadb_url
+
+                    await self.pm.client.send_file(message_object.channel, filename,
+                                                   content=msg)
 
                 # Cleanup
                 os.remove(filename)
