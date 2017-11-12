@@ -43,13 +43,13 @@ class Plugin(object):
 
                 vocadb_api_response = requests.get(vocadb_api_url + video_id[2:])
 
-                if vocadb_api_response.content is b'null':
+                if vocadb_api_response.content == b'null':
                     # Send raw bilibili info
                     await self.pm.client.send_file(message_object.channel, filename,
                                                    content="**Title:** " + json_data["name"] +
                                                            "\n**Author:** " + json_data["author"] +
                                                            "\n**Date:** " + dateutil.parser.parse(
-                                                       json_data["publishData"]).strftime("%B %d, %Y"))
+                                                       json_data["publishDate"]).strftime("%B %d, %Y"))
                 else:
                     vocadb_data = vocadb_api_response.json()
 
