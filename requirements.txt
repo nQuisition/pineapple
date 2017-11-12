@@ -1,8 +1,5 @@
-tornado
-feedparser
 aiohttp==1.0.5
 discord.py==0.16.6
 requests==2.12.4
-Pillow==4.0.0
 PyNaCl==1.1.1
 youtube_dl==2017.3.20
