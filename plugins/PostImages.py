@@ -26,7 +26,8 @@ class Plugin(object):
                 Events.Command("smash", desc="Lemme smash."),
                 Events.Command("dab", desc="Dab like a pro"),
                 Events.Command("thanks", desc="Thank someone"),
-                Events.Command("omg", desc="Oh my gosh. XD Lolz.")]
+                Events.Command("omg", desc="Oh my gosh. XD Lolz."),
+                Events.Command("spice", desc="SMH Lens....")]
 
     async def handle_command(self, message_object, command, args):
         if command == "pat":
@@ -65,6 +66,8 @@ class Plugin(object):
             await self.post_image(message_object, "thanks")
         if command == "omg":
             await self.post_image(message_object, "omg")
+        if command == "spice":
+            await self.post_image(message_object, "spice")
 
     async def post_image_to_user(self, message_object, user, type, message):
         files = glob.glob(os.getcwd() + "/images/" + type + "/" + '*.gif')
