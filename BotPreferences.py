@@ -100,3 +100,45 @@ class BotPreferences(object):
             print("Can't find section " + e.section)
         except NoOptionError as e:
             print("Can't find option " + e.option + ", " + e.section)
+
+    def get_database_config_value(self, server_id, config_key):
+        """
+        Method that can be used to get a server specific config value from the
+        database.
+        :param server_id: The server ID
+        :param config_key: The config key
+        :return: The found config value, None if no config entry was found.
+        """
+        # Connect to SQLite file for server in cache/SERVERID.sqlite
+        con = sqlite3.connect("cache/" + server_id + ".sqlite",
+                              detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
+        with con:
+            cur = con.cursor()
+            cur.execute(
+                "CREATE TABLE IF NOT EXISTS server_config(Key TEXT PRIMARY KEY UNIQUE, Value TEXT)")
+            cur.execute("SELECT * FROM server_config WHERE Key = '" + config_key + "'")
+            rows = cur.fetchall()
+            if len(rows) == 1:
+                return rows[0][1]
+            else:
+                return None
+
+    def set_database_config_value(self, server_id, config_key, config_value):
+        """
+        Method that can be used to set a server specific config value in the
+        database.
+        :param server_id: The server ID
+        :param config_key: The config key
+        :param config_value: The config value to set
+        """
+        # Connect to SQLite file for server in cache/SERVERID.sqlite
+        con = sqlite3.connect("cache/" + server_id + ".sqlite",
+                              detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
+        with con:
+            cur = con.cursor()
+            cur.execute(
+                "CREATE TABLE IF NOT EXISTS server_config(Key TEXT PRIMARY KEY UNIQUE, Value TEXT)")
+            query = "INSERT OR REPLACE INTO server_config(Key, Value) values('{0}', '{1}')".format(str(config_key),
+                                                                                           str(config_value))
+            cur.execute(query)
+            con.commit()
