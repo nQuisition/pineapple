@@ -14,9 +14,14 @@ class Plugin(object):
 
     @staticmethod
     def register_events():
-        return [Events.UserJoin("welcome_msg"), Events.UserLeave("leave_msg"),
-                Events.Command("togglewelcome", rank=Ranks.Mod),
-                Events.Command("setdefaultchannel", rank=Ranks.Mod),
+        return [Events.UserJoin("welcome_msg"),
+                Events.UserLeave("leave_msg"),
+                Events.Command("togglewelcome", rank=Ranks.Mod, desc="Toggle the join/leave messages"),
+                Events.Command("setdefaultchannel", rank=Ranks.Mod,
+                               desc="Set the channel to use when posting join/leave messages"),
+                Events.Command("setwelcomemessage", rank=Ranks.Mod,
+                               desc="Set the message to display when a user joins the discord server. "
+                                    "Insert {0} where you want to mention the new user"),
                 Events.Command("ban", rank=Ranks.Mod),
                 Events.Command("shadowban", rank=Ranks.Mod)]
 
@@ -33,10 +38,16 @@ class Plugin(object):
             default_channel = self.pm.botPreferences.get_database_config_value(member.server.id, "default_channel")
             if default_channel is not None:
                 channel = discord.utils.find(lambda m: m.id == default_channel, member.server.channels)
+
+                welcome_message = self.pm.botPreferences.get_database_config_value(member.server.id,
+                                                                                   "welcome_message")
+                if welcome_message is None:
+                    welcome_message = "Welcome to the server {0}".format(member.mention)
+                else:
+                    welcome_message = welcome_message.format(member.mention)
+
                 await self.pm.client.send_file(channel, file,
-                                               content="Welcome to the server " + member.mention +
-                                                       " Please read <#234865303442423814> and tell an admin/mod which "
-                                                       "role you would like")
+                                               content=welcome_message)
 
     async def handle_member_leave(self, member):
         enabled = await self.get_welcome_messages_config(member.server.id)
@@ -65,29 +76,37 @@ class Plugin(object):
         if command == "setdefaultchannel":
             await self.set_default_channel(message_object)
 
+        if command == "setwelcomemessage":
+            await self.set_welcome_message(message_object, args[1])
+
     async def toggle_welcome(self, message_object):
         logging.info("Welcome/leave messages toggled by "
                      + message_object.author.name + "#" + str(message_object.author.discriminator))
-
         await self.pm.client.delete_message(message_object)
 
         enabled = await self.get_welcome_messages_config(message_object.server.id)
         self.pm.botPreferences.set_database_config_value(message_object.server.id,
                                                          "welcome_messages",
                                                          not enabled)
-        await self.pm.client.send_message(message_object.channel, "Welcome messages: **" + str(
-            self.pm.botPreferences.get_database_config_value(message_object.server.id, "welcome_messages")) + "**")
+
+        await self.pm.client.send_message(message_object.channel,
+                                          "Welcome/leave messages: **{0}**".format(str(
+                                              self.pm.botPreferences.get_database_config_value(message_object.server.id,
+                                                                                               "welcome_messages"))))
 
     async def shadow_ban(self, message_object):
         logging.info("Shadow ban on " + message_object.mentions[0].display_name + " executed by "
                      + message_object.author.name + "#" + str(message_object.author.discriminator))
+
         cache_enabled = await self.get_welcome_messages_config(message_object.server.id)
         self.pm.botPreferences.set_database_config_value(message_object.server.id,
                                                          "welcome_messages",
                                                          False)
+
         await self.pm.client.ban(message_object.mentions[0])
         await self.pm.client.delete_message(message_object)
         await asyncio.sleep(5)
+
         self.pm.botPreferences.set_database_config_value(message_object.server.id,
                                                          "welcome_messages",
                                                          cache_enabled)
@@ -98,9 +117,9 @@ class Plugin(object):
         files.extend(glob.glob(os.getcwd() + "/images/" + "leave" + "/" + '*.jpg'))
         file = random.choice(files)
         await asyncio.sleep(1)
+
         msg1 = await self.pm.client.send_file(message_object.channel, file,
                                               content="Bye " + message_object.mentions[0].display_name)
-
         await asyncio.sleep(10)
         try:
             await self.pm.client.delete_message(message_object)
@@ -117,6 +136,13 @@ class Plugin(object):
                                                          message_object.channel.id)
         await self.pm.client.send_message(message_object.channel,
                                           "Set default channel to: #" + message_object.channel.name)
+
+    async def set_welcome_message(self, message_object, text):
+        self.pm.botPreferences.set_database_config_value(message_object.server.id,
+                                                         "welcome_message",
+                                                         text)
+        await self.pm.client.send_message(message_object.channel,
+                                          "Set welcome message to: " + text)
 
     async def get_welcome_messages_config(self, server_id):
         db_enabled = self.pm.botPreferences.get_database_config_value(server_id, "welcome_messages")
