@@ -2,6 +2,7 @@ from util import Events
 import requests
 import discord
 
+
 class Plugin(object):
     def __init__(self, pm):
         self.pm = pm
@@ -17,7 +18,8 @@ class Plugin(object):
 
     async def song(self, message_object, args):
         request_url = "https://vocadb.net/api/songs?query=" + args[1] + \
-                      "&sort=FavoritedTimes&maxResults=2&fields=PVs&lang=Romaji&preferAccurateMatches=true&nameMatchMode=Auto"
+                      "&sort=FavoritedTimes&maxResults=2&fields=PVs&lang=Romaji" \
+                      "&preferAccurateMatches=true&nameMatchMode=Auto"
         response = requests.get(request_url)
         try:
             if len(response.json()["items"]) is 0:
@@ -35,7 +37,8 @@ class Plugin(object):
         for result in results["items"]:
             msg += "**Title:** " + result["name"] + "\n"
             msg += "**Artist:** " + result["artistString"] + "\n"
-            msg += "**Language:** " + result["defaultNameLanguage"]
+            msg += "**Language:** " + result["defaultNameLanguage"] + "\n"
+            msg += "**VocaDB:** <https://vocadb.net/S/" + str(result["id"]) + ">"
 
             for pv in result["pvs"][0:2]:
                 msg += "\n"
