@@ -1,10 +1,11 @@
-import pprint
 import requests
 import re
 import discord
 from util import Events
+import html
 
-# API-URL and type of headers sent by POST-request
+# TODO: (feature) also get the Information about single pages
+#  API-URL and type of headers sent by POST-request
 api_url = "https://api.e-hentai.org/api.php"
 json_request_headers = "{'content-type': 'application/json'}"
 
@@ -31,7 +32,7 @@ class Plugin(object):
                     if element not in seenset:
                         seenset_add(element)
                         yield element
-                except TypeError as e:
+                except TypeError:
                     if element not in seenlist:
                         seenlist_add(element)
                         yield element
@@ -42,7 +43,7 @@ class Plugin(object):
                     if k not in seenset:
                         seenset_add(k)
                         yield element
-                except TypeError as e:
+                except TypeError:
                     if k not in seenlist:
                         seenlist_add(k)
                         yield element
@@ -71,7 +72,7 @@ class Plugin(object):
             # create json from POST-response using requests built-in parser
             json_data = requests.post(api_url, self.build_payload(gallery_id, gallery_token),
                                       json_request_headers).json()
-            # pprint.pprint(json_data)
+
             if 'gmetadata' in json_data and json_data['gmetadata'][0].get('error') is None:
                 em = discord.Embed(description=self.build_title_string(json_data) + "\n" +
                                                self.build_title_jpn_string(json_data) + "\n" +
@@ -80,18 +81,19 @@ class Plugin(object):
                 em.set_image(url=json_data['gmetadata'][0]['thumb'])
                 await self.pm.client.send_message(message_object.channel, "", embed=em)
 
+    # TODO: (performance) send only a single request for up to 25 entries
     @staticmethod
     def build_payload(gallery_id, gallery_token):
         return '{"method": "gdata","gidlist": [[' + gallery_id + ',"' + gallery_token + '"]],"namespace": 1}'
 
     @staticmethod
     def build_title_string(json_data):
-        return '**Title:** ' + pprint.pformat(json_data['gmetadata'][0]['title'])
+        return '**Title:** ' + (html.unescape(json_data['gmetadata'][0]['title']))
 
     @staticmethod
     def build_title_jpn_string(json_data):
         if json_data['gmetadata'][0]['title_jpn']:
-            return '**Japanese Title:** ' + pprint.pformat(json_data['gmetadata'][0]['title_jpn'])
+            return '**Japanese Title:** ' + (html.unescape(json_data['gmetadata'][0]['title_jpn']))
         return ""
 
     # TODO: (core) Make the taglist look pretty when printed
