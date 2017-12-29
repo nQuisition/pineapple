@@ -60,8 +60,12 @@ class Plugin(object):
 
     async def osu_mode(self, message_object, username, mode):
         try:
-            if len(username) is 0 or username is "":
-                username = await self.get_osu_name(message_object)
+            if len(message_object.mentions) is 1:
+                username = await self.get_osu_name(message_object, message_object.mentions[0])
+                if username is None:
+                    return
+            elif len(username) is 0 or username is "":
+                username = await self.get_osu_name(message_object, message_object.author)
                 if username is None:
                     return
             await self.get_badge(message_object.channel, username, mode)
@@ -89,7 +93,8 @@ class Plugin(object):
         try:
             im = Image.open(filename)
             im.close()
-            await self.pm.client.send_file(channel, filename)
+            await self.pm.client.send_file(channel, fp=filename,
+                                           content="<https://osu.ppy.sh/u/" + username + ">")
         except IOError:
             await self.pm.clientWrap.send_message(self.name, channel, "No stats found for this game mode.")
         os.remove(filename)
@@ -315,9 +320,10 @@ class Plugin(object):
         except:
             traceback.print_exc()
 
-    async def get_osu_name(self, msg):
+    async def get_osu_name(self, msg, user):
         """
         Fetches the osu! username for a specific discord user from the database
+        :param user: The user to get the osu name from
         :param msg: Message containing the command
         :return: osu! username as str
         """
@@ -331,14 +337,14 @@ class Plugin(object):
             cur = con.cursor()
             cur.execute(
                 "CREATE TABLE IF NOT EXISTS osu_users(Id TEXT PRIMARY KEY, Username TEXT)")
-            cur.execute("SELECT Username FROM osu_users WHERE Id = ?", (msg.author.id,))
+            cur.execute("SELECT Username FROM osu_users WHERE Id = ?", (user.id,))
             rows = cur.fetchall()
 
             for row in rows:
                 return row[0]
 
             await self.pm.clientWrap.send_message(self.name, msg.channel,
-                                                  "No username set for " + msg.author.display_name +
-                                                  ". You can set one by using the `"
+                                                  "No username set for " + user.display_name +
+                                                  ". That user can set one by using the `"
                                                   + self.pm.botPreferences.commandPrefix + "setosu <osu name>` command")
             return None
