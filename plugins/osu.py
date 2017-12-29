@@ -11,6 +11,7 @@ from PIL import Image
 from tornado import ioloop, httpclient
 import asyncio
 
+
 # noinspection SpellCheckingInspection
 class Plugin(object):
     def __init__(self, pm):
@@ -290,7 +291,9 @@ class Plugin(object):
             except:
                 traceback.print_exc()
         else:
-            await self.delete_osu(user_id)
+            await self.delete_osu(message_object.server.id, user_id)
+            await self.pm.clientWrap.send_message(self.name, message_object.channel, "osu! username deleted for " +
+                                                  message_object.author.display_name)
 
     @staticmethod
     async def delete_osu(server_id, member_id):
@@ -336,5 +339,6 @@ class Plugin(object):
 
             await self.pm.clientWrap.send_message(self.name, msg.channel,
                                                   "No username set for " + msg.author.display_name +
-                                                  ". You can set one by using the `setosu <osu name>` command")
+                                                  ". You can set one by using the `"
+                                                  + self.pm.botPreferences.commandPrefix + "setosu <osu name>` command")
             return None
