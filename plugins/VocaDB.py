@@ -40,7 +40,7 @@ class Plugin(object):
             msg += "**Language:** " + result["defaultNameLanguage"] + "\n"
             msg += "**VocaDB:** <https://vocadb.net/S/" + str(result["id"]) + ">"
 
-            for pv in result["pvs"][0:2]:
+            for pv in result["pvs"]:
                 msg += "\n"
                 if not pv_posted and pv["service"] == "Youtube":
                     msg += pv["url"]
