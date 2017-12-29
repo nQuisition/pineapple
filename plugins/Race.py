@@ -8,6 +8,7 @@ class Plugin(object):
     def __init__(self, pm):
         self.pm = pm
         self.race = self.Race()
+        self.name = "Race"
 
     class Race(object):
         class Participant(object):
@@ -53,27 +54,29 @@ class Plugin(object):
         self.race = self.Race()
         self.race.participants = list()
         self.race.finish_pos = 1
-        race_start = await self.pm.client.send_message(message_object.channel,
-                                                       message_object.author.display_name + " has started a race! \n"
-                                                                                    "Type !joinrace [emoji] to "
-                                                                                    "join the race (10s)")
+        race_start = await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                                           message_object.author.display_name +
+                                                           " has started a race! \n"
+                                                           "Type " + self.pm.botPreferences.commandPrefix +
+                                                           "joinrace [emoji] to "
+                                                           "join the race (20s)")
         # Give users time to join
         self.race.open = True
-        await asyncio.sleep(10)
+        await asyncio.sleep(20)
         await self.pm.client.delete_message(message_object)
         await self.pm.client.delete_message(race_start)
         self.race.open = False
 
         # If enough participants, start the race
         if len(self.race.participants) > 0:
-            race_status = ":checkered_flag: :checkered_flag: :checkered_flag:\n"
+            race_status = ":checkered_flag: :checkered_flag: :checkered_flag:\n\n"
             for p in self.race.participants:
                 steps = round(p.progress / 5) - 1
                 left = 20 - steps - 1
                 race_status += "`" + p.name[:15] + self.repeat("_", 15 - len(p.name)) + "` | " + \
                                self.repeat("\_", steps) + p.emoji + self.repeat("\_", left) + \
                                " (" + str(p.progress) + ") \n"
-            race_status += ":checkered_flag: :checkered_flag: :checkered_flag:"
+            race_status += "\n:checkered_flag: :checkered_flag: :checkered_flag:"
             race_message = await self.pm.client.send_message(message_object.channel, race_status)
 
             # Run the race until every player has finished
@@ -94,7 +97,7 @@ class Plugin(object):
                         player_finished = True
 
                 # Update progress message
-                race_status = ":checkered_flag: :checkered_flag: :checkered_flag:\n"
+                race_status = ":checkered_flag: :checkered_flag: :checkered_flag:\n\n"
                 for p in self.race.participants:
                     steps = round(p.progress / 5) - 1
                     left = 20 - steps - 1
@@ -103,7 +106,7 @@ class Plugin(object):
                                    self.repeat("\_", steps) + p.emoji + self.repeat("\_", left) + \
                                    " (" + str(p.progress) + ") \n"
 
-                race_status += ":checkered_flag: :checkered_flag: :checkered_flag:"
+                race_status += "\n:checkered_flag: :checkered_flag: :checkered_flag:"
                 race_message = await self.pm.client.edit_message(race_message, race_status)
 
                 # Finishing state update
@@ -114,36 +117,33 @@ class Plugin(object):
                 await asyncio.sleep(1)
 
             # Game ended. Display rankings
-            finish_text = "Race ended! Ranking:\n"
+            finish_text = "Race ended!\nRanking:\n"
             for pl in sorted(self.race.participants, key=lambda part: part.position):
                 finish_text += pl.name + " (" + pl.emoji + "): " + str(pl.position) + "\n"
 
-            await self.pm.client.send_message(message_object.channel, finish_text)
+            await self.pm.clientWrap.send_message(self.name, message_object.channel, finish_text)
 
     async def join_race(self, message_object: discord.Message, args):
         if self.race.open:
             if args[1] != "":
-                for e in self.pm.client.get_all_emojis():
-                    print(e)
                 await self.user_join_as_emoji(message_object, args[1])
             else:
                 emojis = [":dog:", ":cat:", ":mouse:", ":hamster:", ":rabbit:", ":bear:", ":panda_face:", ":koala:",
                           ":snail:", ":bee:", ":elephant:", ":gorilla:", ":squid:"]
                 await self.user_join_as_emoji(message_object, random.choice(emojis))
         else:
-            not_running = await self.pm.client.send_message(message_object.channel,
-                                                            "There is no active or open race at this moment! "
-                                                            "Please start one with '!race'")
+            not_running = await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                                                "There is no active or open race at this moment! "
+                                                                "Please start one with '!race'")
             await asyncio.sleep(3)
             await self.pm.client.delete_message(not_running)
 
     async def user_join_as_emoji(self, message_object, emoji):
         self.race.participants.append(self.Race.Participant(message_object.author.display_name, emoji))
 
-        await self.pm.client.send_message(message_object.channel,
-                                          message_object.author.display_name + " has joined the race as " +
-                                          emoji)
-        await asyncio.sleep(3)
+        await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                              message_object.author.display_name + " has joined the race as " +
+                                              emoji)
         await self.pm.client.delete_message(message_object)
 
     @staticmethod
