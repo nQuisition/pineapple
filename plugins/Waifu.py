@@ -41,7 +41,7 @@ class Plugin(object):
             return
 
         await self.pm.client.send_message(message_object.channel,
-                                          "Random Waifu from MyWaifuList.moe: **{}** from **{}**".format(waifu["name"], waifu["series"]["name"]),
+                                          "Your waifu is **{}** from **{}**".format(waifu["name"], waifu["series"]["name"]),
                                           embed = embed)
 
     async def waifu_error_message(self, message_object):
