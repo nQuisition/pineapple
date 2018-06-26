@@ -47,7 +47,7 @@ class Plugin(object):
 
     async def info(self, message_object):
         await self.pm.clientWrap.send_message(self.name, message_object.channel,
-                                              'Info about the bot will be here soon(tm)')
+                                              '**Pineapple**\nSource code available at: https://github.com/Dynista/pineapple')
 
     async def hello(self, message_object):
         msg = 'Hello {0.author.mention}'.format(message_object)
