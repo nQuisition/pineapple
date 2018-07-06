@@ -13,7 +13,7 @@ class Plugin(object):
         if command == "rate":
             await self.rate(message_object, args[1])
 
-    async def rate(self, message_object, user):
+    async def rate(self, message_object, rated):
         '''
         # totally not rigged or something
         def isDevMentioned():
@@ -27,5 +27,10 @@ class Plugin(object):
                 '''
         number = round(random.uniform(1, 100), 2)
         print(message_object.mentions)
-        await self.pm.client.send_message(message_object.channel,
-                                          "I would rate " + "**" + user + "** " + str(number) + "/100")
+        if (rated):
+            await self.pm.client.send_message(message_object.channel,
+                                            "I would rate " + "**" + rated + "** " + str(number) + "/100")
+        else:
+            await self.pm.client.send_message(message_object.channel,
+                                            "I rate this " + str(number) + "/100")
+

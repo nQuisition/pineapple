@@ -3,6 +3,8 @@ cache/*
 log.sqlite
 #temp
 plugins/temp/*
+BotPreferences.py
+config.ini.default
 
 # Created by https://www.gitignore.io/api/python
 .idea/
