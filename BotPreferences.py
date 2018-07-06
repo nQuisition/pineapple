@@ -12,13 +12,13 @@ class BotPreferences(object):
 
     # Prefix for commands, this can be changed to prevent issues with other bots in a server.
     # Multiple characters are supported
-    commandPrefix = "p!"
+    commandPrefix = "!"
 
     # Bot nickname, the bot will use this nickname on startup. Can be temporarily changed with BotNick.py plugin
-    nickName = "Pen Pineapple Apple Bot"
+    nickName = "PineappleBot"
 
     # Discord API OAuth token, used to login. Needs to be created by the bot owner.
-    token = "MjY1Mjg1MTk2MzczMjk1MTA0.DiB0Qw._QZPjZ0uQMKnoRmgOyAtS65LM1Q"
+    token = ""
 
     # Permissions list, each permission level will contain the names of groups that are assigned to it.
     # Ex: Admin: Admin, Owner / Member: Verified / Default: @everyone
