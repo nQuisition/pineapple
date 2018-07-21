@@ -1,7 +1,7 @@
 from util import Events
 from collections import defaultdict
 import arrow
-
+# -*- coding: future_fstrings -*-
 
 class Plugin(object):
     def __init__(self, pm):
@@ -22,10 +22,10 @@ class Plugin(object):
     async def reset(self, message_object):
         delta = self.db[message_object.channel].humanize(only_distance = True)
         self.db[message_object.channel] = arrow.utcnow()
-        await self.pm.clientWrap.send_message(self.name, message_object.channel, f"Timer reset after {delta}.")
+        await self.pm.clientWrap.send_message(self.name, message_object.channel, "Timer reset after {}.".format(delta))
         await self.pm.client.delete_message(message_object)
 
     async def timer(self, message_object):
         delta = self.db[message_object.channel].humanize(only_distance = True)
-        await self.pm.clientWrap.send_message(name, message_object.channel, f"Timer has been running for {delta}.")
+        await self.pm.clientWrap.send_message(self.name, message_object.channel, "Timer has been running for {}.".format(delta))
         await self.pm.client.delete_message(message_object)
