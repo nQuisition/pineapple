@@ -6,7 +6,7 @@ import re
 class Plugin(object):
     def __init__(self, pm):
         self.pm = pm
-        self.match = re.compile("\-?\d+\.?\d+")
+        self.match = re.compile("\-?\d*\.?\d+")
 
     @staticmethod
     def register_events():
@@ -25,16 +25,12 @@ class Plugin(object):
 
     async def ftoc(self, message_object, ftemp):
         ftemp = float(self.match.search(ftemp).group(0))
-        print(ftemp)
         ctemp = (ftemp - 32) * (5/9) 
-        print(ctemp)
         text = "{:.2f}°F is **{:.2f}°C**".format(ftemp, ctemp)
         await self.pm.client.send_message(message_object.channel, text)
     
     async def ctof(self, message_object, ctemp):
         ctemp = float(self.match.search(ctemp).group(0))
-        print(ctemp)
         ftemp = (ctemp * (9/5) ) + 32
-        print(ftemp)
         text = "{:.2f}°C is **{:.2f}°F**".format(ctemp, ftemp)
         await self.pm.client.send_message(message_object.channel, text)
