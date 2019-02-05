@@ -1,11 +1,11 @@
 from util import Events
-from util.Ranks import Ranks
 import re
 
 
 class Plugin(object):
     def __init__(self, pm):
         self.pm = pm
+        self.name = "Temperature"
         self.match = re.compile("\-?\d*\.?\d+")
 
     @staticmethod
@@ -24,13 +24,21 @@ class Plugin(object):
             await self.ctof(message_object, args[1])
 
     async def ftoc(self, message_object, ftemp):
-        ftemp = float(self.match.search(ftemp).group(0))
-        ctemp = (ftemp - 32) * (5/9) 
-        text = "{:.2f}°F is **{:.2f}°C**".format(ftemp, ctemp)
-        await self.pm.client.send_message(message_object.channel, text)
+        try:
+            ftemp = float(self.match.search(ftemp).group(0))
+            ctemp = (ftemp - 32) * (5/9)
+            text = "{:.2f}°F is **{:.2f}°C**".format(ftemp, ctemp)
+            await self.pm.clientWrap.send_message(self.name, message_object.channel, text)
+        except:
+            await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                                  "Please use a valid number to convert.")
     
     async def ctof(self, message_object, ctemp):
-        ctemp = float(self.match.search(ctemp).group(0))
-        ftemp = (ctemp * (9/5) ) + 32
-        text = "{:.2f}°C is **{:.2f}°F**".format(ctemp, ftemp)
-        await self.pm.client.send_message(message_object.channel, text)
+        try:
+            ctemp = float(self.match.search(ctemp).group(0))
+            ftemp = (ctemp * (9/5)) + 32
+            text = "{:.2f}°C is **{:.2f}°F**".format(ctemp, ftemp)
+            await self.pm.clientWrap.send_message(self.name, message_object.channel, text)
+        except:
+            await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                                  "Please use a valid number to convert.")

@@ -1,6 +1,5 @@
 from util import Events
 import requests
-import discord
 
 
 class Plugin(object):

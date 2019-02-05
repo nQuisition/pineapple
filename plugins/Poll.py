@@ -6,6 +6,7 @@ from discord import Emoji
 class Plugin(object):
     def __init__(self, pm):
         self.pm = pm
+        self.name = "Poll"
 
     @staticmethod
     def register_events():
@@ -18,7 +19,6 @@ class Plugin(object):
     async def poll(self, message_object, prompt):
         if prompt.strip() is "":
             prompt = "Yay or Nay?"
-        poll_msg = await self.pm.client.send_message(
-            message_object.channel, prompt)
+        poll_msg = await self.pm.clientWrap.send_message(self.name, message_object.channel, "**Poll:**\n" + prompt)
         await self.pm.client.add_reaction(poll_msg, '\U00002714')
         await self.pm.client.add_reaction(poll_msg, '\U00002716')

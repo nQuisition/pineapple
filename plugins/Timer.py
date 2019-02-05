@@ -1,7 +1,7 @@
 from util import Events
 from collections import defaultdict
 import arrow
-# -*- coding: future_fstrings -*-
+
 
 class Plugin(object):
     def __init__(self, pm):

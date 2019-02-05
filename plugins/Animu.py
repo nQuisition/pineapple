@@ -1,12 +1,12 @@
 from util import Events
-from xml.etree import ElementTree
-import aiohttp
-import html
+import requests
+import discord
 
 
 class Plugin(object):
     def __init__(self, pm):
         self.pm = pm
+        self.name = "Animu"
         self.username = self.pm.botPreferences.get_config_value("MAL", "username")
         self.password = self.pm.botPreferences.get_config_value("MAL", "password")
 
@@ -20,20 +20,15 @@ class Plugin(object):
         if command == "manga":
             await self.mal_search(message_object, args, "manga")
 
-    async def get_xml(self, category, name):
+    async def get_json(self, category, name):
         """
         Queries the MAL search API to find a manga/anime based on a name
         :param category: String, "manga" or "anime"
         :param name: Search query
         :return: XML Data
         """
-        auth = aiohttp.BasicAuth(login=self.username, password=self.password)
-        url = 'https://myanimelist.net/api/' + category + '/search.xml'
-        params = {'q': name}
-        with aiohttp.ClientSession(auth=auth) as session:
-            async with session.get(url, params=params) as response:
-                data = await response.text()
-                return data
+        url = 'https://api.jikan.moe/v3/search/' + category + '?q=' + name
+        return requests.get(url).json()
 
     async def mal_search(self, message_object, args, category):
         """
@@ -42,19 +37,19 @@ class Plugin(object):
         :param args: List of words in the command
         :param category: Type of search
         """
-        data = await self.get_xml(category, ' '.join(args[1:]))
-        if data == '':
-            await self.pm.client.send_message(message_object.channel, "I didn't find anything :cry: ...")
+        data = await self.get_json(category, ' '.join(args[1:]))
+        if 'error' in data:
+            await self.pm.client.send_message(message_object.channel, "Error occurred while searching.")
             return
 
-        root = ElementTree.fromstring(data)
+        root = data['results']
         if len(root) == 0:
-            await self.pm.client.send_message(message_object.channel, "Sorry, I found nothing :cry:.")
+            await self.pm.client.send_message(message_object.channel, "No results.")
         elif len(root) == 1:
             entry = root[0]
         else:
             msg = "**Please choose one by giving its number.**\n"
-            msg += "\n".join(['{} - {}'.format(n + 1, entry[1].text) for n, entry in enumerate(root) if n < 10])
+            msg += "\n".join(['{} - {}'.format(n + 1, entry['title']) for n, entry in enumerate(root) if n < 10])
 
             question = await self.pm.client.send_message(message_object.channel, msg)
 
@@ -73,23 +68,22 @@ class Plugin(object):
             entry = root[int(resp.content) - 1]
 
         switcher = [
-            'english',
             'score',
             'type',
             'episodes',
             'volumes',
             'chapters',
-            'status',
             'start_date',
             'end_date',
             'synopsis'
         ]
 
-        msg = '\n**{}**\n\n'.format(entry.find('title').text)
+        msg = '\n**{}**\n\n'.format(entry['title'])
         for k in switcher:
-            spec = entry.find(k)
-            if spec is not None and spec.text is not None:
-                msg += "**{}** {}\n".format(k.capitalize() + ":", html.unescape(spec.text.replace('<br />', '')))
-        msg += "http://myanimelist.net/{}/{}".format(category, entry.find('id').text)
+            if k in entry and entry[k] is not None:
+                msg += "**{}**: {}\n".format(k.capitalize(), entry[k])
+        msg += entry['url']
 
-        await self.pm.client.send_message(message_object.channel, msg)
+        em = discord.Embed(description=msg, colour=self.pm.clientWrap.get_color(self.name))
+        em.set_image(url=entry['image_url'])
+        await self.pm.client.send_message(message_object.channel, embed=em)

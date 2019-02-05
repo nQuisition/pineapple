@@ -52,16 +52,10 @@ class Plugin(object):
     async def handle_member_leave(self, member):
         enabled = await self.get_welcome_messages_config(member.server.id)
         if enabled:
-            files = glob.glob(os.getcwd() + "/images/" + "leave" + "/" + '*.gif')
-            files.extend(glob.glob(os.getcwd() + "/images/" + "leave" + "/" + '*.png'))
-            files.extend(glob.glob(os.getcwd() + "/images/" + "leave" + "/" + '*.jpg'))
-            file = random.choice(files)
-            await asyncio.sleep(1)
-
             default_channel = self.pm.botPreferences.get_database_config_value(member.server.id, "default_channel")
             if default_channel is not None:
                 channel = discord.utils.find(lambda m: m.id == default_channel, member.server.channels)
-                await self.pm.client.send_file(channel, file, content="Bye " + member.display_name)
+                await self.pm.client.send_file(channel, content="Bye " + member.display_name)
 
     async def handle_command(self, message_object, command, args):
         if command == "togglewelcome":
