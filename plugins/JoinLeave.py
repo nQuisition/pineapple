@@ -55,7 +55,7 @@ class Plugin(object):
             default_channel = self.pm.botPreferences.get_database_config_value(member.server.id, "default_channel")
             if default_channel is not None:
                 channel = discord.utils.find(lambda m: m.id == default_channel, member.server.channels)
-                await self.pm.client.send_file(channel, content="Bye " + member.display_name)
+                self.pm.client.send_message(channel, "Bye " + member.display_name)
 
     async def handle_command(self, message_object, command, args):
         if command == "togglewelcome":
