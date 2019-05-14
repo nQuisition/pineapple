@@ -82,13 +82,12 @@ class Plugin(object):
                                                   "Please specify a target to " + type + ".")
             return
 
-        await self.pm.client.send_message(message_object.channel,
-                                          "**" + user + "** " + message)
-        await self.pm.client.send_file(message_object.channel, file)
+        await self.pm.client.send_file(message_object.channel, file, content="**" + user + "** " + message)
 
     async def post_image(self, message_object, type):
         files = glob.glob(os.getcwd() + "/images/" + type + "/" + '*.gif')
         files.extend(glob.glob(os.getcwd() + "/images/" + type + "/" + '*.png'))
         files.extend(glob.glob(os.getcwd() + "/images/" + type + "/" + '*.jpg'))
         file = random.choice(files)
-        await self.pm.client.send_file(message_object.channel, file)
+        await self.pm.client.delete_message(message_object)
+        await self.pm.client.send_file(message_object.channel, file, content=message_object.author.mention)

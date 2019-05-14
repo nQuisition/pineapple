@@ -15,10 +15,10 @@ class BotPreferences(object):
     commandPrefix = "!"
 
     # Bot nickname, the bot will use this nickname on startup. Can be temporarily changed with BotNick.py plugin
-    nickName = "Pineapple"
+    nickName = "PineappleBot"
 
     # Discord API OAuth token, used to login. Needs to be created by the bot owner.
-    token = "DEFAULT_TOKEN"
+    token = ""
 
     # Permissions list, each permission level will contain the names of groups that are assigned to it.
     # Ex: Admin: Admin, Owner / Member: Verified / Default: @everyone

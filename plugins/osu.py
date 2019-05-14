@@ -30,7 +30,7 @@ class Plugin(object):
                 Events.Command("ctb", desc="Get the osu!catch the beat details for a user"),
                 Events.Command("taiko", desc="Get the osu!taiko details for a user"),
                 Events.Command("mania", desc="Get the osu!mania details for a user"),
-                Events.Command("leaderboard", desc="Get the server leaderboard for a mode (osu, ctb, taiko, mania)"),
+                # Events.Command("leaderboard", desc="Get the server leaderboard for a mode (osu, ctb, taiko, mania)"),
                 Events.Command("setosu", desc="Register your osu! username to your discord account. "
                                               "Will add you to the leaderboards"),
                 Events.Command("deleteosu", desc="Staff command to remove a user from the leaderboard")]
@@ -44,8 +44,8 @@ class Plugin(object):
             await self.osu_mode(message_object, args[1].strip(), 1)
         if command == "mania":
             await self.osu_mode(message_object, args[1].strip(), 3)
-        if command == "leaderboard":
-            await self.leaderboard(message_object, args[1].strip())
+        # if command == "leaderboard":
+        #     await self.leaderboard(message_object, args[1].strip())
         if command == "setosu":
             await self.set_osu(message_object, args[1])
         if command == "deleteosu":
