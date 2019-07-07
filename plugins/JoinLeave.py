@@ -11,6 +11,7 @@ import discord
 class Plugin(object):
     def __init__(self, pm):
         self.pm = pm
+        self.name = "JoinLeave"
 
     @staticmethod
     def register_events():
@@ -50,12 +51,13 @@ class Plugin(object):
                                                content=welcome_message)
 
     async def handle_member_leave(self, member):
-        enabled = await self.get_welcome_messages_config(member.server.id)
-        if enabled:
-            default_channel = self.pm.botPreferences.get_database_config_value(member.server.id, "default_channel")
-            if default_channel is not None:
-                channel = discord.utils.find(lambda m: m.id == default_channel, member.server.channels)
-                await self.pm.client.send_message(channel, member.display_name + " has left the server.")
+        channel = self.get_modlog_channel(member.server)
+        await self.pm.clientWrap.send_message(self.name, channel, member.display_name + " has left the server.")
+
+    def get_modlog_channel(self, server):
+        channel = self.pm.botPreferences.get_database_config_value(server.id, "modlog_channel")
+        if channel is not None:
+            return discord.utils.find(lambda m: m.id == channel, server.channels)
 
     async def handle_command(self, message_object, command, args):
         if command == "togglewelcome":
@@ -74,8 +76,7 @@ class Plugin(object):
             await self.set_welcome_message(message_object, args[1])
 
     async def toggle_welcome(self, message_object):
-        logging.info("Welcome/leave messages toggled by "
-                     + message_object.author.name + "#" + str(message_object.author.discriminator))
+        # Toggle welcome in config
         await self.pm.client.delete_message(message_object)
 
         enabled = await self.get_welcome_messages_config(message_object.server.id)
@@ -83,15 +84,27 @@ class Plugin(object):
                                                          "welcome_messages",
                                                          not enabled)
 
-        await self.pm.client.send_message(message_object.channel,
-                                          "Welcome/leave messages: **{0}**".format(str(
-                                              self.pm.botPreferences.get_database_config_value(message_object.server.id,
-                                                                                               "welcome_messages"))))
+        # Log action
+        log_message = "Welcome/leave messages set to " \
+                      + str(self.pm.botPreferences.get_database_config_value(message_object.server.id,
+                                                                             "welcome_messages")) \
+                      + " by " + message_object.author.name + "#" + str(message_object.author.discriminator)
+        logging.info(log_message)
+
+        mod_channel = self.get_modlog_channel(message_object.server)
+        await self.pm.clientWrap.send_message(self.name, mod_channel, log_message)
 
     async def shadow_ban(self, message_object):
-        logging.info("Shadow ban on " + message_object.mentions[0].display_name + " executed by "
-                     + message_object.author.name + "#" + str(message_object.author.discriminator))
+        # Log action
+        log_message = "Shadow ban on " + message_object.mentions[
+            0].display_name + " executed by " + message_object.author.name + "#" + str(
+            message_object.author.discriminator)
+        logging.info(log_message)
 
+        mod_channel = self.get_modlog_channel(message_object.server)
+        await self.pm.clientWrap.send_message(self.name, mod_channel, log_message)
+
+        # Execute ban silently
         cache_enabled = await self.get_welcome_messages_config(message_object.server.id)
         self.pm.botPreferences.set_database_config_value(message_object.server.id,
                                                          "welcome_messages",
