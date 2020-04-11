@@ -6,7 +6,7 @@ class Plugin(object):
     def __init__(self, pm):
         self.pm = pm
         self.name = "Temperature"
-        self.match = re.compile("\-?\d*\.?\d+")
+        self.match = re.compile(r"\-?\d*\.?\d+")
 
     @staticmethod
     def register_events():
