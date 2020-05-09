@@ -1,6 +1,7 @@
-from configparser import ConfigParser, NoSectionError, NoOptionError
 import os
 import sqlite3
+from configparser import ConfigParser, NoSectionError, NoOptionError
+
 from util import Ranks
 
 
@@ -41,8 +42,6 @@ class BotPreferences(object):
     def bind_roles(self, server_id):
         """
         This method will read all the roles from the server database and add them to their container
-        :param name: Permission level name in config file
-        :param container: Container list to add the groups to
         """
         self.servers[server_id] = None
 
@@ -50,7 +49,7 @@ class BotPreferences(object):
             os.makedirs("cache")
 
         # Connect to SQLite file for server in cache/SERVERID.sqlite
-        con = sqlite3.connect("cache/" + server_id + ".sqlite",
+        con = sqlite3.connect("cache/" + str(server_id) + ".sqlite",
                               detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
 
         with con:
@@ -97,7 +96,7 @@ class BotPreferences(object):
         try:
             return str(self.config.get(category, item))
         except NoSectionError as e:
-            print("Can't find section " + e.section)
+            print("Can't find section")
         except NoOptionError as e:
             print("Can't find option " + e.option + ", " + e.section)
 
@@ -110,7 +109,7 @@ class BotPreferences(object):
         :return: The found config value, None if no config entry was found.
         """
         # Connect to SQLite file for server in cache/SERVERID.sqlite
-        con = sqlite3.connect("cache/" + server_id + ".sqlite",
+        con = sqlite3.connect("cache/" + str(server_id) + ".sqlite",
                               detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
         with con:
             cur = con.cursor()
@@ -132,7 +131,7 @@ class BotPreferences(object):
         :param config_value: The config value to set
         """
         # Connect to SQLite file for server in cache/SERVERID.sqlite
-        con = sqlite3.connect("cache/" + server_id + ".sqlite",
+        con = sqlite3.connect("cache/" + str(server_id) + ".sqlite",
                               detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
         with con:
             cur = con.cursor()

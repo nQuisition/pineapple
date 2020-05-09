@@ -17,7 +17,7 @@ class Plugin(object):
         if command == "help":
             if "all" in args[1]:
                 await self.all_help(message_object)
-            elif args[1] is not "":
+            elif args[1] != "":
                 await self.show_help(message_object, args[1].lower())
             else:
                 await self.show_help_assigned(message_object)
@@ -32,7 +32,7 @@ class Plugin(object):
             if len(commands) > 0:
                 hstr += "\n**{0}**\n".format(name[:-3])
                 for c, d in commands:
-                    if d is not "":
+                    if d != "":
                         hstr += "`" + self.pm.botPreferences.commandPrefix + c + "`: \n_" + d + "_\n"
                     else:
                         hstr += "`" + self.pm.botPreferences.commandPrefix + c + "`\n"

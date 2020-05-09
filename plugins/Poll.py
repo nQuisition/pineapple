@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from util import Events
-from discord import Emoji
 
 
 class Plugin(object):
@@ -20,5 +19,5 @@ class Plugin(object):
         if prompt.strip() is "":
             prompt = "Yay or Nay?"
         poll_msg = await self.pm.clientWrap.send_message(self.name, message_object.channel, "**Poll:**\n" + prompt)
-        await self.pm.client.add_reaction(poll_msg, '\U00002714')
-        await self.pm.client.add_reaction(poll_msg, '\U00002716')
+        await poll_msg.add_reaction('\U00002714')
+        await poll_msg.add_reaction('\U00002716')

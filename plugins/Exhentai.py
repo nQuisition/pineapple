@@ -1,8 +1,10 @@
-import requests
-import re
-import discord
-from util import Events
 import html
+import re
+
+import discord
+import requests
+
+from util import Events
 
 # TODO: (feature) also get the Information about single pages
 #  API-URL and type of headers sent by POST-request
@@ -79,7 +81,7 @@ class Plugin(object):
                                                "*" + self.build_tag_section(json_data) + "*",
                                    colour=self.pm.clientWrap.get_color(self.name))
                 em.set_image(url=json_data['gmetadata'][0]['thumb'])
-                await self.pm.client.send_message(message_object.channel, "", embed=em)
+                await message_object.channel.send("", embed=em)
 
     # TODO: (performance) send only a single request for up to 25 entries
     @staticmethod

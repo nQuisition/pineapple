@@ -1,5 +1,6 @@
-from util import Events
 import discord
+
+from util import Events
 
 
 class Plugin(object):
@@ -30,4 +31,4 @@ class Plugin(object):
         em = discord.Embed(description="Avatar for " + user.display_name,
                            colour=self.pm.clientWrap.get_color(self.name))
         em.set_image(url=user.avatar_url)
-        await self.pm.client.send_message(message_object.channel, "", embed=em)
+        await message_object.channel.send(embed=em)

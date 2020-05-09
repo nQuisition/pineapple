@@ -1,15 +1,16 @@
-import requests
-import urllib.request
+import asyncio
+import json
+import operator
 import os
-from util import Events
 import sqlite3
 import traceback
-import operator
+import urllib.request
+
 import discord
-import json
-from PIL import Image
+import requests
 from tornado import ioloop, httpclient
-import asyncio
+
+from util import Events
 
 
 # noinspection SpellCheckingInspection
@@ -51,7 +52,7 @@ class Plugin(object):
         if command == "deleteosu":
             if len(message_object.mentions) is 1:
                 user_id = message_object.mentions[0].id
-                await self.delete_osu(message_object.server.id, user_id)
+                await self.delete_osu(message_object.guild.id, user_id)
                 await self.pm.clientWrap.send_message(self.name, message_object.channel, "osu! username deleted for " +
                                                       message_object.mentions[0].display_name)
             else:
@@ -91,10 +92,7 @@ class Plugin(object):
 
         # Check if image is valid
         try:
-            im = Image.open(filename)
-            im.close()
-            await self.pm.client.send_file(channel, fp=filename,
-                                           content="<https://osu.ppy.sh/u/" + username + ">")
+            await channel.send(file=discord.File(filename), content="<https://osu.ppy.sh/u/" + username + ">")
         except IOError:
             await self.pm.clientWrap.send_message(self.name, channel, "No stats found for this game mode.")
         os.remove(filename)
@@ -118,9 +116,11 @@ class Plugin(object):
             self.leaderboard_data[json_data["username"]] = json_data
         except:
             print("Failed to fetch user data, http error")
+            return True
         self.request_count -= 1
         if self.request_count == 0:
             ioloop.IOLoop.instance().stop()
+        return False
 
     async def leaderboard(self, message_object, mode):
         """
@@ -158,7 +158,7 @@ class Plugin(object):
                 game_mode_id = 0
 
             # Connect to SQLite file for server in cache/SERVERID.sqlite
-            con = sqlite3.connect("cache/" + message_object.server.id + ".sqlite",
+            con = sqlite3.connect("cache/" + message_object.guild.id + ".sqlite",
                                   detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
             with con:
                 cur = con.cursor()
@@ -181,7 +181,7 @@ class Plugin(object):
                 http_client = httpclient.AsyncHTTPClient()
                 for user in users:
                     self.request_count += 1
-                    http_client.fetch(
+                    await http_client.fetch(
                         'https://osu.ppy.sh/api/get_user?m=' + str(
                             game_mode_id) + '&k=' + self.api_key + '&u=' + user.lower(),
                         self.handle_request, method='GET')
@@ -209,9 +209,9 @@ class Plugin(object):
                     try:
                         user = await self.pm.client.get_user_info(data["discord_id"])
                         member = discord.utils.find(lambda m: m.name == user.name,
-                                                    message_object.channel.server.members)
+                                                    message_object.channel.guild.members)
                         if member is None:
-                            await self.delete_osu(message_object.server.id, data["discord_id"])
+                            await self.delete_osu(message_object.guild.id, data["discord_id"])
                             continue
 
                         # fetch correct display name
@@ -276,7 +276,7 @@ class Plugin(object):
                 os.makedirs("cache")
             try:
                 # Connect to SQLite file for server in cache/SERVERID.sqlite
-                con = sqlite3.connect("cache/" + message_object.server.id + ".sqlite",
+                con = sqlite3.connect("cache/" + str(message_object.guild.id) + ".sqlite",
                                       detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
 
                 with con:
@@ -296,7 +296,7 @@ class Plugin(object):
             except:
                 traceback.print_exc()
         else:
-            await self.delete_osu(message_object.server.id, user_id)
+            await self.delete_osu(message_object.guild.id, user_id)
             await self.pm.clientWrap.send_message(self.name, message_object.channel, "osu! username deleted for " +
                                                   message_object.author.display_name)
 
@@ -331,7 +331,7 @@ class Plugin(object):
         if not os.path.exists("cache/"):
             os.mkdir("cache/")
 
-        con = sqlite3.connect("cache/" + msg.server.id + ".sqlite",
+        con = sqlite3.connect("cache/" + str(msg.guild.id) + ".sqlite",
                               detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
         with con:
             cur = con.cursor()

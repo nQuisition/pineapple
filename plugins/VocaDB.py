@@ -1,5 +1,6 @@
-from util import Events
 import requests
+
+from util import Events
 
 
 class Plugin(object):
@@ -21,13 +22,13 @@ class Plugin(object):
                       "&preferAccurateMatches=true&nameMatchMode=Auto"
         response = requests.get(request_url)
         try:
-            if len(response.json()["items"]) is 0:
-                await self.pm.client.send_message(message_object.channel,
-                                                  "Can't find a song that matches your search :cry:")
+            if len(response.json()["items"]) == 0:
+                await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                                      "Can't find a song that matches your search :cry:")
                 return
         except:
-            await self.pm.client.send_message(message_object.channel,
-                                              "Can't find a song that matches your search :cry:")
+            await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                                  "Can't find a song that matches your search :cry:")
             return
 
         results = response.json()
@@ -48,4 +49,4 @@ class Plugin(object):
                     msg += "<" + pv["url"] + ">"
             msg += "\n\n"
 
-        await self.pm.client.send_message(message_object.channel, msg)
+        await message_object.channel.send(msg)

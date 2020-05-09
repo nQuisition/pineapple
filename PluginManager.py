@@ -1,10 +1,13 @@
-from os.path import dirname, basename
+import asyncio
 import glob
 import importlib.util
+from os.path import dirname, basename
+
+import discord
+
 import BotPreferences
-from util.Ranks import Ranks
 import ClientWrapper
-import asyncio
+from util.Ranks import Ranks
 
 
 class PluginManager(object):
@@ -87,13 +90,13 @@ class PluginManager(object):
         try:
             target, rank = self.commands[command.lower()]
 
-            if message_object.channel.is_private:
+            if isinstance(message_object.channel, discord.abc.PrivateChannel):
                 if rank is Ranks.Default:
                     allowed = True
                 else:
                     allowed = False
             else:
-                allowed = self.user_has_permission(message_object.server.id, message_object.author, rank)
+                allowed = self.user_has_permission(message_object.guild.id, message_object.author, rank)
             if allowed:
                 await target.handle_command(message_object, command.lower(), args)
             else:
@@ -114,7 +117,7 @@ class PluginManager(object):
         try:
             for obj in self.typing:
                 name, rank = self.typing[obj]
-                if self.user_has_permission(channel.server.id, user, rank):
+                if self.user_has_permission(channel.guild.id, user, rank):
                     await name.handle_typing(channel, user, when)
         except AttributeError:
             pass
@@ -122,7 +125,7 @@ class PluginManager(object):
     async def handle_message_delete(self, message):
         for obj in self.delete:
             name, rank = self.delete[obj]
-            if self.user_has_permission(message.server.id, message.author, rank):
+            if self.user_has_permission(message.guild.id, message.author, rank):
                 await name.handle_message_delete(message)
 
     async def handle_member_join(self, member):

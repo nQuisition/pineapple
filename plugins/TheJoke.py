@@ -1,9 +1,10 @@
-from util import Events
-from PIL import Image, ImageFont, ImageDraw
-import urllib.request
-import re
 import os
-import unicodedata
+import urllib.request
+
+import discord
+from PIL import Image, ImageFont, ImageDraw
+
+from util import Events
 
 
 class Plugin(object):
@@ -30,11 +31,6 @@ class Plugin(object):
             await self.the_joke(message_object, args[1])
 
     async def the_joke(self, message_object, txt):
-        """
-        Execute the example_command command. All calls to self.pm.client should be asynchronous (await)!
-        :param message_object: discord.Message object
-        :param user_IDs: IDs of users to ship
-        """
         template = Image.open("images/thejoke.png")
         template = template.convert("RGBA")
         font = ImageFont.truetype("images/LemonMilk.otf", 26)
@@ -59,8 +55,7 @@ class Plugin(object):
             new_im.save(f, "PNG")
 
         with open("thejoke.png", 'rb') as f:
-            await self.pm.client.send_file(
-                message_object.channel, f, filename=None, content="")
+            await message_object.channel.send(file=discord.File(f), content="")
             f.close()
             temp_images = [img for img in os.listdir(".") if img.endswith(".png") or img.endswith(".jpg")]
             for img in temp_images:
@@ -70,7 +65,7 @@ class Plugin(object):
     def get_avatar(user):
         if not os.path.exists("cache/"):
             os.makedirs("cache")
-        if user.avatar_url is "" or None:
+        if user.avatar_url == "" or None:
             url = user.default_avatar_url
             path = "cache/avatar/default_" + user.id + ".png"
         else:

@@ -1,8 +1,9 @@
-from PluginManager import PluginManager
-import discord
-import traceback
-import asyncio
 import logging
+import traceback
+
+import discord
+
+from PluginManager import PluginManager
 
 logging.basicConfig(filename='pineapple.log', filemode='a', level=logging.INFO,
                     format=('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
@@ -29,15 +30,17 @@ async def on_ready():
     """
     Event handler, fires when the bot has connected and is logged in
     """
-    logging.info('Logged in as ' + client.user.name + " (" + client.user.id + ")")
+    logging.info('Logged in as ' + client.user.name + " (" + str(client.user.id) + ")")
 
     # Change nickname to nickname in configuration
-    for instance in client.servers:
-        await client.change_nickname(instance.me, pm.botPreferences.nickName)
+    for instance in client.guilds:
+        await instance.me.edit(nick=pm.botPreferences.nickName)
 
         # Load rank bindings
         pm.botPreferences.bind_roles(instance.id)
-    await client.change_presence(game=discord.Game(name='Use ' + pm.botPreferences.commandPrefix + 'help for help'))
+
+    game = discord.Game('Use ' + pm.botPreferences.commandPrefix + 'help for help')
+    await client.change_presence(status=discord.Status.online, activity=game)
     await pm.handle_loop()
 
 
@@ -52,10 +55,10 @@ async def on_message(message):
             # Send the received message off to the Plugin Manager to handle the command
             words = message.content.partition(' ')
             await pm.handle_command(message, words[0][len(pm.botPreferences.commandPrefix):], words[1:])
-        elif message.server is not None:
+        elif message.guild is not None:
             await pm.handle_message(message)
     except Exception as e:
-        await client.send_message(message.channel, "Error: " + str(e))
+        await message.channel.send("Error: " + str(e))
         if pm.botPreferences.get_config_value("client", "debug") == "1":
             traceback.print_exc()
 
@@ -71,7 +74,7 @@ async def on_typing(channel, user, when):
     try:
         await pm.handle_typing(channel, user, when)
     except Exception as e:
-        await client.send_message(channel, "Error: " + str(e))
+        await channel.send("Error: " + str(e))
         if pm.botPreferences.get_config_value("client", "debug") == "1":
             traceback.print_exc()
 
@@ -86,7 +89,7 @@ async def on_message_delete(message):
         if message.author.name != "PluginBot":
             await pm.handle_message_delete(message)
     except Exception as e:
-        await client.send_message(message.channel, "Error: " + str(e))
+        await message.channel.send("Error: " + str(e))
         if pm.botPreferences.get_config_value("client", "debug") == "1":
             traceback.print_exc()
 

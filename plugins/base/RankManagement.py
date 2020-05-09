@@ -1,5 +1,6 @@
-import sqlite3
 import os
+import sqlite3
+
 from util import Events
 from util.Ranks import Ranks
 
@@ -23,15 +24,15 @@ class Plugin(object):
         elif command == "addmember":
             await self.bind(message_object, args[1], "Member")
 
-        self.pm.botPreferences.bind_roles(message_object.server.id)
+        self.pm.botPreferences.bind_roles(message_object.guild.id)
 
     async def admin(self, message_object, group):
-        if message_object.author is message_object.server.owner:
+        if message_object.author is message_object.guild.owner:
             if not os.path.exists("cache/"):
                 os.makedirs("cache")
 
             # Connect to SQLite file for server in cache/SERVERID.sqlite
-            con = sqlite3.connect("cache/" + message_object.server.id + ".sqlite",
+            con = sqlite3.connect("cache/" + str(message_object.guild.id) + ".sqlite",
                                   detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
 
             with con:
@@ -39,13 +40,16 @@ class Plugin(object):
                 cur.execute("CREATE TABLE IF NOT EXISTS rank_binding(DiscordGroup TEXT PRIMARY KEY, Rank TEXT)")
                 cur.execute("INSERT OR IGNORE INTO rank_binding(DiscordGroup, Rank) VALUES(?, ?)", (group, "Admin"))
 
+            await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                                  "Group " + group + " was added as admin")
+
     async def bind(self, message_object, group, rank):
-        if message_object.author is message_object.server.owner:
+        if message_object.author is message_object.guild.owner:
             if not os.path.exists("cache/"):
                 os.makedirs("cache")
 
             # Connect to SQLite file for server in cache/SERVERID.sqlite
-            con = sqlite3.connect("cache/" + message_object.server.id + ".sqlite",
+            con = sqlite3.connect("cache/" + str(message_object.guild.id) + ".sqlite",
                                   detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
 
             with con:

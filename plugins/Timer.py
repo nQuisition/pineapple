@@ -1,6 +1,8 @@
-from util import Events
 from collections import defaultdict
+
 import arrow
+
+from util import Events
 
 
 class Plugin(object):
@@ -11,7 +13,7 @@ class Plugin(object):
 
     @staticmethod
     def register_events():
-        return [Events.Command("timer"),Events.Command("reset")]
+        return [Events.Command("timer"), Events.Command("reset")]
 
     async def handle_command(self, message_object, command, args):
         if command == "timer":
@@ -20,12 +22,13 @@ class Plugin(object):
             await self.reset(message_object)
 
     async def reset(self, message_object):
-        delta = self.db[message_object.channel].humanize(only_distance = True)
+        delta = self.db[message_object.channel].humanize(only_distance=True)
         self.db[message_object.channel] = arrow.utcnow()
         await self.pm.clientWrap.send_message(self.name, message_object.channel, "Timer reset after {}.".format(delta))
-        await self.pm.client.delete_message(message_object)
+        await message_object.delete()
 
     async def timer(self, message_object):
-        delta = self.db[message_object.channel].humanize(only_distance = True)
-        await self.pm.clientWrap.send_message(self.name, message_object.channel, "Timer has been running for {}.".format(delta))
-        await self.pm.client.delete_message(message_object)
+        delta = self.db[message_object.channel].humanize(only_distance=True)
+        await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                              "Timer has been running for {}.".format(delta))
+        await message_object.delete()

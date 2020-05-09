@@ -1,6 +1,7 @@
-from util import Events
-import requests
 import discord
+import requests
+
+from util import Events
 
 
 class Plugin(object):
@@ -39,31 +40,29 @@ class Plugin(object):
         """
         data = await self.get_json(category, ' '.join(args[1:]))
         if 'error' in data:
-            await self.pm.client.send_message(message_object.channel, "Error occurred while searching.")
+            await message_object.channel.send("Error occurred while searching.")
             return
 
         root = data['results']
         if len(root) == 0:
-            await self.pm.client.send_message(message_object.channel, "No results.")
+            await message_object.channel.send("No results.")
         elif len(root) == 1:
             entry = root[0]
         else:
             msg = "**Please choose one by giving its number.**\n"
             msg += "\n".join(['{} - {}'.format(n + 1, entry['title']) for n, entry in enumerate(root) if n < 10])
 
-            question = await self.pm.client.send_message(message_object.channel, msg)
+            question = await message_object.channel.send(msg)
 
-            def check(m): return m.content in map(str, range(1, len(root) + 1))
-            resp = await self.pm.client.wait_for_message(
-                author=message_object.author,
-                check=check,
-                timeout=20
-            )
+            def check(m):
+                return m.author == message_object.author and m.content in map(str, range(1, len(root) + 1))
+
+            resp = await self.pm.client.wait_for('message', check=check, timeout=20)
             if resp is None:
                 return
 
-            await self.pm.client.delete_message(question)
-            await self.pm.client.delete_message(resp)
+            await question.delete()
+            await resp.delete()
 
             entry = root[int(resp.content) - 1]
 
@@ -86,4 +85,4 @@ class Plugin(object):
 
         em = discord.Embed(description=msg, colour=self.pm.clientWrap.get_color(self.name))
         em.set_image(url=entry['image_url'])
-        await self.pm.client.send_message(message_object.channel, embed=em)
+        await message_object.channel.send(embed=em)

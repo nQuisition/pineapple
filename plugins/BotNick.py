@@ -16,4 +16,4 @@ class Plugin(object):
             await self.nick(message_object, args[1])
 
     async def nick(self, message_object, nick):
-        await self.pm.client.change_nickname(message_object.server.me, nick)
+        await message_object.guild.me.edit(nick=nick)
