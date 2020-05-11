@@ -28,4 +28,4 @@ class Plugin(object):
         Execute the example_command command. All calls to self.pm.client should be asynchronous (await)!
         :param message_object: discord.Message object
         """
-        await self.pm.client.send_message(message_object.channel, 'Pong')
+        await message_object.channel.send('Pong')

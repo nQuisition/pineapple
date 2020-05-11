@@ -100,9 +100,8 @@ class PluginManager(object):
             if allowed:
                 await target.handle_command(message_object, command.lower(), args)
             else:
-                await self.client.delete_message(message_object)
-                await self.client.send_message(message_object.author,
-                                               "You don't have the required permissions to do that (Rank required: "
+                await message_object.delete()
+                await message_object.author.send("You don't have the required permissions to do that (Rank required: "
                                                + rank.name + ")")
         except KeyError:
             pass

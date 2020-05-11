@@ -235,14 +235,14 @@ class Plugin(object):
                                           "pp_raw"]))) + "pp)" + " (" + name + ") \n"
                         index += 1
                     except Exception as e:
-                        await self.pm.client.send_message(message_object.channel, "Error: " + str(e))
+                        await message_object.channel.send("Error: " + str(e))
                         if self.pm.botPreferences.get_config_value("client", "debug") == "1":
                             traceback.print_exc()
                         self.leaderboard_lock = False
                         self.leaderboard_data = dict()
                         self.request_count = 0
 
-                await self.pm.client.delete_message(lb_msg)
+                await lb_msg.delete()
 
                 if len(msg) > 1500:
                     lb_strings = list(map(''.join, zip(*[iter(msg)] * 1000)))
@@ -256,7 +256,7 @@ class Plugin(object):
                 self.leaderboard_data = dict()
                 self.request_count = 0
         except Exception as e:
-            await self.pm.client.send_message(message_object.channel, "Error: " + str(e))
+            await message_object.channel.send("Error: " + str(e))
             if self.pm.botPreferences.get_config_value("client", "debug") == "1":
                 traceback.print_exc()
             self.leaderboard_lock = False

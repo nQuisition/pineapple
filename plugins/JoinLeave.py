@@ -77,7 +77,7 @@ class Plugin(object):
 
     async def toggle_welcome(self, message_object):
         # Toggle welcome in config
-        await self.pm.client.delete_message(message_object)
+        await message_object.delete()
 
         enabled = await self.get_welcome_messages_config(message_object.guild.id)
         self.pm.botPreferences.set_database_config_value(message_object.guild.id,
@@ -111,7 +111,7 @@ class Plugin(object):
                                                          False)
 
         await self.pm.client.ban(message_object.mentions[0])
-        await self.pm.client.delete_message(message_object)
+        await message_object.delete()
         await asyncio.sleep(5)
 
         self.pm.botPreferences.set_database_config_value(message_object.guild.id,
@@ -141,15 +141,13 @@ class Plugin(object):
         self.pm.botPreferences.set_database_config_value(message_object.guild.id,
                                                          "default_channel",
                                                          message_object.guild.id)
-        await self.pm.client.send_message(message_object.channel,
-                                          "Set default channel to: #" + message_object.channel.name)
+        await message_object.channel.send("Set default channel to: #" + message_object.channel.name)
 
     async def set_welcome_message(self, message_object, text):
         self.pm.botPreferences.set_database_config_value(message_object.guild.id,
                                                          "welcome_message",
                                                          text)
-        await self.pm.client.send_message(message_object.channel,
-                                          "Set welcome message to: " + text)
+        await message_object.channel.send("Set welcome message to: " + text)
 
     async def get_welcome_messages_config(self, server_id):
         db_enabled = self.pm.botPreferences.get_database_config_value(server_id, "welcome_messages")

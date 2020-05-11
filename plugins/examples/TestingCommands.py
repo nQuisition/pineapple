@@ -15,5 +15,4 @@ class Plugin(object):
             await self.role(message_object, )
 
     async def role(self, message_object):
-        await self.pm.client.send_message(message_object.channel,
-                                          str([role.name.replace("@", "(at)") for role in message_object.author.roles]))
+        await message_object.channel.send(str([role.name.replace("@", "(at)") for role in message_object.author.roles]))
