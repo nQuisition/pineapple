@@ -1,3 +1,5 @@
+import discord
+
 from util import Events
 
 
@@ -40,10 +42,10 @@ class Plugin(object):
         # Split text into pieces of 1000 chars
         help_strings = list(map(''.join, zip(*[iter(hstr)] * 1000)))
         for string in help_strings:
-            await self.pm.client.send_message(message_object.author, string)
+            await message_object.author.send(string)
 
-        if not message_object.channel.is_private:
-            await self.pm.client.delete_message(message_object)
+        if not isinstance(message_object.channel, discord.abc.PrivateChannel):
+            await message_object.delete()
 
     async def info(self, message_object):
         await self.pm.clientWrap.send_message(self.name, message_object.channel,
@@ -62,8 +64,8 @@ class Plugin(object):
         except KeyError:
             await self.pm.clientWrap.send_message(self.name, message_object.author,
                                                   ":exclamation: That\'s not a valid plugin name")
-        if not message_object.channel.is_private:
-            await self.pm.client.delete_message(message_object)
+        if not isinstance(message_object.channel, discord.abc.PrivateChannel):
+            await message_object.delete()
 
     async def show_help_assigned(self, message_object):
         x = "Bot Help\n```"
@@ -74,5 +76,5 @@ class Plugin(object):
         x += "```\n`" + self.pm.botPreferences.commandPrefix + "help [help_topic]` to evoke a help topic.\n`" + \
              self.pm.botPreferences.commandPrefix + "help all` for all commands."
         await self.pm.clientWrap.send_message(self.name, message_object.author, x)
-        if not message_object.channel.is_private:
-            await self.pm.client.delete_message(message_object)
+        if not isinstance(message_object.channel, discord.abc.PrivateChannel):
+            await message_object.delete()

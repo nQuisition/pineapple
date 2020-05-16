@@ -15,8 +15,8 @@ class ClientWrapper(object):
 
     async def edit_message(self, name, old_message, new_message):
         em = discord.Embed(description=new_message, colour=self.get_color(name))
-        msg = await self.client.edit_message(old_message, embed=em)
-        return msg
+        await old_message.edit(embed=em)
+        return old_message
 
     @staticmethod
     def get_color(name):
