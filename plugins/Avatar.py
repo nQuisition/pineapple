@@ -17,13 +17,13 @@ class Plugin(object):
             await self.avatar(message_object)
 
     async def avatar(self, message_object):
-        if len(message_object.mentions) is 1:
+        if len(message_object.mentions) == 1:
             await self.post_avatar(message_object, message_object.mentions[0])
         else:
             await self.post_avatar(message_object, message_object.author)
 
     async def post_avatar(self, message_object, user):
-        if user.avatar_url is None or user.avatar_url is "":
+        if user.avatar_url is None or user.avatar_url == "":
             await self.pm.clientWrap.send_message(self.name, message_object.channel,
                                                   user.display_name + " has no avatar set!")
             return

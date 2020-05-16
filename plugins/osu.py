@@ -50,7 +50,7 @@ class Plugin(object):
         if command == "setosu":
             await self.set_osu(message_object, args[1])
         if command == "deleteosu":
-            if len(message_object.mentions) is 1:
+            if len(message_object.mentions) == 1:
                 user_id = message_object.mentions[0].id
                 await self.delete_osu(message_object.guild.id, user_id)
                 await self.pm.clientWrap.send_message(self.name, message_object.channel, "osu! username deleted for " +
@@ -61,11 +61,11 @@ class Plugin(object):
 
     async def osu_mode(self, message_object, username, mode):
         try:
-            if len(message_object.mentions) is 1:
+            if len(message_object.mentions) == 1:
                 username = await self.get_osu_name(message_object, message_object.mentions[0])
                 if username is None:
                     return
-            elif len(username) is 0 or username is "":
+            elif len(username) == 0 or username == "":
                 username = await self.get_osu_name(message_object, message_object.author)
                 if username is None:
                     return
@@ -90,7 +90,7 @@ class Plugin(object):
         image_url = self.base_url.format(id, username)
         urllib.request.urlretrieve(image_url, filename)
 
-        # Check if image is valid
+        # Check if image == valid
         try:
             await channel.send(file=discord.File(filename), content="<https://osu.ppy.sh/u/" + username + ">")
         except IOError:
@@ -131,7 +131,7 @@ class Plugin(object):
         """
         if self.leaderboard_lock:
             await self.pm.clientWrap.send_message(self.name, message_object.channel,
-                                                  "Leaderboard is currently being loaded. Please wait.")
+                                                  "Leaderboard == currently being loaded. Please wait.")
             return
         else:
             self.leaderboard_lock = True
@@ -139,7 +139,7 @@ class Plugin(object):
             self.request_count = 0
         if not os.path.exists("cache/"):
             os.makedirs("cache")
-        if mode is "":
+        if mode == "":
             await self.pm.clientWrap.send_message(self.name, message_object.channel,
                                                   "Please specify the game mode (osu, taiko, ctb, mania)")
             return
@@ -221,11 +221,11 @@ class Plugin(object):
                             name = user.name
 
                         # get an emoji for top 3
-                        if index is 1:
+                        if index == 1:
                             emoji = ":first_place:"
-                        elif index is 2:
+                        elif index == 2:
                             emoji = ":second_place:"
-                        elif index is 3:
+                        elif index == 3:
                             emoji = ":third_place:"
                         else:
                             emoji = str(index) + "#:"
@@ -271,7 +271,7 @@ class Plugin(object):
         :return: None
         """
         user_id = message_object.author.id
-        if name is not "" and name is not None:
+        if name != "" and name is not None:
             if not os.path.exists("cache/"):
                 os.makedirs("cache")
             try:
