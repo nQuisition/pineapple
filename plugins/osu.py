@@ -90,7 +90,7 @@ class Plugin(object):
         image_url = self.base_url.format(id, username)
         urllib.request.urlretrieve(image_url, filename)
 
-        # Check if image == valid
+        # Check if image is valid
         try:
             await channel.send(file=discord.File(filename), content="<https://osu.ppy.sh/u/" + username + ">")
         except IOError:
@@ -131,7 +131,7 @@ class Plugin(object):
         """
         if self.leaderboard_lock:
             await self.pm.clientWrap.send_message(self.name, message_object.channel,
-                                                  "Leaderboard == currently being loaded. Please wait.")
+                                                  "Leaderboard is currently being loaded. Please wait.")
             return
         else:
             self.leaderboard_lock = True
