@@ -1,4 +1,5 @@
 import datetime
+
 from util import Events
 
 
@@ -18,6 +19,6 @@ class Plugin(object):
             await self.ping(message_object, "Ping")
 
     async def ping(self, message_object, reply):
-        speed = datetime.datetime.now() - message_object.timestamp
+        speed = datetime.datetime.now() - message_object.created_at
         await self.pm.clientWrap.send_message(self.name, message_object.channel,
                                               reply + " " + str(round(speed.microseconds / 1000)) + "ms")

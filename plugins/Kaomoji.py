@@ -18,14 +18,10 @@ class Plugin(object):
             await self.why(message_object)
 
     async def lenny(self, message_object):
-        await self.pm.client.send_message(message_object.channel, "( ͡° ͜ʖ ͡°)")
-        await self.pm.client.delete_message(message_object)
+        await message_object.channel.send("( ͡° ͜ʖ ͡°)")
 
     async def wot(self, message_object):
-        await self.pm.client.send_message(message_object.channel, "ಠ_ಠ")
-        await self.pm.client.delete_message(message_object)
+        await message_object.channel.send("ಠ_ಠ")
 
     async def why(self, message_object):
-        await self.pm.client.send_message(message_object.channel, "щ(ಠ益ಠщ)")
-        await self.pm.client.delete_message(message_object)
-
+        await message_object.channel.send("щ(ಠ益ಠщ)")

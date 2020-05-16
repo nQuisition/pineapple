@@ -1,9 +1,11 @@
-from util import Events
-from PIL import Image
-import urllib.request
-import re
 import os
-import unicodedata
+import re
+import urllib.request
+
+import discord
+from PIL import Image
+
+from util import Events
 
 # rudimentary regex match for finding syllables
 SYLLABLE = "([aeiouyAEIOUY]|[0-9]|[ ])"
@@ -33,20 +35,15 @@ class Plugin(object):
             await self.ship(message_object)
 
     async def ship(self, message_object):
-        """
-        Execute the example_command command. All calls to self.pm.client should be asynchronous (await)!
-        :param message_object: discord.Message object
-        :param user_IDs: IDs of users to ship
-        """
         if not os.path.exists("cache/"):
             os.mkdir("cache/")
             if not os.path.exists("cache/avatar/"):
                 os.mkdir("cache/avatar/")
 
-        if len(message_object.mentions) is 2:
+        if len(message_object.mentions) == 2:
             user1 = message_object.mentions[0]
             user2 = message_object.mentions[1]
-        elif len(message_object.mentions) is 1:
+        elif len(message_object.mentions) == 1:
             user1 = message_object.mentions[0]
             user2 = message_object.mentions[0]
         else:
@@ -66,15 +63,15 @@ class Plugin(object):
         # concatenate half of u1 syllables with u2 syllables(integer division, ew...)
 
         # dumb fix for words that cannot be split (non-latin character sets?) also make sure that integer division doesnt truncate the result off the face of the earth
-        if len(u1_parts) is 1:
+        if len(u1_parts) == 1:
             u1_parts = [u1_parts[0]]
             div1 = 1
-        elif len(u1_parts) is 0:
+        elif len(u1_parts) == 0:
             u1_parts = [n1]
             div1 = 1
-        if len(u2_parts) is 1:
+        if len(u2_parts) == 1:
             u2_parts = [u2_parts[0]]
-        elif len(u2_parts) is 0:
+        elif len(u2_parts) == 0:
             u2_parts = [n2]
 
         name = u1_parts[:len(u1_parts) // div1] + u2_parts[len(u2_parts) // 2:]
@@ -103,8 +100,7 @@ class Plugin(object):
             new_im.save(f, "PNG")
 
         with open("ship.png", 'rb') as f:
-            await self.pm.client.send_file(
-                message_object.channel, f, filename=None, content="""
+            await message_object.channel.send(file=discord.File(f), content="""
                 **{}** *The ship has sailed~!*""".format(name))
             f.close()
             temp_images = [img for img in os.listdir(".") if img.endswith(".png") or img.endswith(".jpg")]
@@ -115,7 +111,7 @@ class Plugin(object):
     def get_avatar(user):
         if not os.path.exists("cache/"):
             os.makedirs("cache")
-        if user.avatar_url is "" or None:
+        if user.avatar_url == "" or None:
             url = user.default_avatar_url
             path = "cache/avatar/default_" + user.id + ".png"
         else:

@@ -22,12 +22,12 @@ class Plugin(object):
         :param args: List of words in the message
         """
         if command == "reload":
-            await self.pm.client.delete_message(message_object)
+            await message_object.delete()
             await self.reload()
 
     async def reload(self):
         self.pm.load_plugins()
         self.pm.register_events()
 
-        for instance in self.pm.client.servers:
+        for instance in self.pm.client.guilds:
             self.pm.botPreferences.bind_roles(instance.id)

@@ -1,8 +1,10 @@
+import operator
+from datetime import datetime
+
+import discord
+
 from util import Events
 from util.Ranks import Ranks
-import operator
-import discord
-from datetime import datetime
 
 
 class Plugin(object):
@@ -26,7 +28,7 @@ class Plugin(object):
             await self.joined(message_object)
 
     async def rolestat(self, message_object):
-        server = message_object.server
+        server = message_object.guild
         msg = "Role stats for this server (" + str(server.member_count) + " users in total):\n"
 
         roles = dict()
@@ -45,8 +47,8 @@ class Plugin(object):
         await self.pm.clientWrap.send_message(self.name, message_object.channel, msg)
 
     async def server_info(self, message_object):
-        server = message_object.server
-        msg = "**Name:** " + server.name + " (" + server.id + ")\n"
+        server = message_object.guild
+        msg = "**Name:** " + server.name + " (" + str(server.id) + ")\n"
         msg += "**Total members:** " + str(server.member_count) + "\n"
         msg += "**Server owner:** " + server.owner.name + "\n"
         msg += "**Server region:** " + str(server.region) + "\n"
@@ -54,7 +56,7 @@ class Plugin(object):
 
         em = discord.Embed(description=msg, colour=self.pm.clientWrap.get_color(self.name))
         em.set_image(url=server.icon_url)
-        await self.pm.client.send_message(message_object.channel, "", embed=em)
+        await message_object.channel.send(embed=em)
 
     async def joined(self, message_object):
         user = message_object.author

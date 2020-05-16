@@ -1,11 +1,5 @@
 from util import Events
-import glob
-import os
-import random
-import asyncio
 from util.Ranks import Ranks
-import logging
-import discord
 
 
 class Plugin(object):
@@ -22,8 +16,7 @@ class Plugin(object):
             await self.set_modlog_channel(message_object)
 
     async def set_modlog_channel(self, message_object):
-        self.pm.botPreferences.set_database_config_value(message_object.server.id,
+        self.pm.botPreferences.set_database_config_value(message_object.guild.id,
                                                          "modlog_channel",
                                                          message_object.channel.id)
-        await self.pm.client.send_message(message_object.channel,
-                                          "Set mod log channel to: #" + message_object.channel.name)
+        await message_object.channel.send("Set mod log channel to: #" + message_object.channel.name)

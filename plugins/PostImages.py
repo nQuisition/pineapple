@@ -1,7 +1,10 @@
-from util import Events
 import glob
 import os
 import random
+
+import discord
+
+from util import Events
 
 
 class Plugin(object):
@@ -75,19 +78,19 @@ class Plugin(object):
         files.extend(glob.glob(os.getcwd() + "/images/" + type + "/" + '*.jpg'))
         file = random.choice(files)
 
-        await self.pm.client.delete_message(message_object)
+        await message_object.delete()
 
         if user is None or user == "":
             await self.pm.clientWrap.send_message(self.name, message_object.channel,
                                                   "Please specify a target to " + type + ".")
             return
 
-        await self.pm.client.send_file(message_object.channel, file, content="**" + user + "** " + message)
+        await message_object.channel.send(file=discord.File(file), content="**" + user + "** " + message)
 
     async def post_image(self, message_object, type):
         files = glob.glob(os.getcwd() + "/images/" + type + "/" + '*.gif')
         files.extend(glob.glob(os.getcwd() + "/images/" + type + "/" + '*.png'))
         files.extend(glob.glob(os.getcwd() + "/images/" + type + "/" + '*.jpg'))
         file = random.choice(files)
-        await self.pm.client.delete_message(message_object)
-        await self.pm.client.send_file(message_object.channel, file, content=message_object.author.mention)
+        await message_object.delete()
+        await message_object.channel.send(file=discord.File(file), content=message_object.author.mention)

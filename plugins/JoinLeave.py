@@ -1,11 +1,13 @@
-from util import Events
+import asyncio
 import glob
+import logging
 import os
 import random
-import asyncio
-from util.Ranks import Ranks
-import logging
+
 import discord
+
+from util import Events
+from util.Ranks import Ranks
 
 
 class Plugin(object):
@@ -27,7 +29,7 @@ class Plugin(object):
                 Events.Command("shadowban", rank=Ranks.Mod)]
 
     async def handle_member_join(self, member):
-        enabled = await self.get_welcome_messages_config(member.server.id)
+        enabled = await self.get_welcome_messages_config(member.guild.id)
         logging.info("User joined " + member.display_name)
         if enabled:
             files = glob.glob(os.getcwd() + "/images/" + "join" + "/" + '*.gif')
@@ -36,28 +38,26 @@ class Plugin(object):
             file = random.choice(files)
             await asyncio.sleep(1)
 
-            default_channel = self.pm.botPreferences.get_database_config_value(member.server.id, "default_channel")
+            default_channel = self.pm.botPreferences.get_database_config_value(member.guild.id, "default_channel")
             if default_channel is not None:
-                channel = discord.utils.find(lambda m: m.id == default_channel, member.server.channels)
+                channel = discord.utils.find(lambda m: str(m.id) == default_channel, member.guild.channels)
 
-                welcome_message = self.pm.botPreferences.get_database_config_value(member.server.id,
-                                                                                   "welcome_message")
+                welcome_message = self.pm.botPreferences.get_database_config_value(member.guild.id, "welcome_message")
                 if welcome_message is None:
                     welcome_message = "Welcome to the server {0}".format(member.mention)
                 else:
                     welcome_message = welcome_message.format(member.mention)
 
-                await self.pm.client.send_file(channel, file,
-                                               content=welcome_message)
+                await channel.send(file=discord.File(file), content=welcome_message)
 
     async def handle_member_leave(self, member):
-        channel = self.get_modlog_channel(member.server)
+        channel = self.get_modlog_channel(member.guild)
         await self.pm.clientWrap.send_message(self.name, channel, member.display_name + " has left the server.")
 
-    def get_modlog_channel(self, server):
-        channel = self.pm.botPreferences.get_database_config_value(server.id, "modlog_channel")
+    def get_modlog_channel(self, guild):
+        channel = self.pm.botPreferences.get_database_config_value(guild.id, "modlog_channel")
         if channel is not None:
-            return discord.utils.find(lambda m: m.id == channel, server.channels)
+            return discord.utils.find(lambda m: str(m.id) == channel, guild.channels)
 
     async def handle_command(self, message_object, command, args):
         if command == "togglewelcome":
@@ -79,19 +79,19 @@ class Plugin(object):
         # Toggle welcome in config
         await self.pm.client.delete_message(message_object)
 
-        enabled = await self.get_welcome_messages_config(message_object.server.id)
-        self.pm.botPreferences.set_database_config_value(message_object.server.id,
+        enabled = await self.get_welcome_messages_config(message_object.guild.id)
+        self.pm.botPreferences.set_database_config_value(message_object.guild.id,
                                                          "welcome_messages",
                                                          not enabled)
 
         # Log action
         log_message = "Welcome/leave messages set to " \
-                      + str(self.pm.botPreferences.get_database_config_value(message_object.server.id,
+                      + str(self.pm.botPreferences.get_database_config_value(message_object.guild.id,
                                                                              "welcome_messages")) \
                       + " by " + message_object.author.name + "#" + str(message_object.author.discriminator)
         logging.info(log_message)
 
-        mod_channel = self.get_modlog_channel(message_object.server)
+        mod_channel = self.get_modlog_channel(message_object.guild)
         await self.pm.clientWrap.send_message(self.name, mod_channel, log_message)
 
     async def shadow_ban(self, message_object):
@@ -101,12 +101,12 @@ class Plugin(object):
             message_object.author.discriminator)
         logging.info(log_message)
 
-        mod_channel = self.get_modlog_channel(message_object.server)
+        mod_channel = self.get_modlog_channel(message_object.guild)
         await self.pm.clientWrap.send_message(self.name, mod_channel, log_message)
 
         # Execute ban silently
-        cache_enabled = await self.get_welcome_messages_config(message_object.server.id)
-        self.pm.botPreferences.set_database_config_value(message_object.server.id,
+        cache_enabled = await self.get_welcome_messages_config(message_object.guild.id)
+        self.pm.botPreferences.set_database_config_value(message_object.guild.id,
                                                          "welcome_messages",
                                                          False)
 
@@ -114,7 +114,7 @@ class Plugin(object):
         await self.pm.client.delete_message(message_object)
         await asyncio.sleep(5)
 
-        self.pm.botPreferences.set_database_config_value(message_object.server.id,
+        self.pm.botPreferences.set_database_config_value(message_object.guild.id,
                                                          "welcome_messages",
                                                          cache_enabled)
 
@@ -125,27 +125,27 @@ class Plugin(object):
         file = random.choice(files)
         await asyncio.sleep(1)
 
-        msg1 = await self.pm.client.send_file(message_object.channel, file,
-                                              content="Bye " + message_object.mentions[0].display_name)
+        msg1 = await message_object.channel.send(file=discord.File(file),
+                                                 content="Bye " + message_object.mentions[0].display_name)
         await asyncio.sleep(10)
         try:
-            await self.pm.client.delete_message(message_object)
+            await message_object.delete()
         except:
             print("Failed to delete message")
         try:
-            await self.pm.client.delete_message(msg1)
+            await msg1.delete()
         except:
             print("Failed to delete message")
 
     async def set_default_channel(self, message_object):
-        self.pm.botPreferences.set_database_config_value(message_object.server.id,
+        self.pm.botPreferences.set_database_config_value(message_object.guild.id,
                                                          "default_channel",
-                                                         message_object.channel.id)
+                                                         message_object.guild.id)
         await self.pm.client.send_message(message_object.channel,
                                           "Set default channel to: #" + message_object.channel.name)
 
     async def set_welcome_message(self, message_object, text):
-        self.pm.botPreferences.set_database_config_value(message_object.server.id,
+        self.pm.botPreferences.set_database_config_value(message_object.guild.id,
                                                          "welcome_message",
                                                          text)
         await self.pm.client.send_message(message_object.channel,

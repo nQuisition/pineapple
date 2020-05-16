@@ -1,7 +1,9 @@
-from util import Events
-import discord
 import asyncio
 import random
+
+import discord
+
+from util import Events
 
 
 class Plugin(object):
@@ -59,12 +61,12 @@ class Plugin(object):
                                                            " has started a race! \n"
                                                            "Type " + self.pm.botPreferences.commandPrefix +
                                                            "joinrace [emoji] to "
-                                                           "join the race (20s)")
+                                                           "join the race (30s)")
         # Give users time to join
         self.race.open = True
-        await asyncio.sleep(20)
-        await self.pm.client.delete_message(message_object)
-        await self.pm.client.delete_message(race_start)
+        await asyncio.sleep(30)
+        await message_object.delete()
+        await race_start.delete()
         self.race.open = False
 
         # If enough participants, start the race
@@ -77,7 +79,7 @@ class Plugin(object):
                                self.repeat("\_", steps) + p.emoji + self.repeat("\_", left) + \
                                " (" + str(p.progress) + ") \n"
             race_status += "\n:checkered_flag: :checkered_flag: :checkered_flag:"
-            race_message = await self.pm.client.send_message(message_object.channel, race_status)
+            race_message = await message_object.channel.send(race_status)
 
             # Run the race until every player has finished
             self.race.running = True
@@ -107,7 +109,7 @@ class Plugin(object):
                                    " (" + str(p.progress) + ") \n"
 
                 race_status += "\n:checkered_flag: :checkered_flag: :checkered_flag:"
-                race_message = await self.pm.client.edit_message(race_message, race_status)
+                await race_message.edit(content=race_status)
 
                 # Finishing state update
                 if player_finished:
@@ -136,7 +138,7 @@ class Plugin(object):
                                                                 "There is no active or open race at this moment! "
                                                                 "Please start one with '!race'")
             await asyncio.sleep(3)
-            await self.pm.client.delete_message(not_running)
+            await not_running.delete()
 
     async def user_join_as_emoji(self, message_object, emoji):
         self.race.participants.append(self.Race.Participant(message_object.author.display_name, emoji))
@@ -144,7 +146,7 @@ class Plugin(object):
         await self.pm.clientWrap.send_message(self.name, message_object.channel,
                                               message_object.author.display_name + " has joined the race as " +
                                               emoji)
-        await self.pm.client.delete_message(message_object)
+        await message_object.delete()
 
     @staticmethod
     def repeat(char, num):

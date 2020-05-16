@@ -1,15 +1,19 @@
+import os
+import random
+import sqlite3
+import urllib.request
+
+import discord
+import requests
+
 from util import Events
 from util.Ranks import Ranks
-import requests
-import urllib.request
-import os
-import sqlite3
-import random
 
 
 class Plugin(object):
     def __init__(self, pm):
         self.pm = pm
+        self.name = "Gelbooru"
         self.base_url = "http://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&limit=100&tags="
         self.base_src = "http://gelbooru.com/index.php?page=post&s=view&id="
         if not os.path.exists("cache/"):
@@ -43,15 +47,15 @@ class Plugin(object):
         search_tags = set(text.split())  # splits tags on second_place
         blacklist = self.get_blacklist(message_object)
         if len(search_tags) is 0:
-            await self.pm.client.send_message(message_object.channel, "Please enter tags to search.:thinking:")
+            await self.pm.clientWrap.send_message(self.name, message_object.channel, "Please enter tags to search.")
             return
         search_tags.discard("rating:questionable")  # no loopholes
         search_tags.discard("rating:safe")  # no loopholes
         search_tags.discard("rating:explicit")  # no loopholes
 
         if len(search_tags.intersection(blacklist)) > 0:  # if all tags filtered, exit
-            await self.pm.client.send_message(message_object.channel,
-                                              "The tags used have been blacklisted by an Admin. :cry:")
+            await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                                  "The tags used have been blacklisted by an Admin. :cry:")
             return
         if not nsfw:
             search_tags.add("rating:safe")  # append safe tag to URL if not nsfw
@@ -65,12 +69,14 @@ class Plugin(object):
         response = requests.get(request_url)
         try:
             if len(response.json()) is 0:
-                await self.pm.client.send_message(message_object.channel, "Can't find an image that matches your "
-                                                                          "tag(s) :cry:")
+                await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                                      "Can't find an image that matches your "
+                                                      "tag(s) :cry:")
                 return
         except:
-            await self.pm.client.send_message(message_object.channel, "Can't find an image that matches your "
-                                                                      "tag(s) :cry:")
+            await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                                  "Can't find an image that matches your "
+                                                  "tag(s) :cry:")
             return
 
         img_response = response.json()[random.randint(0, len(response.json()) - 1)]
@@ -81,8 +87,9 @@ class Plugin(object):
             response_tags = set(img_response["tags"].split())  # split tags from results
             retries -= 1  # decrement recount timer
             if retries is 0:
-                await self.pm.client.send_message(message_object.channel, "Can't find an image that matches your "
-                                                                          "tag(s) :cry:")
+                await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                                      "Can't find an image that matches your "
+                                                      "tag(s) :cry:")
                 return
 
         gel_url = self.base_src + str(img_response["id"])  # this is the link to the gelbooru page
@@ -99,11 +106,11 @@ class Plugin(object):
         f.close()
 
         if os.path.getsize(filename) > 8000000:
-            await self.pm.client.send_message(message_object.channel, "The image that was found was too large to "
-                                                                      "upload. " + image_url)
+            await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                                  "The image that was found was too large to "
+                                                  "upload. " + image_url)
         else:
-            await self.pm.client.send_file(message_object.channel, filename)
-            await self.pm.client.send_message(message_object.channel, "**Source:** <" + gel_url + ">")
+            await message_object.channel.send(file=discord.File(filename), content="**Source:** <" + gel_url + ">")
 
         os.remove(filename)
 
@@ -120,7 +127,7 @@ class Plugin(object):
         # Connect to SQLite file for server in cache/SERVERID.sqlite
         if not os.path.exists("cache/"):
             os.mkdir("cache/")
-        con = sqlite3.connect("cache/" + message_object.server.id + ".sqlite",
+        con = sqlite3.connect("cache/" + str(message_object.guild.id) + ".sqlite",
                               detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
 
         for item in block_tags:
@@ -132,13 +139,13 @@ class Plugin(object):
                     'INSERT OR IGNORE INTO booru_blacklist(Tag) VALUES(?)',
                     (item,))
 
-        await self.pm.client.send_message(message_object.channel,
-                                          "{} Tags added".format(len(block_tags)))
+        await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                              "{} Tags added".format(len(block_tags)))
 
     async def remove_blacklist(self, message_object, text):
         """
         Remove tags from the booru search blacklist
-        :param message_object: Message containing the command
+        :param message_object: Message containing the command!
         :param text: Text to be split containing the tags
         :return: None
         """
@@ -148,7 +155,7 @@ class Plugin(object):
         # Connect to SQLite file for server in cache/SERVERID.sqlite
         if not os.path.exists("cache/"):
             os.mkdir("cache/")
-        con = sqlite3.connect("cache/" + message_object.server.id + ".sqlite",
+        con = sqlite3.connect("cache/" + str(message_object.guild.id) + ".sqlite",
                               detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
 
         for item in block_tags:
@@ -160,20 +167,19 @@ class Plugin(object):
                     'DELETE FROM booru_blacklist WHERE Tag = ?',
                     (item,))
 
-        await self.pm.client.send_message(message_object.channel, "Tags removed from the blacklist")
+        await self.pm.clientWrap.send_message(self.name, message_object.channel, "Tags removed from the blacklist")
 
     async def print_blacklist(self, message_object):
         """
         Remove tags from the booru search blacklist
         :param message_object: Message containing the command
-        :param text: Text to be split containing the tags
         :return: None
         """
         tags = self.get_blacklist(message_object)
         msg = "Blacklisted tags: "
         for tag in tags:
             msg += tag + " "
-        await self.pm.client.send_message(message_object.channel, msg)
+        await self.pm.clientWrap.send_message(self.name, message_object.channel, msg)
 
     @staticmethod
     def get_blacklist(message_object):
@@ -181,7 +187,7 @@ class Plugin(object):
             # Connect to SQLite file for server in cache/SERVERID.sqlite
             if not os.path.exists("cache/"):
                 os.mkdir("cache/")
-            con = sqlite3.connect("cache/" + message_object.server.id + ".sqlite",
+            con = sqlite3.connect("cache/" + str(message_object.guild.id) + ".sqlite",
                                   detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
             tags = list()
             with con:

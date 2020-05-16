@@ -1,4 +1,5 @@
 import random
+
 import discord
 
 
@@ -9,7 +10,7 @@ class ClientWrapper(object):
 
     async def send_message(self, name, channel, message):
         em = discord.Embed(description=message, colour=self.get_color(name))
-        msg = await self.client.send_message(channel, embed=em)
+        msg = await channel.send(embed=em)
         return msg
 
     async def edit_message(self, name, old_message, new_message):
