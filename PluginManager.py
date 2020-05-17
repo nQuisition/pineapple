@@ -25,7 +25,7 @@ class PluginManager(object):
 
     # References to various managers
     botPreferences = None
-    client = None
+    client: discord.Client = None
     clientWrap = None
 
     def __init__(self, directory, client):

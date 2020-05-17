@@ -46,6 +46,7 @@ class Plugin(object):
         root = data['results']
         if len(root) == 0:
             await message_object.channel.send("No results.")
+            return
         elif len(root) == 1:
             entry = root[0]
         else:

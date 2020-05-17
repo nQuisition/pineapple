@@ -39,7 +39,7 @@ class BotMention(object):
         self.desc = desc
 
 
-class UserJoin(Command):
+class UserJoin(object):
     """
     UserJoin event, fires when a user joins a server
     NOT IMPLEMENTED

@@ -181,10 +181,13 @@ class Plugin(object):
                 http_client = httpclient.AsyncHTTPClient()
                 for user in users:
                     self.request_count += 1
-                    await http_client.fetch(
+                    response = await http_client.fetch(
                         'https://osu.ppy.sh/api/get_user?m=' + str(
-                            game_mode_id) + '&k=' + self.api_key + '&u=' + user.lower(),
-                        self.handle_request, method='GET')
+                            game_mode_id) + '&k=' + self.api_key + '&u=' + user.lower(), method='GET')
+                    is_error = self.handle_request(response)
+                    if is_error:
+                        # TODO not sure if/how it should be handled
+                        pass
                 ioloop.IOLoop.instance().start()
 
                 while self.request_count != 0:

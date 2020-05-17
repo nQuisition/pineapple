@@ -106,7 +106,7 @@ async def on_member_remove(member):
 
 @client.event
 async def on_server_join(server):
-    for instance in pm.client.servers:
+    for instance in pm.client.guilds:
         pm.botPreferences.bind_roles(instance.id)
 
 
