@@ -165,7 +165,7 @@ class PluginManager(object):
         :return: True/False, whether used is allowed to trigger this event
         """
         highest_rank = Ranks.Default
-        if not hasattr(user, 'server'):
+        if not hasattr(user, 'guild'):
             return True
 
         try:
