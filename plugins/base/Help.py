@@ -1,12 +1,12 @@
 import discord
 
 from util import Events
+from AbstractPlugin import AbstractPlugin
 
 
-class Plugin(object):
+class Plugin(AbstractPlugin):
     def __init__(self, pm):
-        self.pm = pm
-        self.name = "Help"
+        super().__init__(pm, "Help")
 
     @staticmethod
     def register_events():

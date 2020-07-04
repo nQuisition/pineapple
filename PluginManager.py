@@ -2,17 +2,21 @@ import asyncio
 import glob
 import importlib.util
 from os.path import dirname, basename
+from typing import Dict
 
 import discord
 
 import BotPreferences
 import ClientWrapper
+from AbstractPlugin import AbstractPlugin
+from DatabaseManager import DatabaseManager
 from util.Ranks import Ranks
+import CoreModels
 
 
 class PluginManager(object):
     # Container for all loaded plugins, dictionary: { filename: Plugin object }
-    plugins = {}
+    plugins: Dict[str, AbstractPlugin] = {}
 
     # Event handler containers, dictionary: { Event name: (plugin, minimum_rank) }
     commands = {}
@@ -25,19 +29,22 @@ class PluginManager(object):
 
     # References to various managers
     botPreferences = None
-    client = None
+    client: discord.Client = None
     clientWrap = None
+    dbManager: DatabaseManager = None
 
-    def __init__(self, directory, client):
+    def __init__(self, directory, cache_directory, client):
         """
         Initializes some fields for plugins to use
         :param directory: Plugin directory path, should always be "plugins/"
         :param client: discord.Client object
         """
         self.dir = directory
+        self.cache_dir = cache_directory
         self.botPreferences = BotPreferences.BotPreferences(self)
         self.client = client
         self.clientWrap = ClientWrapper.ClientWrapper(self)
+        self.dbManager = DatabaseManager(cache_directory)
         self.comlist = {}
         self.loop_running = True
 
@@ -59,12 +66,17 @@ class PluginManager(object):
         # Find all python files in the plugin directory
         modules = glob.glob(dirname(__file__) + "/" + self.dir + "/**/*.py", recursive=True)
 
+        # Register core models with database manager
+        self.dbManager.register_plugin_models("Core", [CoreModels.ServerConfig, CoreModels.RankBinding])
+
         # Iterate over each file, import them as a Python module and add them to the plugin list
         for f in modules:
             spec = importlib.util.spec_from_file_location(basename(f)[:-3], f)
             plugin = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(plugin)
-            self.plugins[basename(f)] = plugin.Plugin(self)
+            plugin_object: AbstractPlugin = plugin.Plugin(self)
+            self.dbManager.register_plugin_models(plugin_object.get_name(), plugin_object.get_models())
+            self.plugins[basename(f)] = plugin_object
             print("Loaded plugin: " + basename(f))
 
     def register_events(self):

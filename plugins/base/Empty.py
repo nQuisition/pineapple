@@ -1,9 +1,10 @@
 from util import Events
+from AbstractPlugin import AbstractPlugin
 
 
-class Plugin(object):
+class Plugin(AbstractPlugin):
     def __init__(self, pm):
-        self.pm = pm
+        super().__init__(pm, "Empty")
 
     @staticmethod
     def register_events():

@@ -19,7 +19,7 @@ client = discord.Client()
 
 logging.info("Loading plugins")
 # Loads and initializes the plugin manager for the bot
-pm = PluginManager("plugins", client)
+pm = PluginManager("plugins", "cache", client)
 pm.load_plugins()
 pm.register_events()
 logging.info("Plugins loaded and registered")
@@ -106,7 +106,7 @@ async def on_member_remove(member):
 
 @client.event
 async def on_server_join(server):
-    for instance in pm.client.servers:
+    for instance in pm.client.guilds:
         pm.botPreferences.bind_roles(instance.id)
 
 

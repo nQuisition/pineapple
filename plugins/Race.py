@@ -4,13 +4,13 @@ import random
 import discord
 
 from util import Events
+from AbstractPlugin import AbstractPlugin
 
 
-class Plugin(object):
+class Plugin(AbstractPlugin):
     def __init__(self, pm):
-        self.pm = pm
+        super().__init__(pm, "Race")
         self.race = self.Race()
-        self.name = "Race"
 
     class Race(object):
         class Participant(object):

@@ -2,12 +2,12 @@ import discord
 import requests
 
 from util import Events
+from AbstractPlugin import AbstractPlugin
 
 
-class Plugin(object):
+class Plugin(AbstractPlugin):
     def __init__(self, pm):
-        self.pm = pm
-        self.name = "Animu"
+        super().__init__(pm, "Animu")
         self.username = self.pm.botPreferences.get_config_value("MAL", "username")
         self.password = self.pm.botPreferences.get_config_value("MAL", "password")
 
@@ -46,6 +46,7 @@ class Plugin(object):
         root = data['results']
         if len(root) == 0:
             await message_object.channel.send("No results.")
+            return
         elif len(root) == 1:
             entry = root[0]
         else:

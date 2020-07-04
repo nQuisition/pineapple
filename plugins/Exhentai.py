@@ -5,6 +5,7 @@ import discord
 import requests
 
 from util import Events
+from AbstractPlugin import AbstractPlugin
 
 # TODO: (feature) also get the Information about single pages
 #  API-URL and type of headers sent by POST-request
@@ -12,10 +13,9 @@ api_url = "https://api.e-hentai.org/api.php"
 json_request_headers = "{'content-type': 'application/json'}"
 
 
-class Plugin(object):
+class Plugin(AbstractPlugin):
     def __init__(self, pm):
-        self.pm = pm
-        self.name = "Exhentai"
+        super().__init__(pm, "Exhentai")
 
     @staticmethod
     def register_events():

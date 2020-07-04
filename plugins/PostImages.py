@@ -5,12 +5,12 @@ import random
 import discord
 
 from util import Events
+from AbstractPlugin import AbstractPlugin
 
 
-class Plugin(object):
+class Plugin(AbstractPlugin):
     def __init__(self, pm):
-        self.pm = pm
-        self.name = "PostImages"
+        super().__init__(pm, "PostImages")
 
     @staticmethod
     def register_events():

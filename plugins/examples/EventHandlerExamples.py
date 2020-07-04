@@ -3,11 +3,12 @@ import glob
 import os
 import random
 import asyncio
+from AbstractPlugin import AbstractPlugin
 
 
-class Plugin(object):
+class Plugin(AbstractPlugin):
     def __init__(self, pm):
-        self.pm = pm
+        super().__init__(pm, "EventHandlerExample")
 
     @staticmethod
     def register_events():

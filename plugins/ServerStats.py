@@ -5,12 +5,12 @@ import discord
 
 from util import Events
 from util.Ranks import Ranks
+from AbstractPlugin import AbstractPlugin
 
 
-class Plugin(object):
+class Plugin(AbstractPlugin):
     def __init__(self, pm):
-        self.pm = pm
-        self.name = "ServerStats"
+        super().__init__(pm, "ServerStats")
 
     @staticmethod
     def register_events():

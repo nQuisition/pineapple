@@ -6,15 +6,15 @@ import discord
 from PIL import Image
 
 from util import Events
+from AbstractPlugin import AbstractPlugin
 
 # rudimentary regex match for finding syllables
 SYLLABLE = "([aeiouyAEIOUY]|[0-9]|[ ])"
 
 
-class Plugin(object):
+class Plugin(AbstractPlugin):
     def __init__(self, pm):
-        self.pm = pm
-        self.name = "Ship"
+        super().__init__(pm, "Ship")
 
     @staticmethod
     def register_events():

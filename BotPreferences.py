@@ -1,8 +1,8 @@
-import os
-import sqlite3
 from configparser import ConfigParser, NoSectionError, NoOptionError
+from peewee import DoesNotExist
 
 from util import Ranks
+from CoreModels import RankBinding, ServerConfig
 
 
 class BotPreferences(object):
@@ -45,31 +45,21 @@ class BotPreferences(object):
         """
         self.servers[server_id] = None
 
-        if not os.path.exists("cache/"):
-            os.makedirs("cache")
+        with self.pluginManager.dbManager.lock(server_id, "Core"):
+            rank_bindings = RankBinding.select()
 
-        # Connect to SQLite file for server in cache/SERVERID.sqlite
-        con = sqlite3.connect("cache/" + str(server_id) + ".sqlite",
-                              detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
+        rc = Ranks.RankContainer()
 
-        with con:
-            cur = con.cursor()
-            cur.execute("CREATE TABLE IF NOT EXISTS rank_binding(DiscordGroup TEXT PRIMARY KEY, Rank TEXT)")
-            cur.execute("SELECT * FROM rank_binding")
-            rows = cur.fetchall()
+        rc.default.append("@everyone")
 
-            rc = Ranks.RankContainer()
-
-            rc.default.append("@everyone")
-
-            for row in rows:
-                if row[1] == "Admin":
-                    rc.admin.append(row[0])
-                if row[1] == "Mod":
-                    rc.mod.append(row[0])
-                if row[1] == "Member":
-                    rc.member.append(row[0])
-            self.servers[server_id] = rc
+        for rank_binding in rank_bindings:
+            if rank_binding.rank == "Admin":
+                rc.admin.append(rank_binding.discord_group)
+            if rank_binding.rank == "Mod":
+                rc.mod.append(rank_binding.discord_group)
+            if rank_binding.rank == "Member":
+                rc.member.append(rank_binding.discord_group)
+        self.servers[server_id] = rc
 
     def reload_config(self):
         """
@@ -108,19 +98,12 @@ class BotPreferences(object):
         :param config_key: The config key
         :return: The found config value, None if no config entry was found.
         """
-        # Connect to SQLite file for server in cache/SERVERID.sqlite
-        con = sqlite3.connect("cache/" + str(server_id) + ".sqlite",
-                              detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
-        with con:
-            cur = con.cursor()
-            cur.execute(
-                "CREATE TABLE IF NOT EXISTS server_config(Key TEXT PRIMARY KEY UNIQUE, Value TEXT)")
-            cur.execute("SELECT * FROM server_config WHERE Key = '" + config_key + "'")
-            rows = cur.fetchall()
-            if len(rows) == 1:
-                return rows[0][1]
-            else:
-                return None
+        try:
+            with self.pluginManager.dbManager.lock(server_id, "Core"):
+                config_entry = ServerConfig.get_by_id(config_key)
+        except DoesNotExist:
+            return None
+        return config_entry.value
 
     def set_database_config_value(self, server_id, config_key, config_value):
         """
@@ -130,14 +113,5 @@ class BotPreferences(object):
         :param config_key: The config key
         :param config_value: The config value to set
         """
-        # Connect to SQLite file for server in cache/SERVERID.sqlite
-        con = sqlite3.connect("cache/" + str(server_id) + ".sqlite",
-                              detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
-        with con:
-            cur = con.cursor()
-            cur.execute(
-                "CREATE TABLE IF NOT EXISTS server_config(Key TEXT PRIMARY KEY UNIQUE, Value TEXT)")
-            query = "INSERT OR REPLACE INTO server_config(Key, Value) values('{0}', '{1}')".format(str(config_key),
-                                                                                           str(config_value))
-            cur.execute(query)
-            con.commit()
+        with self.pluginManager.dbManager.lock(server_id, "Core"):
+            ServerConfig.insert(key=str(config_key), value=str(config_value)).on_conflict_replace().execute()
