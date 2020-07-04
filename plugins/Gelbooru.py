@@ -106,10 +106,9 @@ class Plugin(AbstractPlugin):
         f.write(data)
         f.close()
 
-        if os.path.getsize(filename) > 8000000:
-            await self.pm.clientWrap.send_message(self.name, message_object.channel,
-                                                  "The image that was found was too large to "
-                                                  "upload. " + image_url)
+        if os.path.getsize(filename) > message_object.guild.filesize_limit:
+            await message_object.channel.send("The image that was found was too large to "
+                                              "upload. " + image_url)
         else:
             await message_object.channel.send(file=discord.File(filename), content="**Source:** <" + gel_url + ">")
 
