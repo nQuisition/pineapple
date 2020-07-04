@@ -1,6 +1,7 @@
 config.ini
 cache/*
 log.sqlite
+playground/*
 #temp
 plugins/temp/*
 

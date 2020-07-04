@@ -5,11 +5,12 @@ from dateutil.parser import parse
 import pytz
 import re
 import random
+from AbstractPlugin import AbstractPlugin
 
-class Plugin(object):
+
+class Plugin(AbstractPlugin):
     def __init__(self, pm):
-        self.pm = pm
-        self.name = 'Timezone'
+        super().__init__(pm, "Timezone")
         self.output_timezones = [
             pytz.timezone('America/Los_Angeles'),
             pytz.timezone('America/New_York'), 

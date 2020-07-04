@@ -1,10 +1,11 @@
 from util import Events
 from util.Ranks import Ranks
+from AbstractPlugin import AbstractPlugin
 
 
-class Plugin(object):
+class Plugin(AbstractPlugin):
     def __init__(self, pm):
-        self.pm = pm
+        super().__init__(pm, "Reload")
 
     @staticmethod
     def register_events():

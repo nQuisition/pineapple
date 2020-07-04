@@ -8,12 +8,12 @@ import discord
 
 from util import Events
 from util.Ranks import Ranks
+from AbstractPlugin import AbstractPlugin
 
 
-class Plugin(object):
+class Plugin(AbstractPlugin):
     def __init__(self, pm):
-        self.pm = pm
-        self.name = "JoinLeave"
+        super().__init__(pm, "JoinLeave")
 
     @staticmethod
     def register_events():
@@ -110,7 +110,7 @@ class Plugin(object):
                                                          "welcome_messages",
                                                          False)
 
-        await self.pm.client.ban(message_object.mentions[0])
+        await message_object.mentions[0].ban()
         await message_object.delete()
         await asyncio.sleep(5)
 

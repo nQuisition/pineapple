@@ -1,23 +1,21 @@
 import os
 import random
-import sqlite3
 import urllib.request
 
 import discord
 import requests
+from peewee import Model, TextField
 
 from util import Events
 from util.Ranks import Ranks
+from AbstractPlugin import AbstractPlugin
 
 
-class Plugin(object):
+class Plugin(AbstractPlugin):
     def __init__(self, pm):
-        self.pm = pm
-        self.name = "Gelbooru"
+        super().__init__(pm, "Gelbooru")
         self.base_url = "http://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&limit=100&tags="
         self.base_src = "http://gelbooru.com/index.php?page=post&s=view&id="
-        if not os.path.exists("cache/"):
-            os.makedirs("cache")
 
     @staticmethod
     def register_events():
@@ -41,6 +39,9 @@ class Plugin(object):
                 await self.add_blacklist(message_object, args[1])
         if command == "unblacklist":
             await self.remove_blacklist(message_object, args[1])
+
+    def get_models(self):
+        return [BooruBlacklist]
 
     async def search(self, message_object, text, nsfw):
         text = text.lower()  # moves all tags to lowercase
@@ -124,20 +125,9 @@ class Plugin(object):
         text = text.lower()  # moves all tags to lowercase
         block_tags = set(text.split())  # splits tags on second_place
 
-        # Connect to SQLite file for server in cache/SERVERID.sqlite
-        if not os.path.exists("cache/"):
-            os.mkdir("cache/")
-        con = sqlite3.connect("cache/" + str(message_object.guild.id) + ".sqlite",
-                              detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
-
-        for item in block_tags:
-            with con:
-                cur = con.cursor()
-                cur.execute(
-                    "CREATE TABLE IF NOT EXISTS booru_blacklist(Tag TEXT PRIMARY KEY)")
-                cur.execute(
-                    'INSERT OR IGNORE INTO booru_blacklist(Tag) VALUES(?)',
-                    (item,))
+        with self.pm.dbManager.lock(message_object.guild.id, self.get_name()):
+            for item in block_tags:
+                BooruBlacklist.insert(tag=item).on_conflict_ignore().execute()
 
         await self.pm.clientWrap.send_message(self.name, message_object.channel,
                                               "{} Tags added".format(len(block_tags)))
@@ -152,20 +142,9 @@ class Plugin(object):
         text = text.lower()  # moves all tags to lowercase
         block_tags = set(text.split())  # splits tags on second_place
 
-        # Connect to SQLite file for server in cache/SERVERID.sqlite
-        if not os.path.exists("cache/"):
-            os.mkdir("cache/")
-        con = sqlite3.connect("cache/" + str(message_object.guild.id) + ".sqlite",
-                              detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
-
-        for item in block_tags:
-            with con:
-                cur = con.cursor()
-                cur.execute(
-                    "CREATE TABLE IF NOT EXISTS booru_blacklist(Tag TEXT PRIMARY KEY)")
-                cur.execute(
-                    'DELETE FROM booru_blacklist WHERE Tag = ?',
-                    (item,))
+        with self.pm.dbManager.lock(message_object.guild.id, self.get_name()):
+            for item in block_tags:
+                BooruBlacklist.delete_by_id(item)
 
         await self.pm.clientWrap.send_message(self.name, message_object.channel, "Tags removed from the blacklist")
 
@@ -181,25 +160,22 @@ class Plugin(object):
             msg += tag + " "
         await self.pm.clientWrap.send_message(self.name, message_object.channel, msg)
 
-    @staticmethod
-    def get_blacklist(message_object):
+    def get_blacklist(self, message_object):
         try:
-            # Connect to SQLite file for server in cache/SERVERID.sqlite
-            if not os.path.exists("cache/"):
-                os.mkdir("cache/")
-            con = sqlite3.connect("cache/" + str(message_object.guild.id) + ".sqlite",
-                                  detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
             tags = list()
-            with con:
-                cur = con.cursor()
-                cur.execute("SELECT * FROM booru_blacklist")
-                rows = cur.fetchall()
-
-                for row in rows:
+            with self.pm.dbManager.lock(message_object.guild.id, self.get_name()):
+                for row in BooruBlacklist.select():
                     try:
-                        tags.append(row[0])
+                        tags.append(row.tag)
                     except:
                         continue
             return tags
         except:
             return list()
+
+
+class BooruBlacklist(Model):
+    tag = TextField(primary_key=True, column_name='Tag')
+
+    class Meta:
+        table_name = 'booru_blacklist'

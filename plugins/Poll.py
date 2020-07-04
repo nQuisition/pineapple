@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from util import Events
+from AbstractPlugin import AbstractPlugin
 
 
-class Plugin(object):
+class Plugin(AbstractPlugin):
     def __init__(self, pm):
-        self.pm = pm
-        self.name = "Poll"
+        super().__init__(pm, "Poll")
 
     @staticmethod
     def register_events():

@@ -5,12 +5,12 @@ import discord
 from PIL import Image, ImageFont, ImageDraw
 
 from util import Events
+from AbstractPlugin import AbstractPlugin
 
 
-class Plugin(object):
+class Plugin(AbstractPlugin):
     def __init__(self, pm):
-        self.pm = pm
-        self.name = "TheJoke"
+        super().__init__(pm, "TheJoke")
 
     @staticmethod
     def register_events():

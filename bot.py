@@ -19,7 +19,7 @@ client = discord.Client()
 
 logging.info("Loading plugins")
 # Loads and initializes the plugin manager for the bot
-pm = PluginManager("plugins", client)
+pm = PluginManager("plugins", "cache", client)
 pm.load_plugins()
 pm.register_events()
 logging.info("Plugins loaded and registered")

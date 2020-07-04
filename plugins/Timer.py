@@ -3,13 +3,13 @@ from collections import defaultdict
 import arrow
 
 from util import Events
+from AbstractPlugin import AbstractPlugin
 
 
-class Plugin(object):
+class Plugin(AbstractPlugin):
     def __init__(self, pm):
-        self.pm = pm
+        super().__init__(pm, "Timer")
         self.db = defaultdict(arrow.utcnow)
-        self.name = "Timer"
 
     @staticmethod
     def register_events():

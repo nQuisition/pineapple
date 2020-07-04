@@ -1,20 +1,22 @@
-import os
-import sqlite3
-
 from util import Events
 from util.Ranks import Ranks
+from AbstractPlugin import AbstractPlugin
+from CoreModels import RankBinding
 
 
-class Plugin(object):
+class Plugin(AbstractPlugin):
     def __init__(self, pm):
-        self.pm = pm
-        self.name = "RankManagement"
+        super().__init__(pm, "RankManagement")
 
     @staticmethod
     def register_events():
         return [Events.Command("addadmin", desc="Add an admin group"),
                 Events.Command("addmod", Ranks.Admin, desc="Add a mod group"),
                 Events.Command("addmember", Ranks.Admin, desc="Add a member group")]
+
+    def get_models(self):
+        # TODO ideally we probably don't want to import other plugin's model and use it as our own. Reference instead?
+        return [RankBinding]
 
     async def handle_command(self, message_object, command, args):
         if command == "addadmin":
@@ -28,33 +30,16 @@ class Plugin(object):
 
     async def admin(self, message_object, group):
         if message_object.author is message_object.guild.owner:
-            if not os.path.exists("cache/"):
-                os.makedirs("cache")
-
-            # Connect to SQLite file for server in cache/SERVERID.sqlite
-            con = sqlite3.connect("cache/" + str(message_object.guild.id) + ".sqlite",
-                                  detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
-
-            with con:
-                cur = con.cursor()
-                cur.execute("CREATE TABLE IF NOT EXISTS rank_binding(DiscordGroup TEXT PRIMARY KEY, Rank TEXT)")
-                cur.execute("INSERT OR IGNORE INTO rank_binding(DiscordGroup, Rank) VALUES(?, ?)", (group, "Admin"))
+            with self.pm.dbManager.lock(message_object.guild.id, self.get_name()):
+                RankBinding.insert(discord_group=group, rank="Admin").on_conflict_ignore().execute()
 
             await self.pm.clientWrap.send_message(self.name, message_object.channel,
                                                   "Group " + group + " was added as admin")
 
     async def bind(self, message_object, group, rank):
         if message_object.author is message_object.guild.owner:
-            if not os.path.exists("cache/"):
-                os.makedirs("cache")
+            with self.pm.dbManager.lock(message_object.guild.id, self.get_name()):
+                RankBinding.insert(discord_group=group, rank=rank).on_conflict_ignore().execute()
 
-            # Connect to SQLite file for server in cache/SERVERID.sqlite
-            con = sqlite3.connect("cache/" + str(message_object.guild.id) + ".sqlite",
-                                  detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
-
-            with con:
-                cur = con.cursor()
-                cur.execute("CREATE TABLE IF NOT EXISTS rank_binding(DiscordGroup TEXT PRIMARY KEY, Rank TEXT)")
-                cur.execute("INSERT OR IGNORE INTO rank_binding(DiscordGroup, Rank) VALUES(?, ?)", (group, rank))
-                await self.pm.clientWrap.send_message(self.name, message_object.channel,
-                                                      "Group " + group + " was added as " + rank)
+            await self.pm.clientWrap.send_message(self.name, message_object.channel,
+                                                  "Group " + group + " was added as " + rank)
