@@ -14,7 +14,12 @@ currency_aliases = {
     'RMB': 'CNY',
     '€': 'EUR',
     '£': 'GBP',
-    '¥': 'JPY'
+    '¥': 'JPY',
+    'YEN': 'JPY',
+    'DOLLAR': 'USD',
+    'DOLLARS': 'USD',
+    'EURO': 'EUR',
+    'EUROS': 'EUR'
 }
 
 
