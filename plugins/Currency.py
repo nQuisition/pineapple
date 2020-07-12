@@ -19,12 +19,18 @@ currency_aliases = {
     'DOLLAR': 'USD',
     'DOLLARS': 'USD',
     'EURO': 'EUR',
-    'EUROS': 'EUR'
+    'EUROS': 'EUR',
+    'QUID': 'GBP'
 }
 
 
 class InvalidCacheException(Exception):
     pass
+
+
+class FixerApiException(Exception):
+    def __init__(self, message):
+        super().__init__('Fixer API error: ' + message)
 
 
 class Plugin(AbstractPlugin):
@@ -92,6 +98,8 @@ class Plugin(AbstractPlugin):
                 request_url = f'http://data.fixer.io/api/latest?access_key={self.api_key}&format=1'
                 async with self.session.get(request_url) as resp:
                     json_resp = await resp.json()
+                    if not json_resp['success']:
+                        raise FixerApiException(json_resp['error']['info'])
                     with open(self.cache_path, 'w') as json_file:
                         json_resp['_updated'] = now
                         json.dump(json_resp, json_file)
