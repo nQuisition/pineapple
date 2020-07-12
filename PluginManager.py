@@ -1,10 +1,12 @@
 import asyncio
 import glob
 import importlib.util
+import os
 from os.path import dirname, basename
 from typing import Dict
 
 import discord
+
 
 import BotPreferences
 import ClientWrapper
@@ -41,6 +43,8 @@ class PluginManager(object):
         """
         self.dir = directory
         self.cache_dir = cache_directory
+        if not os.path.exists(cache_directory):
+            os.makedirs(cache_directory)
         self.botPreferences = BotPreferences.BotPreferences(self)
         self.client = client
         self.clientWrap = ClientWrapper.ClientWrapper(self)
