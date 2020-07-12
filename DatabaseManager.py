@@ -16,8 +16,6 @@ class DatabaseManager:
     def __init__(self, db_dir):
         self.db = SqliteDatabase(None)
         self.db_dir = db_dir
-        if not os.path.exists(db_dir):
-            os.makedirs(db_dir)
 
     def register_plugin_models(self, plugin_name: str, models: List[Type[Model]]):
         if len(models) == 0:
