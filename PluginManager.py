@@ -2,6 +2,7 @@ import asyncio
 import glob
 import importlib.util
 import os
+import traceback
 from os.path import dirname, basename
 from typing import Dict
 
@@ -156,8 +157,12 @@ class PluginManager(object):
     async def handle_loop(self):
         while self.loop_running:
             for obj in self.loop:
-                name, rank = self.loop[obj]
-                await name.handle_loop()
+                # catch exceptions, otherwise the loop dies
+                try:
+                    name, rank = self.loop[obj]
+                    await name.handle_loop()
+                except:
+                    traceback.print_exc()
             await asyncio.sleep(5)
 
     ###
