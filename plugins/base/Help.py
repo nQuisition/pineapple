@@ -49,7 +49,13 @@ class Plugin(AbstractPlugin):
 
     async def info(self, message_object):
         await self.pm.clientWrap.send_message(self.name, message_object.channel,
-                                              '**Pineapple**\nSource code available at: https://github.com/Dynista/pineapple')
+                                              '**Pineapple**\n'
+                                              'Source code available at: https://github.com/Dynista/pineapple\n'
+                                              'Number of servers: ' + str(len(self.pm.client.guilds)) + '\n'
+                                              'Total users: ' + await self.get_total_users())
+
+    async def get_total_users(self):
+        return str(sum(len(guild.members) for guild in self.pm.client.guilds))
 
     async def hello(self, message_object):
         msg = 'Hello {0.author.mention}'.format(message_object)
