@@ -8,6 +8,9 @@ EMBED_DESCRIPTION_MAX_LENGTH = 2048
 
 
 class ClientWrapper(object):
+
+    rng = random.Random()
+
     def __init__(self, pm):
         self.pluginManager = pm
         self.client = pm.client
@@ -53,8 +56,8 @@ class ClientWrapper(object):
 
     @staticmethod
     def get_color(name):
-        random.seed(name)
-        r = random.randint(0, 255)
-        g = random.randint(0, 255)
-        b = random.randint(0, 255)
+        ClientWrapper.rng.seed(name)
+        r = ClientWrapper.rng.randint(0, 255)
+        g = ClientWrapper.rng.randint(0, 255)
+        b = ClientWrapper.rng.randint(0, 255)
         return discord.Color((r << 16) + (g << 8) + b)
