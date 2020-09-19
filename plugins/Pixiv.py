@@ -3,7 +3,7 @@ import os
 import time
 from datetime import datetime
 from typing import List, TypedDict, Literal, Optional
-from asyncio import gather
+from asyncio import gather, Lock
 from aiohttp import ClientSession
 from pixivpy_async import *
 import discord
@@ -57,6 +57,7 @@ class Plugin(AbstractPlugin):
 
     session: ClientSession
     api: AppPixivAPI
+    login_lock: Lock
     only_nsfw: bool
     use_download_images: bool
     preferred_image_size: Literal['square_medium', 'medium', 'large', 'original']
@@ -67,6 +68,7 @@ class Plugin(AbstractPlugin):
     def __init__(self, pm):
         super().__init__(pm, "Pixiv")
         self.api = AppPixivAPI()
+        self.login_lock = Lock()
         self.session = ClientSession()
         self.only_nsfw = self.pm.botPreferences.get_config_value("Pixiv", "only_nsfw") != "0"
         self.use_download_images = self.pm.botPreferences.get_config_value("Pixiv", "download_images") != "0"
@@ -83,9 +85,10 @@ class Plugin(AbstractPlugin):
 
     async def ensure_login(self):
         now = int(time.time())
-        # give a minute grace period
-        if now > self.token_expires_at - 60:
-            await self.login()
+        async with self.login_lock:
+            # give a minute grace period
+            if now > self.token_expires_at - 60:
+                await self.login()
 
     async def login(self):
         if self.api.refresh_token is not None:
