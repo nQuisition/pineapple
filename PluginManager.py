@@ -3,7 +3,7 @@ import glob
 import importlib.util
 import os
 from os.path import dirname, basename
-from typing import Dict
+from typing import Dict, Literal
 
 import discord
 
@@ -27,6 +27,7 @@ class PluginManager(object):
     typing = {}
     delete = {}
     message = {}
+    reaction = {}
     loop = {}
 
     # References to various managers
@@ -65,6 +66,7 @@ class PluginManager(object):
         self.leave.clear()
         self.typing.clear()
         self.delete.clear()
+        self.reaction.clear()
         self.loop.clear()
 
         # Find all python files in the plugin directory
@@ -97,6 +99,7 @@ class PluginManager(object):
             self.bind_event("UserLeave", self.leave, plugin, events, self.comlist, name)
             self.bind_event("MessageDelete", self.delete, plugin, events, self.comlist, name)
             self.bind_event("Typing", self.typing, plugin, events, self.comlist, name)
+            self.bind_event("Reaction", self.reaction, plugin, events, self.comlist, name)
             self.bind_event("Loop", self.loop, plugin, events, self.comlist, name)
 
     ###
@@ -151,6 +154,13 @@ class PluginManager(object):
         for obj in self.leave:
             name, rank = self.leave[obj]
             await name.handle_member_leave(member)
+
+    async def handle_reaction_event(self, payload: discord.RawReactionActionEvent,
+                                    event_type: Literal['ADD', 'REMOVE']):
+        for obj in self.reaction:
+            name, rank = self.reaction[obj]
+            # TODO should check permissions?
+            await name.handle_reaction(payload, event_type)
 
     async def handle_loop(self):
         while self.loop_running:

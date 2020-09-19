@@ -65,7 +65,7 @@ class BotPreferences(object):
         """
         Reload the values in the config file into memory
         """
-        self.config.read("config.ini")
+        self.config.read("config.ini", encoding="utf-8")
 
         # Discord login token
         self.token = self.get_config_value("client", "token")

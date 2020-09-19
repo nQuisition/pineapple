@@ -2,7 +2,7 @@ import re
 import os
 import time
 from datetime import datetime
-from typing import List, TypedDict, Literal, Optional
+from typing import List, TypedDict, Literal, Optional, Dict
 from asyncio import gather, Lock
 from aiohttp import ClientSession
 from pixivpy_async import *
@@ -35,6 +35,13 @@ class PixivArtwork(TypedDict):
     image_urls: List[PixivImageUrls]
 
 
+class CachedMessageInfo(TypedDict):
+    message: discord.Message
+    author_id: int
+    version: int
+    added: int
+
+
 def get_tag_url(tag: str):
     return f'https://pixiv.net/tags/{tag}/artworks'
 
@@ -64,6 +71,8 @@ class Plugin(AbstractPlugin):
     images_limit: int
     cache_dir: str
     token_expires_at: int
+    message_cache: Dict[int, CachedMessageInfo]
+    retry_emoji: str
 
     def __init__(self, pm):
         super().__init__(pm, "Pixiv")
@@ -76,12 +85,14 @@ class Plugin(AbstractPlugin):
         self.images_limit = int(self.pm.botPreferences.get_config_value("Pixiv", "images_limit"))
         self.cache_dir = os.path.join(pm.cache_dir, 'pixiv')
         self.token_expires_at = 0
+        self.message_cache = {}
+        self.retry_emoji = self.pm.botPreferences.get_config_value("Pixiv", "retry_emoji")
         if not os.path.exists(self.cache_dir):
             os.makedirs(self.cache_dir)
 
     @staticmethod
     def register_events():
-        return [Events.Message("Pixiv")]
+        return [Events.Message("Pixiv"), Events.Reaction("Pixiv"), Events.Loop("Pixiv")]
 
     async def ensure_login(self):
         now = int(time.time())
@@ -138,6 +149,30 @@ class Plugin(AbstractPlugin):
             await self.process_matches_download(processed_matches, message_object)
         else:
             await self.process_matches_proxy(processed_matches, message_object)
+
+    async def handle_reaction(self, payload: discord.RawReactionActionEvent, event_type: Literal['ADD', 'REMOVE']):
+        if str(payload.emoji) != self.retry_emoji or event_type != 'ADD':
+            return
+        if payload.message_id not in self.message_cache:
+            return
+        message_info = self.message_cache[payload.message_id]
+        message = message_info['message']
+        # tsundere pineapple >:(
+        await message.remove_reaction(payload.emoji, payload.member)
+        # only allow the original author to retry to prevent potential spam
+        # TODO allow mods to retry too?
+        if payload.user_id != message_info['author_id']:
+            return
+        embed = message.embeds[0]
+        image_url = f'{embed.image.url}?v={message_info["version"]}'
+        embed.set_image(url=image_url)
+        await message.edit(embed=embed)
+        message_info['version'] += 1
+
+    async def handle_loop(self):
+        now = int(time.time())
+        retry_time_window = int(self.pm.botPreferences.get_config_value("Pixiv", "retry_time_window"))
+        self.message_cache = {k: v for k, v in self.message_cache.items() if now < v['added'] + retry_time_window}
 
     async def fetch_artwork_data(self, item_id: int, url: str) -> Optional[PixivArtwork]:
         try:
@@ -229,7 +264,9 @@ class Plugin(AbstractPlugin):
                 embed.add_field(name='Bookmarks', value=str(bookmarks), inline=True)
                 embed.add_field(name='Tags', value=tags, inline=True)
                 embed.set_image(url=image_url)
-                await message_object.channel.send(embed=embed)
+                message = await message_object.channel.send(embed=embed)
+                self.message_cache[message.id] = {'message': message, 'author_id': message_object.author.id,
+                                                  'version': 1, 'added': int(time.time())}
 
     async def download_image(self, image_url: str):
         headers = {'referer': 'https://www.pixiv.net/'}

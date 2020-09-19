@@ -30,3 +30,7 @@ download_images = 0
 preferred_image_size = original
 # Max number of images in a gallery to post, 0 for unlimited
 images_limit = 6
+# Approximate number of seconds after the preview was posted during which it is possible to reload the image
+retry_time_window = 30
+# :repeat:
+retry_emoji = 🔁

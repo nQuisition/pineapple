@@ -105,6 +105,12 @@ async def on_member_remove(member):
 
 
 @client.event
+async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
+    if payload.guild_id is not None and client.user.id != payload.user_id:
+        await pm.handle_reaction_event(payload, 'ADD')
+
+
+@client.event
 async def on_server_join(server):
     for instance in pm.client.guilds:
         pm.botPreferences.bind_roles(instance.id)
